@@ -1,1 +1,2 @@
 # OpenCameraX
+用于在openCamera基础上进行备注学习，将git提交记录汇总分解为具体的功能，针对性的研究
