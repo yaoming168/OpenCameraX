@@ -12,9 +12,9 @@ import java.util.Locale;
 import net.sourceforge.opencamera.GyroSensor;
 import net.sourceforge.opencamera.ImageSaver;
 import net.sourceforge.opencamera.LocationSupplier;
-import net.sourceforge.opencamera.MainActivity;
-import net.sourceforge.opencamera.MyApplicationInterface;
-import net.sourceforge.opencamera.MyDebug;
+import net.sourceforge.opencamera.CameraXActivity;
+import net.sourceforge.opencamera.CameraXApplicationInterface;
+import net.sourceforge.opencamera.CameraXDebug;
 import net.sourceforge.opencamera.PreferenceKeys;
 import net.sourceforge.opencamera.preview.ApplicationInterface;
 import net.sourceforge.opencamera.R;
@@ -53,15 +53,15 @@ import android.widget.RelativeLayout;
 public class DrawPreview {
     private static final String TAG = "DrawPreview";
 
-    private final MainActivity main_activity;
-    private final MyApplicationInterface applicationInterface;
+    private final CameraXActivity main_activity;
+    private final CameraXApplicationInterface applicationInterface;
 
     // store to avoid calling PreferenceManager.getDefaultSharedPreferences() repeatedly
     private final SharedPreferences sharedPreferences;
 
     // cached preferences (need to call updateSettings() to refresh):
     private boolean has_settings;
-    private MyApplicationInterface.PhotoMode photoMode;
+    private CameraXApplicationInterface.PhotoMode photoMode;
     private boolean show_time_pref;
     private boolean show_camera_id_pref;
     private boolean show_free_memory_pref;
@@ -232,8 +232,8 @@ public class DrawPreview {
     private final static int histogram_width_dp = 100;
     private final static int histogram_height_dp = 60;
 
-    public DrawPreview(MainActivity main_activity, MyApplicationInterface applicationInterface) {
-        if( MyDebug.LOG )
+    public DrawPreview(CameraXActivity main_activity, CameraXApplicationInterface applicationInterface) {
+        if( CameraXDebug.LOG )
             Log.d(TAG, "DrawPreview");
         this.main_activity = main_activity;
         this.sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
@@ -274,7 +274,7 @@ public class DrawPreview {
     }
 
     public void onDestroy() {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "onDestroy");
         // clean up just in case
         if( location_bitmap != null ) {
@@ -386,7 +386,7 @@ public class DrawPreview {
         int rotation = Math.round(view.getRotation());
         // rotation can be outside [0, 359] if the user repeatedly rotates in same direction!
         rotation = (rotation % 360 + 360) % 360; // version of (rotation % 360) that work if rotation is -ve
-        /*if( MyDebug.LOG )
+        /*if( CameraXDebug.LOG )
             Log.d(TAG, "    mod rotation: " + rotation);*/
         if( rotation == 180 || rotation == 90 ) {
             // annoying behaviour that getLocationOnScreen takes the rotation into account
@@ -399,15 +399,15 @@ public class DrawPreview {
      *  and when ghosting the last image.
      */
     public void updateThumbnail(Bitmap thumbnail, boolean is_video, boolean want_thumbnail_animation) {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "updateThumbnail");
         if( want_thumbnail_animation && applicationInterface.getThumbnailAnimationPref() ) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "thumbnail_anim started");
             thumbnail_anim = true;
             thumbnail_anim_start_ms = System.currentTimeMillis();
             test_thumbnail_anim_count++;
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "test_thumbnail_anim_count is now: " + test_thumbnail_anim_count);
         }
         Bitmap old_thumbnail = this.last_thumbnail;
@@ -427,19 +427,19 @@ public class DrawPreview {
     /** Displays the thumbnail as a fullscreen image (used for pause preview option).
      */
     public void showLastImage() {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "showLastImage");
         this.show_last_image = true;
     }
 
     public void clearLastImage() {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "clearLastImage");
         this.show_last_image = false;
     }
 
     public void clearGhostImage() {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "clearGhostImage");
         this.allow_ghost_last_image = false;
     }
@@ -460,19 +460,19 @@ public class DrawPreview {
     }
 
     public void turnFrontScreenFlashOn() {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "turnFrontScreenFlashOn");
         front_screen_flash = true;
     }
 
     public void onCaptureStarted() {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "onCaptureStarted");
         capture_started = true;
     }
 
     public void onContinuousFocusMove(boolean start) {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "onContinuousFocusMove: " + start);
         if( start ) {
             if( !continuous_focus_moving ) { // don't restart the animation if already in motion
@@ -484,7 +484,7 @@ public class DrawPreview {
     }
 
     public void clearContinuousFocusMove() {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "clearContinuousFocusMove");
         if( continuous_focus_moving ) {
             continuous_focus_moving = false;
@@ -514,11 +514,11 @@ public class DrawPreview {
      *  should be used when the settings may have changed.
      */
     public void updateSettings() {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "updateSettings");
 
         photoMode = applicationInterface.getPhotoMode();
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "photoMode: " + photoMode);
 
         show_time_pref = sharedPreferences.getBoolean(PreferenceKeys.ShowTimePreferenceKey, true);
@@ -568,12 +568,12 @@ public class DrawPreview {
         ghost_image_pref = sharedPreferences.getString(PreferenceKeys.GhostImagePreferenceKey, "preference_ghost_image_off");
         if( ghost_image_pref.equals("preference_ghost_image_selected") ) {
             String new_ghost_selected_image_pref = sharedPreferences.getString(PreferenceKeys.GhostSelectedImageSAFPreferenceKey, "");
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "new_ghost_selected_image_pref: " + new_ghost_selected_image_pref);
 
             KeyguardManager keyguard_manager = (KeyguardManager)main_activity.getSystemService(Context.KEYGUARD_SERVICE);
             boolean is_locked = keyguard_manager != null && keyguard_manager.inKeyguardRestrictedInputMode();
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "is_locked?: " + is_locked);
 
             if( is_locked ) {
@@ -585,7 +585,7 @@ public class DrawPreview {
                 }
             }
             else if( !new_ghost_selected_image_pref.equals(ghost_selected_image_pref) ) {
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "ghost_selected_image_pref has changed");
                 ghost_selected_image_pref = new_ghost_selected_image_pref;
                 if( ghost_selected_image_bitmap != null ) {
@@ -641,7 +641,7 @@ public class DrawPreview {
             zebra_stripes_threshold = Integer.parseInt(zebra_stripes_value);
         }
         catch(NumberFormatException e) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.e(TAG, "failed to parse zebra_stripes_value: " + zebra_stripes_value);
             e.printStackTrace();
             zebra_stripes_threshold = 0;
@@ -670,7 +670,7 @@ public class DrawPreview {
 
     private void updateCachedViewAngles(long time_ms) {
         if( last_view_angles_time == 0 || time_ms > last_view_angles_time + 10000 ) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "update cached view angles");
             // don't call this too often, for UI performance
             // note that updateSettings will force the time to reset anyway, but we check every so often
@@ -686,7 +686,7 @@ public class DrawPreview {
      *  The image will be downscaled if required to be comparable to the preview width.
      */
     private Bitmap loadBitmap(Uri uri) throws IOException {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "loadBitmap: " + uri);
         Bitmap bitmap;
         try {
@@ -713,7 +713,7 @@ public class DrawPreview {
 
                     int ratio = (int) Math.ceil((double) image_size / display_size);
                     sample_size = Integer.highestOneBit(ratio);
-                    if( MyDebug.LOG ) {
+                    if( CameraXDebug.LOG ) {
                         Log.d(TAG, "display_size: " + display_size);
                         Log.d(TAG, "image_size: " + image_size);
                         Log.d(TAG, "ratio: " + ratio);
@@ -721,7 +721,7 @@ public class DrawPreview {
                     }
                 }
                 else {
-                    if( MyDebug.LOG )
+                    if( CameraXDebug.LOG )
                         Log.e(TAG, "failed to obtain width/height of bitmap");
                 }
             }
@@ -733,7 +733,7 @@ public class DrawPreview {
             bitmap = BitmapFactory.decodeStream(input, null, options);
             if( input != null )
                 input.close();
-            if( MyDebug.LOG && bitmap != null ) {
+            if( CameraXDebug.LOG && bitmap != null ) {
                 Log.d(TAG, "bitmap width: " + bitmap.getWidth());
                 Log.d(TAG, "bitmap height: " + bitmap.getHeight());
             }
@@ -995,7 +995,7 @@ public class DrawPreview {
                 // aspect ratio may differ to the requested photo/video resolution's aspect ratio, in which case it's still useful
                 // to display the crop guide
                 if( crop_ratio > 0.0 && Math.abs(preview.getCurrentPreviewAspectRatio() - crop_ratio) > 1.0e-5 ) {
-		    		/*if( MyDebug.LOG ) {
+		    		/*if( CameraXDebug.LOG ) {
 		    			Log.d(TAG, "crop_ratio: " + crop_ratio);
 		    			Log.d(TAG, "preview_targetRatio: " + preview_targetRatio);
 		    			Log.d(TAG, "canvas width: " + canvas.getWidth());
@@ -1070,21 +1070,21 @@ public class DrawPreview {
             // http://code.google.com/p/android/issues/detail?id=42104
             // update: now seems to be fixed
             // also possibly related https://code.google.com/p/android/issues/detail?id=181201
-            //int height = applicationInterface.drawTextWithBackground(canvas, p, current_time_string, Color.WHITE, Color.BLACK, location_x, location_y, MyApplicationInterface.Alignment.ALIGNMENT_TOP);
+            //int height = applicationInterface.drawTextWithBackground(canvas, p, current_time_string, Color.WHITE, Color.BLACK, location_x, location_y, CameraXApplicationInterface.Alignment.ALIGNMENT_TOP);
             if( text_bounds_time == null ) {
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "compute text_bounds_time");
                 text_bounds_time = new Rect();
                 // better to not use a fixed string like "00:00:00" as don't want to make assumptions - e.g., in 12 hour format we'll have the appended am/pm to account for!
                 Calendar calendar = Calendar.getInstance();
                 calendar.set(100, 0, 1, 10, 59, 59);
                 String bounds_time_string = dateFormatTimeInstance.format(calendar.getTime());
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "bounds_time_string:" + bounds_time_string);
                 p.getTextBounds(bounds_time_string, 0, bounds_time_string.length(), text_bounds_time);
             }
             first_line_xshift += text_bounds_time.width() + gap_x;
-            int height = applicationInterface.drawTextWithBackground(canvas, p, current_time_string, Color.WHITE, Color.BLACK, location_x, location_y, MyApplicationInterface.Alignment.ALIGNMENT_TOP, null, MyApplicationInterface.Shadow.SHADOW_OUTLINE, text_bounds_time);
+            int height = applicationInterface.drawTextWithBackground(canvas, p, current_time_string, Color.WHITE, Color.BLACK, location_x, location_y, CameraXApplicationInterface.Alignment.ALIGNMENT_TOP, null, CameraXApplicationInterface.Shadow.SHADOW_OUTLINE, text_bounds_time);
             height += gap_y;
             // don't update location_y yet, as we have time and cameraid shown on the same line
             first_line_height = Math.max(first_line_height, height);
@@ -1097,13 +1097,13 @@ public class DrawPreview {
                 last_camera_id_time = time_ms;
             }
             if( text_bounds_camera_id == null ) {
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "compute text_bounds_camera_id");
                 text_bounds_camera_id = new Rect();
                 p.getTextBounds(camera_id_string, 0, camera_id_string.length(), text_bounds_camera_id);
             }
             int xpos = align_right ? location_x - first_line_xshift : location_x + first_line_xshift;
-            int height = applicationInterface.drawTextWithBackground(canvas, p, camera_id_string, Color.WHITE, Color.BLACK, xpos, location_y, MyApplicationInterface.Alignment.ALIGNMENT_TOP, null, MyApplicationInterface.Shadow.SHADOW_OUTLINE, text_bounds_camera_id);
+            int height = applicationInterface.drawTextWithBackground(canvas, p, camera_id_string, Color.WHITE, Color.BLACK, xpos, location_y, CameraXApplicationInterface.Alignment.ALIGNMENT_TOP, null, CameraXApplicationInterface.Shadow.SHADOW_OUTLINE, text_bounds_camera_id);
             height += gap_y;
             // don't update location_y yet, as we have time and cameraid shown on the same line
             first_line_height = Math.max(first_line_height, height);
@@ -1123,7 +1123,7 @@ public class DrawPreview {
                 long free_mb = main_activity.getStorageUtils().freeMemory();
                 if( free_mb >= 0 ) {
                     float new_free_memory_gb = free_mb/1024.0f;
-                    if( MyDebug.LOG ) {
+                    if( CameraXDebug.LOG ) {
                         Log.d(TAG, "free_memory_gb: " + free_memory_gb);
                         Log.d(TAG, "new_free_memory_gb: " + new_free_memory_gb);
                     }
@@ -1135,14 +1135,14 @@ public class DrawPreview {
                 last_free_memory_time = time_ms; // always set this, so that in case of free memory not being available, we aren't calling freeMemory() every frame
             }
             if( free_memory_gb >= 0.0f && free_memory_gb_string != null ) {
-                //int height = applicationInterface.drawTextWithBackground(canvas, p, free_memory_gb_string, Color.WHITE, Color.BLACK, location_x, location_y, MyApplicationInterface.Alignment.ALIGNMENT_TOP);
+                //int height = applicationInterface.drawTextWithBackground(canvas, p, free_memory_gb_string, Color.WHITE, Color.BLACK, location_x, location_y, CameraXApplicationInterface.Alignment.ALIGNMENT_TOP);
                 if( text_bounds_free_memory == null ) {
-                    if( MyDebug.LOG )
+                    if( CameraXDebug.LOG )
                         Log.d(TAG, "compute text_bounds_free_memory");
                     text_bounds_free_memory = new Rect();
                     p.getTextBounds(free_memory_gb_string, 0, free_memory_gb_string.length(), text_bounds_free_memory);
                 }
-                int height = applicationInterface.drawTextWithBackground(canvas, p, free_memory_gb_string, Color.WHITE, Color.BLACK, location_x, location_y, MyApplicationInterface.Alignment.ALIGNMENT_TOP, null, MyApplicationInterface.Shadow.SHADOW_OUTLINE, text_bounds_free_memory);
+                int height = applicationInterface.drawTextWithBackground(canvas, p, free_memory_gb_string, Color.WHITE, Color.BLACK, location_x, location_y, CameraXApplicationInterface.Alignment.ALIGNMENT_TOP, null, CameraXApplicationInterface.Shadow.SHADOW_OUTLINE, text_bounds_free_memory);
                 height += gap_y;
                 if( ui_rotation == 90 ) {
                     location_y -= height;
@@ -1159,12 +1159,12 @@ public class DrawPreview {
         if (OSDLine1 != null && OSDLine1.length() > 0) {
             applicationInterface.drawTextWithBackground(canvas, p, OSDLine1,
                     Color.WHITE, Color.BLACK,  location_x, bottom_y - y_offset,
-                    MyApplicationInterface.Alignment.ALIGNMENT_BOTTOM, null, MyApplicationInterface.Shadow.SHADOW_OUTLINE);
+                    CameraXApplicationInterface.Alignment.ALIGNMENT_BOTTOM, null, CameraXApplicationInterface.Shadow.SHADOW_OUTLINE);
         }
         if (OSDLine2 != null && OSDLine2.length() > 0) {
             applicationInterface.drawTextWithBackground(canvas, p, OSDLine2,
                     Color.WHITE, Color.BLACK, location_x, bottom_y,
-                    MyApplicationInterface.Alignment.ALIGNMENT_BOTTOM, null, MyApplicationInterface.Shadow.SHADOW_OUTLINE);
+                    CameraXApplicationInterface.Alignment.ALIGNMENT_BOTTOM, null, CameraXApplicationInterface.Shadow.SHADOW_OUTLINE);
         }
         p.setTextSize(16 * scale + 0.5f); // Restore text size
 
@@ -1224,7 +1224,7 @@ public class DrawPreview {
                     ae_started_scanning_ms = -1;
                 }
                 // can't cache the bounds rect, as the width may change significantly as the ISO or exposure values change
-                int height = applicationInterface.drawTextWithBackground(canvas, p, iso_exposure_string, text_color, Color.BLACK, location_x, location_y, MyApplicationInterface.Alignment.ALIGNMENT_TOP, ybounds_text, MyApplicationInterface.Shadow.SHADOW_OUTLINE);
+                int height = applicationInterface.drawTextWithBackground(canvas, p, iso_exposure_string, text_color, Color.BLACK, location_x, location_y, CameraXApplicationInterface.Alignment.ALIGNMENT_TOP, ybounds_text, CameraXApplicationInterface.Shadow.SHADOW_OUTLINE);
                 height += gap_y;
                 // only move location_y if we actually print something (because on old camera API, even if the ISO option has
                 // been enabled, we'll never be able to display the on-screen ISO)
@@ -1337,13 +1337,13 @@ public class DrawPreview {
             }
 
             if( (
-                    photoMode == MyApplicationInterface.PhotoMode.DRO ||
-                            photoMode == MyApplicationInterface.PhotoMode.HDR ||
-                            photoMode == MyApplicationInterface.PhotoMode.Panorama ||
-                            photoMode == MyApplicationInterface.PhotoMode.ExpoBracketing ||
-                            photoMode == MyApplicationInterface.PhotoMode.FocusBracketing ||
-                            photoMode == MyApplicationInterface.PhotoMode.FastBurst ||
-                            photoMode == MyApplicationInterface.PhotoMode.NoiseReduction
+                    photoMode == CameraXApplicationInterface.PhotoMode.DRO ||
+                            photoMode == CameraXApplicationInterface.PhotoMode.HDR ||
+                            photoMode == CameraXApplicationInterface.PhotoMode.Panorama ||
+                            photoMode == CameraXApplicationInterface.PhotoMode.ExpoBracketing ||
+                            photoMode == CameraXApplicationInterface.PhotoMode.FocusBracketing ||
+                            photoMode == CameraXApplicationInterface.PhotoMode.FastBurst ||
+                            photoMode == CameraXApplicationInterface.PhotoMode.NoiseReduction
             ) &&
                     !applicationInterface.isVideoPref() ) { // these photo modes not supported for video mode
                 icon_dest.set(location_x2, location_y, location_x2 + icon_size, location_y + icon_size);
@@ -1352,16 +1352,16 @@ public class DrawPreview {
                 p.setAlpha(64);
                 canvas.drawRect(icon_dest, p);
                 p.setAlpha(255);
-                Bitmap bitmap = photoMode == MyApplicationInterface.PhotoMode.DRO ? dro_bitmap :
-                        photoMode == MyApplicationInterface.PhotoMode.HDR ? hdr_bitmap :
-                                photoMode == MyApplicationInterface.PhotoMode.Panorama ? panorama_bitmap :
-                                    photoMode == MyApplicationInterface.PhotoMode.ExpoBracketing ? expo_bitmap :
-                                            photoMode == MyApplicationInterface.PhotoMode.FocusBracketing ? focus_bracket_bitmap :
-                                                    photoMode == MyApplicationInterface.PhotoMode.FastBurst ? burst_bitmap :
-                                                            photoMode == MyApplicationInterface.PhotoMode.NoiseReduction ? nr_bitmap :
+                Bitmap bitmap = photoMode == CameraXApplicationInterface.PhotoMode.DRO ? dro_bitmap :
+                        photoMode == CameraXApplicationInterface.PhotoMode.HDR ? hdr_bitmap :
+                                photoMode == CameraXApplicationInterface.PhotoMode.Panorama ? panorama_bitmap :
+                                    photoMode == CameraXApplicationInterface.PhotoMode.ExpoBracketing ? expo_bitmap :
+                                            photoMode == CameraXApplicationInterface.PhotoMode.FocusBracketing ? focus_bracket_bitmap :
+                                                    photoMode == CameraXApplicationInterface.PhotoMode.FastBurst ? burst_bitmap :
+                                                            photoMode == CameraXApplicationInterface.PhotoMode.NoiseReduction ? nr_bitmap :
                                                                     null;
                 if( bitmap != null ) {
-                    if( photoMode == MyApplicationInterface.PhotoMode.NoiseReduction && applicationInterface.getNRModePref() == ApplicationInterface.NRModePref.NRMODE_LOW_LIGHT ) {
+                    if( photoMode == CameraXApplicationInterface.PhotoMode.NoiseReduction && applicationInterface.getNRModePref() == ApplicationInterface.NRModePref.NRMODE_LOW_LIGHT ) {
                         p.setColorFilter(new PorterDuffColorFilter(Color.rgb(255, 235, 59), PorterDuff.Mode.SRC_IN)); // Yellow 500
                     }
                     canvas.drawBitmap(bitmap, null, icon_dest, p);
@@ -1468,7 +1468,7 @@ public class DrawPreview {
                         alpha = 1.0f;
                     icon_dest.set(location_x2, location_y, location_x2 + icon_size, location_y + icon_size);
 
-					/*if( MyDebug.LOG )
+					/*if( CameraXDebug.LOG )
 						Log.d(TAG, "alpha: " + alpha);*/
                     p.setStyle(Paint.Style.FILL);
                     p.setColor(Color.BLACK);
@@ -1499,7 +1499,7 @@ public class DrawPreview {
             if( preview.isPreviewBitmapEnabled() ) {
                 int [] histogram = preview.getHistogram();
                 if( histogram != null ) {
-					/*if( MyDebug.LOG )
+					/*if( CameraXDebug.LOG )
 						Log.d(TAG, "histogram length: " + histogram.length);*/
                     final int histogram_width = (int) (histogram_width_dp * scale + 0.5f); // convert dps to pixels
                     final int histogram_height = (int) (histogram_height_dp * scale + 0.5f); // convert dps to pixels
@@ -1586,11 +1586,11 @@ public class DrawPreview {
      */
     private void drawHistogramChannel(Canvas canvas, int [] histogram_channel, int max) {
         /*long debug_time = 0;
-        if( MyDebug.LOG ) {
+        if( CameraXDebug.LOG ) {
             debug_time = System.currentTimeMillis();
         }*/
 
-		/*if( MyDebug.LOG )
+		/*if( CameraXDebug.LOG )
 			Log.d(TAG, "drawHistogramChannel, time before creating path: " + (System.currentTimeMillis() - debug_time));*/
         path.reset();
         path.moveTo(icon_dest.left, icon_dest.bottom);
@@ -1602,10 +1602,10 @@ public class DrawPreview {
         }
         path.lineTo(icon_dest.right, icon_dest.bottom);
         path.close();
-		/*if( MyDebug.LOG )
+		/*if( CameraXDebug.LOG )
 			Log.d(TAG, "drawHistogramChannel, time after creating path: " + (System.currentTimeMillis() - debug_time));*/
         canvas.drawPath(path, p);
-		/*if( MyDebug.LOG )
+		/*if( CameraXDebug.LOG )
 			Log.d(TAG, "drawHistogramChannel, time before drawing path: " + (System.currentTimeMillis() - debug_time));*/
     }
 
@@ -1663,7 +1663,7 @@ public class DrawPreview {
                 // 270 is portrait
 
                 if( last_take_photo_top_time == 0 || time_ms > last_take_photo_top_time + 1000 ) {
-                    /*if( MyDebug.LOG )
+                    /*if( CameraXDebug.LOG )
                         Log.d(TAG, "update cached take_photo_top");*/
                     // don't call this too often, for UI performance (due to calling View.getLocationOnScreen())
                     View view = main_activity.findViewById(R.id.take_photo);
@@ -1674,7 +1674,7 @@ public class DrawPreview {
                     take_photo_top = view_left - this_left;
 
                     last_take_photo_top_time = time_ms;
-                    /*if( MyDebug.LOG ) {
+                    /*if( CameraXDebug.LOG ) {
                         Log.d(TAG, "view_left: " + view_left);
                         Log.d(TAG, "this_left: " + this_left);
                         Log.d(TAG, "take_photo_top: " + take_photo_top);
@@ -1684,7 +1684,7 @@ public class DrawPreview {
 				// diff_x is the difference from the centre of the canvas to the position we want
                 int diff_x = take_photo_top - canvas.getWidth()/2;
 
-				/*if( MyDebug.LOG ) {
+				/*if( CameraXDebug.LOG ) {
 					Log.d(TAG, "view left: " + view_left);
 					Log.d(TAG, "this left: " + this_left);
 					Log.d(TAG, "canvas is " + canvas.getWidth() + " x " + canvas.getHeight());
@@ -1706,7 +1706,7 @@ public class DrawPreview {
                     // so we don't interfere with the top bar info (datetime, free memory, ISO) when upside down
                     max_x -= (int)(2.5*gap_y);
                 }
-				/*if( MyDebug.LOG ) {
+				/*if( CameraXDebug.LOG ) {
 					Log.d(TAG, "root view right: " + preview.getView().getRootView().getRight());
 					Log.d(TAG, "diff_x: " + diff_x);
 					Log.d(TAG, "canvas.getWidth()/2 + diff_x: " + (canvas.getWidth()/2+diff_x));
@@ -1757,7 +1757,7 @@ public class DrawPreview {
                 }
                 if( angle_string == null || time_ms > this.last_angle_string_time + 500 ) {
                     // update cached string
-					/*if( MyDebug.LOG )
+					/*if( CameraXDebug.LOG )
 						Log.d(TAG, "update angle_string: " + angle_string);*/
                     last_angle_string_time = time_ms;
                     String number_string = formatLevelAngle(level_angle);
@@ -1766,22 +1766,22 @@ public class DrawPreview {
                     cached_angle = level_angle;
                     //String angle_string = "" + level_angle;
                 }
-                //applicationInterface.drawTextWithBackground(canvas, p, angle_string, color, Color.BLACK, canvas.getWidth() / 2 + pixels_offset_x, text_base_y, MyApplicationInterface.Alignment.ALIGNMENT_BOTTOM, ybounds_text, true);
+                //applicationInterface.drawTextWithBackground(canvas, p, angle_string, color, Color.BLACK, canvas.getWidth() / 2 + pixels_offset_x, text_base_y, CameraXApplicationInterface.Alignment.ALIGNMENT_BOTTOM, ybounds_text, true);
                 if( text_bounds_angle_single == null ) {
-                    if( MyDebug.LOG )
+                    if( CameraXDebug.LOG )
                         Log.d(TAG, "compute text_bounds_angle_single");
                     text_bounds_angle_single = new Rect();
                     String bounds_angle_string = "-9.0" + (char)0x00B0;
                     p.getTextBounds(bounds_angle_string, 0, bounds_angle_string.length(), text_bounds_angle_single);
                 }
                 if( text_bounds_angle_double == null ) {
-                    if( MyDebug.LOG )
+                    if( CameraXDebug.LOG )
                         Log.d(TAG, "compute text_bounds_angle_double");
                     text_bounds_angle_double = new Rect();
                     String bounds_angle_string = "-45.0" + (char)0x00B0;
                     p.getTextBounds(bounds_angle_string, 0, bounds_angle_string.length(), text_bounds_angle_double);
                 }
-                applicationInterface.drawTextWithBackground(canvas, p, angle_string, color, Color.BLACK, canvas.getWidth() / 2 + pixels_offset_x, text_base_y, MyApplicationInterface.Alignment.ALIGNMENT_BOTTOM, null, MyApplicationInterface.Shadow.SHADOW_OUTLINE, Math.abs(cached_angle) < 10.0 ? text_bounds_angle_single : text_bounds_angle_double);
+                applicationInterface.drawTextWithBackground(canvas, p, angle_string, color, Color.BLACK, canvas.getWidth() / 2 + pixels_offset_x, text_base_y, CameraXApplicationInterface.Alignment.ALIGNMENT_BOTTOM, null, CameraXApplicationInterface.Shadow.SHADOW_OUTLINE, Math.abs(cached_angle) < 10.0 ? text_bounds_angle_single : text_bounds_angle_double);
                 p.setUnderlineText(false);
             }
             if( draw_geo_direction ) {
@@ -1803,11 +1803,11 @@ public class DrawPreview {
                     geo_angle += 360.0f;
                 }
                 String string = "" + Math.round(geo_angle) + (char)0x00B0;
-                applicationInterface.drawTextWithBackground(canvas, p, string, color, Color.BLACK, canvas.getWidth() / 2 + pixels_offset_x, text_base_y, MyApplicationInterface.Alignment.ALIGNMENT_BOTTOM, ybounds_text, MyApplicationInterface.Shadow.SHADOW_OUTLINE);
+                applicationInterface.drawTextWithBackground(canvas, p, string, color, Color.BLACK, canvas.getWidth() / 2 + pixels_offset_x, text_base_y, CameraXApplicationInterface.Alignment.ALIGNMENT_BOTTOM, ybounds_text, CameraXApplicationInterface.Shadow.SHADOW_OUTLINE);
             }
             if( preview.isOnTimer() ) {
                 long remaining_time = (preview.getTimerEndTime() - time_ms + 999)/1000;
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "remaining_time: " + remaining_time);
                 if( remaining_time > 0 ) {
                     p.setTextSize(42 * scale + 0.5f); // convert dps to pixels
@@ -1826,7 +1826,7 @@ public class DrawPreview {
             else if( preview.isVideoRecording() ) {
                 long video_time = preview.getVideoTime();
                 String time_s = getTimeStringFromSeconds(video_time/1000);
-            	/*if( MyDebug.LOG )
+            	/*if( CameraXDebug.LOG )
 					Log.d(TAG, "video_time: " + video_time + " " + time_s);*/
                 p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
                 p.setTextAlign(Paint.Align.CENTER);
@@ -1851,7 +1851,7 @@ public class DrawPreview {
                         video_max_amp_prev2 = video_max_amp;
                         video_max_amp = preview.getMaxAmplitude();
                         last_video_max_amp_time = time_ms;
-                        if( MyDebug.LOG ) {
+                        if( CameraXDebug.LOG ) {
                             if( video_max_amp > 30000 ) {
                                 Log.d(TAG, "max_amp: " + video_max_amp);
                             }
@@ -1905,7 +1905,7 @@ public class DrawPreview {
                     p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
                     p.setTextAlign(Paint.Align.CENTER);
                     int pixels_offset_y = 2*text_y; // avoid overwriting the zoom
-                    if( ui_rotation == 0 && applicationInterface.getPhotoMode() == MyApplicationInterface.PhotoMode.FocusBracketing ) {
+                    if( ui_rotation == 0 && applicationInterface.getPhotoMode() == CameraXApplicationInterface.PhotoMode.FocusBracketing ) {
                         // avoid clashing with the target focus bracketing seekbar in landscape orientation
                         pixels_offset_y = 5*gap_y;
                     }
@@ -1947,13 +1947,13 @@ public class DrawPreview {
                     // Convert the dps to pixels, based on density scale
                     p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
                     p.setTextAlign(Paint.Align.CENTER);
-                    applicationInterface.drawTextWithBackground(canvas, p, getContext().getResources().getString(R.string.zoom) + ": " + zoom_ratio +"x", Color.WHITE, Color.BLACK, canvas.getWidth() / 2, text_base_y - text_y, MyApplicationInterface.Alignment.ALIGNMENT_BOTTOM, ybounds_text, MyApplicationInterface.Shadow.SHADOW_OUTLINE);
+                    applicationInterface.drawTextWithBackground(canvas, p, getContext().getResources().getString(R.string.zoom) + ": " + zoom_ratio +"x", Color.WHITE, Color.BLACK, canvas.getWidth() / 2, text_base_y - text_y, CameraXApplicationInterface.Alignment.ALIGNMENT_BOTTOM, ybounds_text, CameraXApplicationInterface.Shadow.SHADOW_OUTLINE);
                 }
             }
 
         }
         else if( camera_controller == null ) {
-			/*if( MyDebug.LOG ) {
+			/*if( CameraXDebug.LOG ) {
 				Log.d(TAG, "no camera!");
 				Log.d(TAG, "width " + canvas.getWidth() + " height " + canvas.getHeight());
 			}*/
@@ -1984,13 +1984,13 @@ public class DrawPreview {
         if( top_icon != null ) {
             if( last_top_icon_shift_time == 0 || time_ms > last_top_icon_shift_time + 1000 ) {
                 // avoid computing every time, due to cost of calling View.getLocationOnScreen()
-                /*if( MyDebug.LOG )
+                /*if( CameraXDebug.LOG )
                     Log.d(TAG, "update cached top_icon_shift");*/
                 int top_margin = getViewOnScreenX(top_icon) + top_icon.getWidth();
                 preview.getView().getLocationOnScreen(gui_location);
                 int preview_left = gui_location[0];
                 this.top_icon_shift = top_margin - preview_left;
-                /*if( MyDebug.LOG ) {
+                /*if( CameraXDebug.LOG ) {
                     Log.d(TAG, "top_icon.getRotation(): " + top_icon.getRotation());
                     Log.d(TAG, "preview_left: " + preview_left);
                     Log.d(TAG, "top_margin: " + top_margin);
@@ -2028,7 +2028,7 @@ public class DrawPreview {
             if( focus_seekbars_margin_left == -1 || new_focus_seekbars_margin_left != focus_seekbars_margin_left ) {
                 // we check whether focus_seekbars_margin_left has changed, in case there is a performance cost for setting layoutparams
                 this.focus_seekbars_margin_left = new_focus_seekbars_margin_left;
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "set focus_seekbars_margin_left to " + focus_seekbars_margin_left);
 
                 View view = main_activity.findViewById(R.id.focus_seekbar);
@@ -2068,7 +2068,7 @@ public class DrawPreview {
                 has_battery_frac = true;
                 battery_frac = battery_level/(float)battery_scale;
                 last_battery_time = time_ms;
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "Battery status is " + battery_level + " / " + battery_scale + " : " + battery_frac);
             }
             //battery_frac = 0.2999f; // test
@@ -2101,7 +2101,7 @@ public class DrawPreview {
         CameraController camera_controller = preview.getCameraController();
         boolean has_level_angle = preview.hasLevelAngle();
         boolean actual_show_angle_line_pref;
-        if( photoMode == MyApplicationInterface.PhotoMode.Panorama ) {
+        if( photoMode == CameraXApplicationInterface.PhotoMode.Panorama ) {
             // in panorama mode, we should the level iff we aren't taking the panorama photos
             actual_show_angle_line_pref = !main_activity.getApplicationInterface().getGyroSensor().isRecording();
         }
@@ -2133,7 +2133,7 @@ public class DrawPreview {
                 default:
                     break;
             }
-			/*if( MyDebug.LOG ) {
+			/*if( CameraXDebug.LOG ) {
 				Log.d(TAG, "orig_level_angle: " + preview.getOrigLevelAngle());
 				Log.d(TAG, "angle: " + angle);
 			}*/
@@ -2200,7 +2200,7 @@ public class DrawPreview {
             float camera_angle_y = this.view_angle_y_preview;
             float angle_scale_x = (float)( canvas.getWidth() / (2.0 * Math.tan( Math.toRadians((camera_angle_x/2.0)) )) );
             float angle_scale_y = (float)( canvas.getHeight() / (2.0 * Math.tan( Math.toRadians((camera_angle_y/2.0)) )) );
-			/*if( MyDebug.LOG ) {
+			/*if( CameraXDebug.LOG ) {
 				Log.d(TAG, "camera_angle_x: " + camera_angle_x);
 				Log.d(TAG, "camera_angle_y: " + camera_angle_y);
 				Log.d(TAG, "angle_scale_x: " + angle_scale_x);
@@ -2208,7 +2208,7 @@ public class DrawPreview {
 				Log.d(TAG, "angle_scale_x/scale: " + angle_scale_x/scale);
 				Log.d(TAG, "angle_scale_y/scale: " + angle_scale_y/scale);
 			}*/
-			/*if( MyDebug.LOG ) {
+			/*if( CameraXDebug.LOG ) {
 				Log.d(TAG, "has_pitch_angle?: " + has_pitch_angle);
 				Log.d(TAG, "show_pitch_lines?: " + show_pitch_lines);
 			}*/
@@ -2224,7 +2224,7 @@ public class DrawPreview {
                     double this_angle = pitch_angle - latitude_angle;
                     if( Math.abs(this_angle) < 90.0 ) {
                         float pitch_distance = angle_scale * (float)Math.tan( Math.toRadians(this_angle) ); // angle_scale is already in pixels rather than dps
-						/*if( MyDebug.LOG ) {
+						/*if( CameraXDebug.LOG ) {
 							Log.d(TAG, "pitch_angle: " + pitch_angle);
 							Log.d(TAG, "pitch_distance_dp: " + pitch_distance_dp);
 						}*/
@@ -2252,7 +2252,7 @@ public class DrawPreview {
                         draw_rect.set(cx - pitch_radius, cy + pitch_distance - hthickness, cx + pitch_radius, cy + pitch_distance + hthickness);
                         canvas.drawRoundRect(draw_rect, hthickness, hthickness, p);
                         // draw pitch angle indicator
-                        applicationInterface.drawTextWithBackground(canvas, p, "" + latitude_angle + "\u00B0", p.getColor(), Color.BLACK, (int)(cx + pitch_radius + 4*hthickness), (int)(cy + pitch_distance - 2*hthickness), MyApplicationInterface.Alignment.ALIGNMENT_CENTRE);
+                        applicationInterface.drawTextWithBackground(canvas, p, "" + latitude_angle + "\u00B0", p.getColor(), Color.BLACK, (int)(cx + pitch_radius + 4*hthickness), (int)(cy + pitch_distance - 2*hthickness), CameraXApplicationInterface.Alignment.ALIGNMENT_CENTRE);
                     }
                 }
             }
@@ -2265,7 +2265,7 @@ public class DrawPreview {
                     angle_step = 5;
                 for(int longitude_angle=0;longitude_angle<360;longitude_angle+=angle_step) {
                     double this_angle = longitude_angle - geo_angle;
-					/*if( MyDebug.LOG ) {
+					/*if( CameraXDebug.LOG ) {
 						Log.d(TAG, "longitude_angle: " + longitude_angle);
 						Log.d(TAG, "geo_angle: " + geo_angle);
 						Log.d(TAG, "this_angle: " + this_angle);
@@ -2279,7 +2279,7 @@ public class DrawPreview {
                     if( this_angle > 180.0 )
                         this_angle = - (360.0 - this_angle);
                     if( Math.abs(this_angle) < 90.0 ) {
-						/*if( MyDebug.LOG ) {
+						/*if( CameraXDebug.LOG ) {
 							Log.d(TAG, "this_angle is now: " + this_angle);
 						}*/
                         float geo_distance = angle_scale * (float)Math.tan( Math.toRadians(this_angle) ); // angle_scale is already in pixels rather than dps
@@ -2296,7 +2296,7 @@ public class DrawPreview {
                         draw_rect.set(cx + geo_distance - hthickness, cy - geo_radius, cx + geo_distance + hthickness, cy + geo_radius);
                         canvas.drawRoundRect(draw_rect, hthickness, hthickness, p);
                         // draw geo direction angle indicator
-                        applicationInterface.drawTextWithBackground(canvas, p, "" + longitude_angle + "\u00B0", p.getColor(), Color.BLACK, (int)(cx + geo_distance), (int)(cy - geo_radius - 4*hthickness), MyApplicationInterface.Alignment.ALIGNMENT_BOTTOM);
+                        applicationInterface.drawTextWithBackground(canvas, p, "" + longitude_angle + "\u00B0", p.getColor(), Color.BLACK, (int)(cx + geo_distance), (int)(cy - geo_radius - 4*hthickness), CameraXApplicationInterface.Alignment.ALIGNMENT_BOTTOM);
                     }
                 }
             }
@@ -2360,7 +2360,7 @@ public class DrawPreview {
             long time = time_ms - this.thumbnail_anim_start_ms;
             final long duration = 500;
             if( time > duration ) {
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "thumbnail_anim finished");
                 this.thumbnail_anim = false;
             }
@@ -2414,7 +2414,7 @@ public class DrawPreview {
             // frozen if we pause because the image saver queue is full
             long dt = time_ms - continuous_focus_moving_ms;
             final long length = 1000;
-			/*if( MyDebug.LOG )
+			/*if( CameraXDebug.LOG )
 				Log.d(TAG, "continuous focus moving, dt: " + dt);*/
             if( dt <= length ) {
                 float frac = ((float)dt) / (float)length;
@@ -2431,7 +2431,7 @@ public class DrawPreview {
                     float alpha = (frac-0.5f)*2.0f;
                     radius = (1.0f-alpha) * max_radius + alpha * min_radius;
                 }
-				/*if( MyDebug.LOG ) {
+				/*if( CameraXDebug.LOG ) {
 					Log.d(TAG, "dt: " + dt);
 					Log.d(TAG, "radius: " + radius);
 				}*/
@@ -2502,10 +2502,10 @@ public class DrawPreview {
     }
 
     public void onDrawPreview(Canvas canvas) {
-		/*if( MyDebug.LOG )
+		/*if( CameraXDebug.LOG )
 			Log.d(TAG, "onDrawPreview");*/
         if( !has_settings ) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "onDrawPreview: need to update settings");
             updateSettings();
         }
@@ -2698,7 +2698,7 @@ public class DrawPreview {
 
                     // show indicator for not being "upright", but only if tilt angle is within 20 degrees
                     if( gyroSensor.isUpright() != 0 && Math.abs(angle_x) <= 20.0f*0.0174532925199f ) {
-                        //applicationInterface.drawTextWithBackground(canvas, p, "not upright", Color.WHITE, Color.BLACK, canvas.getWidth()/2, canvas.getHeight()/2, MyApplicationInterface.Alignment.ALIGNMENT_CENTRE, null, true);
+                        //applicationInterface.drawTextWithBackground(canvas, p, "not upright", Color.WHITE, Color.BLACK, canvas.getWidth()/2, canvas.getHeight()/2, CameraXApplicationInterface.Alignment.ALIGNMENT_CENTRE, null, true);
                         canvas.save();
                         canvas.rotate(ui_rotation, canvas.getWidth()/2.0f, canvas.getHeight()/2.0f);
                         final int icon_size = (int) (64 * scale + 0.5f); // convert dps to pixels
@@ -2733,7 +2733,7 @@ public class DrawPreview {
         last_image_dst_rect.top = 0;
         last_image_dst_rect.right = canvas.getWidth();
         last_image_dst_rect.bottom = canvas.getHeight();
-		/*if( MyDebug.LOG ) {
+		/*if( CameraXDebug.LOG ) {
 			Log.d(TAG, "thumbnail: " + bitmap.getWidth() + " x " + bitmap.getHeight());
 			Log.d(TAG, "canvas: " + canvas.getWidth() + " x " + canvas.getHeight());
 		}*/

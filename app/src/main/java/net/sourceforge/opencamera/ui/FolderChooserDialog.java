@@ -1,6 +1,6 @@
 package net.sourceforge.opencamera.ui;
 
-import net.sourceforge.opencamera.MyDebug;
+import net.sourceforge.opencamera.CameraXDebug;
 import net.sourceforge.opencamera.R;
 import net.sourceforge.opencamera.StorageUtils;
 
@@ -103,22 +103,22 @@ public class FolderChooserDialog extends DialogFragment {
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "onCreateDialog");
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "start in folder: " + start_folder);
 
         list = new ListView(getActivity());
         list.setOnItemClickListener(new OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "onItemClick: " + position);
                 FileWrapper file_wrapper = (FileWrapper) parent.getItemAtPosition(position);
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "clicked: " + file_wrapper.toString());
                 File file = file_wrapper.getFile();
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "file: " + file.toString());
                 if( file.isDirectory() ) {
                     refreshList(file);
@@ -150,7 +150,7 @@ public class FolderChooserDialog extends DialogFragment {
                     b_positive.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
-                            if( MyDebug.LOG )
+                            if( CameraXDebug.LOG )
                                 Log.d(TAG, "choose folder: " + current_folder.toString());
                             if( useFolder() ) {
                                 folder_dialog.dismiss();
@@ -163,7 +163,7 @@ public class FolderChooserDialog extends DialogFragment {
                     b_neutral.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
-                            if( MyDebug.LOG )
+                            if( CameraXDebug.LOG )
                                 Log.d(TAG, "new folder in: " + current_folder.toString());
                             newFolder();
                         }
@@ -173,10 +173,10 @@ public class FolderChooserDialog extends DialogFragment {
         });
 
         if( !start_folder.exists() ) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "create new folder" + start_folder);
             if( !start_folder.mkdirs() ) {
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "failed to create new folder");
                 // don't do anything yet, this is handled below
             }
@@ -184,16 +184,16 @@ public class FolderChooserDialog extends DialogFragment {
         refreshList(start_folder);
         if( !canWrite() ) {
             // see testFolderChooserInvalid()
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "failed to read folder");
 
             if( show_dcim_shortcut ) {
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "fall back to DCIM");
                 // note that we reset to DCIM rather than DCIM/OpenCamera, just to increase likelihood of getting back to a valid state
                 refreshList(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM));
                 if( current_folder == null ) {
-                    if( MyDebug.LOG )
+                    if( CameraXDebug.LOG )
                         Log.d(TAG, "can't even read DCIM?!");
                     refreshList(new File("/"));
                 }
@@ -207,7 +207,7 @@ public class FolderChooserDialog extends DialogFragment {
     }
 
     public void setMaxParent(File max_parent) {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "setMaxParent: " + max_parent);
         this.max_parent = max_parent;
     }
@@ -229,10 +229,10 @@ public class FolderChooserDialog extends DialogFragment {
     }
 
     private void refreshList(File new_folder) {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "refreshList: " + new_folder);
         if( new_folder == null ) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "refreshList: null folder");
             return;
         }
@@ -242,7 +242,7 @@ public class FolderChooserDialog extends DialogFragment {
             files = new_folder.listFiles();
         }
         catch(Exception e) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "exception reading folder");
             e.printStackTrace();
         }
@@ -303,14 +303,14 @@ public class FolderChooserDialog extends DialogFragment {
                 return true;
         }
         catch(Exception e) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "exception in canWrite()");
         }
         return false;
     }
 
     private boolean useFolder() {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "useFolder");
         if( current_folder == null )
             return false;
@@ -319,12 +319,12 @@ public class FolderChooserDialog extends DialogFragment {
             if( this.show_dcim_shortcut ) {
                 File base_folder = StorageUtils.getBaseFolder();
                 if( current_folder.getParentFile() != null && current_folder.getParentFile().equals(base_folder) ) {
-                    if( MyDebug.LOG )
+                    if( CameraXDebug.LOG )
                         Log.d(TAG, "parent folder is base folder");
                     new_save_location = current_folder.getName();
                 }
             }
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "new_save_location: " + new_save_location);
             chosen_folder = new_save_location;
             return true;
@@ -365,7 +365,7 @@ public class FolderChooserDialog extends DialogFragment {
     }
 
     private void newFolder() {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "newFolder");
         if( current_folder == null )
             return;
@@ -390,27 +390,27 @@ public class FolderChooserDialog extends DialogFragment {
                             else {
                                 try {
                                     String new_folder_name = current_folder.getAbsolutePath() + File.separator + edit_text.getText().toString();
-                                    if( MyDebug.LOG )
+                                    if( CameraXDebug.LOG )
                                         Log.d(TAG, "create new folder: " + new_folder_name);
                                     File new_folder = new File(new_folder_name);
                                     if( new_folder.exists() ) {
-                                        if( MyDebug.LOG )
+                                        if( CameraXDebug.LOG )
                                             Log.d(TAG, "folder already exists");
                                         Toast.makeText(getActivity(), R.string.folder_exists, Toast.LENGTH_SHORT).show();
                                     }
                                     else if( new_folder.mkdirs() ) {
-                                        if( MyDebug.LOG )
+                                        if( CameraXDebug.LOG )
                                             Log.d(TAG, "created new folder");
                                         refreshList(current_folder);
                                     }
                                     else {
-                                        if( MyDebug.LOG )
+                                        if( CameraXDebug.LOG )
                                             Log.d(TAG, "failed to create new folder");
                                         Toast.makeText(getActivity(), R.string.failed_create_folder, Toast.LENGTH_SHORT).show();
                                     }
                                 }
                                 catch(Exception e) {
-                                    if( MyDebug.LOG )
+                                    if( CameraXDebug.LOG )
                                         Log.d(TAG, "exception trying to create new folder");
                                     e.printStackTrace();
                                     Toast.makeText(getActivity(), R.string.failed_create_folder, Toast.LENGTH_SHORT).show();

@@ -1,8 +1,8 @@
 package net.sourceforge.opencamera.ui;
 
-import net.sourceforge.opencamera.MainActivity;
-import net.sourceforge.opencamera.MyApplicationInterface;
-import net.sourceforge.opencamera.MyDebug;
+import net.sourceforge.opencamera.CameraXActivity;
+import net.sourceforge.opencamera.CameraXApplicationInterface;
+import net.sourceforge.opencamera.CameraXDebug;
 import net.sourceforge.opencamera.PreferenceKeys;
 import net.sourceforge.opencamera.R;
 import net.sourceforge.opencamera.cameracontroller.CameraController;
@@ -75,11 +75,11 @@ public class PopupView extends LinearLayout {
 
     public PopupView(Context context) {
         super(context);
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "new PopupView: " + this);
 
         final long debug_time = System.nanoTime();
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "PopupView time 1: " + (System.nanoTime() - debug_time));
         this.setOrientation(LinearLayout.VERTICAL);
 
@@ -88,7 +88,7 @@ public class PopupView extends LinearLayout {
         arrow_button_w = (int) (arrow_button_w_dp * scale + 0.5f); // convert dps to pixels
         arrow_button_h = (int) (arrow_button_h_dp * scale + 0.5f); // convert dps to pixels
 
-        final MainActivity main_activity = (MainActivity)this.getContext();
+        final CameraXActivity main_activity = (CameraXActivity)this.getContext();
 
         boolean small_screen = false;
         total_width_dp = 280;
@@ -97,7 +97,7 @@ public class PopupView extends LinearLayout {
             total_width_dp = max_width_dp;
             small_screen = true;
         }
-        if( MyDebug.LOG ) {
+        if( CameraXDebug.LOG ) {
             Log.d(TAG, "max_width_dp: " + max_width_dp);
             Log.d(TAG, "total_width_dp: " + total_width_dp);
             Log.d(TAG, "small_screen: " + small_screen);
@@ -105,7 +105,7 @@ public class PopupView extends LinearLayout {
 
 		/*{
 			int total_width = (int) (total_width_dp * scale + 0.5f); // convert dps to pixels;
-			if( MyDebug.LOG )
+			if( CameraXDebug.LOG )
 				Log.d(TAG, "total_width: " + total_width);
 			ViewGroup.LayoutParams params = new LayoutParams(
 					total_width,
@@ -114,7 +114,7 @@ public class PopupView extends LinearLayout {
 		}*/
 
         final Preview preview = main_activity.getPreview();
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "PopupView time 2: " + (System.nanoTime() - debug_time));
         if( !main_activity.getMainUI().showCycleFlashIcon() )
         {
@@ -132,7 +132,7 @@ public class PopupView extends LinearLayout {
                 addButtonOptionsToPopup(supported_flash_values, R.array.flash_icons, R.array.flash_values, getResources().getString(R.string.flash_mode), preview.getCurrentFlashValue(), 0, "TEST_FLASH", new ButtonOptionsPopupListener() {
                     @Override
                     public void onClick(String option) {
-                        if( MyDebug.LOG )
+                        if( CameraXDebug.LOG )
                             Log.d(TAG, "clicked flash: " + option);
                         preview.updateFlash(option);
                         main_activity.getMainUI().setPopupIcon();
@@ -141,7 +141,7 @@ public class PopupView extends LinearLayout {
                 });
             }
         }
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "PopupView time 3: " + (System.nanoTime() - debug_time));
 
         //if( preview.isVideo() && preview.isTakingPhoto() ) {
@@ -151,8 +151,8 @@ public class PopupView extends LinearLayout {
         else {
             // make a copy of getSupportedFocusValues() so we can modify it
             List<String> supported_focus_values = preview.getSupportedFocusValues();
-            MyApplicationInterface.PhotoMode photo_mode = main_activity.getApplicationInterface().getPhotoMode();
-            if( !preview.isVideo() && photo_mode == MyApplicationInterface.PhotoMode.FocusBracketing ) {
+            CameraXApplicationInterface.PhotoMode photo_mode = main_activity.getApplicationInterface().getPhotoMode();
+            if( !preview.isVideo() && photo_mode == CameraXApplicationInterface.PhotoMode.FocusBracketing ) {
                 // don't show focus modes in focus bracketing mode (as we'll always run in manual focus mode)
                 supported_focus_values = null;
             }
@@ -169,13 +169,13 @@ public class PopupView extends LinearLayout {
             addButtonOptionsToPopup(supported_focus_values, R.array.focus_mode_icons, R.array.focus_mode_values, getResources().getString(R.string.focus_mode), preview.getCurrentFocusValue(), 0, "TEST_FOCUS", new ButtonOptionsPopupListener() {
                 @Override
                 public void onClick(String option) {
-                    if( MyDebug.LOG )
+                    if( CameraXDebug.LOG )
                         Log.d(TAG, "clicked focus: " + option);
                     preview.updateFocus(option, false, true);
                     main_activity.getMainUI().destroyPopup(); // need to recreate popup for new selection
                 }
             });
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "PopupView time 4: " + (System.nanoTime() - debug_time));
 
             SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
@@ -183,36 +183,36 @@ public class PopupView extends LinearLayout {
             //final boolean use_expanded_menu = true;
             final boolean use_expanded_menu = false;
             final List<String> photo_modes = new ArrayList<>();
-            final List<MyApplicationInterface.PhotoMode> photo_mode_values = new ArrayList<>();
+            final List<CameraXApplicationInterface.PhotoMode> photo_mode_values = new ArrayList<>();
             photo_modes.add( getResources().getString(use_expanded_menu ? R.string.photo_mode_standard_full : R.string.photo_mode_standard) );
-            photo_mode_values.add( MyApplicationInterface.PhotoMode.Standard );
+            photo_mode_values.add( CameraXApplicationInterface.PhotoMode.Standard );
             if( main_activity.supportsNoiseReduction() ) {
                 photo_modes.add(getResources().getString(use_expanded_menu ? R.string.photo_mode_noise_reduction_full : R.string.photo_mode_noise_reduction));
-                photo_mode_values.add(MyApplicationInterface.PhotoMode.NoiseReduction);
+                photo_mode_values.add(CameraXApplicationInterface.PhotoMode.NoiseReduction);
             }
             if( main_activity.supportsDRO() ) {
                 photo_modes.add( getResources().getString(R.string.photo_mode_dro) );
-                photo_mode_values.add( MyApplicationInterface.PhotoMode.DRO );
+                photo_mode_values.add( CameraXApplicationInterface.PhotoMode.DRO );
             }
             if( main_activity.supportsHDR() ) {
                 photo_modes.add( getResources().getString(R.string.photo_mode_hdr) );
-                photo_mode_values.add( MyApplicationInterface.PhotoMode.HDR );
+                photo_mode_values.add( CameraXApplicationInterface.PhotoMode.HDR );
             }
             if( main_activity.supportsPanorama() ) {
                 photo_modes.add(getResources().getString(use_expanded_menu ? R.string.photo_mode_panorama_full : R.string.photo_mode_panorama));
-                photo_mode_values.add(MyApplicationInterface.PhotoMode.Panorama);
+                photo_mode_values.add(CameraXApplicationInterface.PhotoMode.Panorama);
             }
             if( main_activity.supportsFastBurst() ) {
                 photo_modes.add(getResources().getString(use_expanded_menu ? R.string.photo_mode_fast_burst_full : R.string.photo_mode_fast_burst));
-                photo_mode_values.add(MyApplicationInterface.PhotoMode.FastBurst);
+                photo_mode_values.add(CameraXApplicationInterface.PhotoMode.FastBurst);
             }
             if( main_activity.supportsExpoBracketing() ) {
                 photo_modes.add( getResources().getString(use_expanded_menu ? R.string.photo_mode_expo_bracketing_full : R.string.photo_mode_expo_bracketing) );
-                photo_mode_values.add( MyApplicationInterface.PhotoMode.ExpoBracketing );
+                photo_mode_values.add( CameraXApplicationInterface.PhotoMode.ExpoBracketing );
             }
             if( main_activity.supportsFocusBracketing() ) {
                 photo_modes.add( getResources().getString(use_expanded_menu ? R.string.photo_mode_focus_bracketing_full : R.string.photo_mode_focus_bracketing) );
-                photo_mode_values.add( MyApplicationInterface.PhotoMode.FocusBracketing );
+                photo_mode_values.add( CameraXApplicationInterface.PhotoMode.FocusBracketing );
             }
             if( preview.isVideo() ) {
                 // only show photo modes when in photo mode, not video mode!
@@ -227,7 +227,7 @@ public class PopupView extends LinearLayout {
                 }
                 if( current_mode == null ) {
                     // applicationinterface should only report we're in a mode if it's supported, but just in case...
-                    if( MyDebug.LOG )
+                    if( CameraXDebug.LOG )
                         Log.e(TAG, "can't find current mode for mode: " + photo_mode);
                     current_mode = ""; // this will mean no photo mode is highlighted in the UI
                 }
@@ -236,7 +236,7 @@ public class PopupView extends LinearLayout {
                     addRadioOptionsToPopup(sharedPreferences, photo_modes, photo_modes, getResources().getString(R.string.photo_mode), null, null, current_mode, "TEST_PHOTO_MODE", new RadioOptionsListener() {
                         @Override
                         public void onClick(String selected_value) {
-                            if( MyDebug.LOG )
+                            if( CameraXDebug.LOG )
                                 Log.d(TAG, "clicked photo mode: " + selected_value);
 
                             changePhotoMode(photo_modes, photo_mode_values, selected_value);
@@ -245,13 +245,13 @@ public class PopupView extends LinearLayout {
                 }
                 else {
                     addTitleToPopup(getResources().getString(R.string.photo_mode));
-                    if( MyDebug.LOG )
+                    if( CameraXDebug.LOG )
                         Log.d(TAG, "PopupView time 6: " + (System.nanoTime() - debug_time));
 
                     addButtonOptionsToPopup(photo_modes, -1, -1, "", current_mode, 4, "TEST_PHOTO_MODE", new ButtonOptionsPopupListener() {
                         @Override
                         public void onClick(String option) {
-                            if( MyDebug.LOG )
+                            if( CameraXDebug.LOG )
                                 Log.d(TAG, "clicked photo mode: " + option);
 
                             changePhotoMode(photo_modes, photo_mode_values, option);
@@ -259,11 +259,11 @@ public class PopupView extends LinearLayout {
                     });
                 }
             }
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "PopupView time 7: " + (System.nanoTime() - debug_time));
 
-            if( !preview.isVideo() && photo_mode == MyApplicationInterface.PhotoMode.NoiseReduction ) {
-                if( MyDebug.LOG )
+            if( !preview.isVideo() && photo_mode == CameraXApplicationInterface.PhotoMode.NoiseReduction ) {
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "add noise reduction options");
 
                 final String [] nr_mode_values = getResources().getStringArray(R.array.preference_nr_mode_values);
@@ -278,7 +278,7 @@ public class PopupView extends LinearLayout {
                 String nr_mode_value = main_activity.getApplicationInterface().getNRMode();
                 nr_mode_index = Arrays.asList(nr_mode_values).indexOf(nr_mode_value);
                 if( nr_mode_index == -1 ) {
-                    if( MyDebug.LOG )
+                    if( CameraXDebug.LOG )
                         Log.d(TAG, "can't find nr_mode_value " + nr_mode_value + " in nr_mode_values!");
                     nr_mode_index = 0;
                 }
@@ -346,10 +346,10 @@ public class PopupView extends LinearLayout {
 
                 this.addView(checkBox);
             }
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "PopupView time 8: " + (System.nanoTime() - debug_time));
 
-            if( !preview.isVideo() && photo_mode != MyApplicationInterface.PhotoMode.Panorama ) {
+            if( !preview.isVideo() && photo_mode != CameraXApplicationInterface.PhotoMode.Panorama ) {
                 // Only show photo resolutions in photo mode - even if photo snapshots whilst recording video is supported, the
                 // resolutions for that won't match what the user has requested for photo mode resolutions.
                 // And Panorama mode chooses its own resolution.
@@ -373,7 +373,7 @@ public class PopupView extends LinearLayout {
                     Log.e(TAG, "couldn't find index of current picture size");
                 }
                 else {
-                    if( MyDebug.LOG )
+                    if( CameraXDebug.LOG )
                         Log.d(TAG, "picture_size_index: " + picture_size_index);
                 }
                 addArrayOptionsToPopup(picture_size_strings, getResources().getString(R.string.preference_resolution), false, false, picture_size_index, false, "PHOTO_RESOLUTIONS", new ArrayOptionsPopupListener() {
@@ -381,7 +381,7 @@ public class PopupView extends LinearLayout {
                     final Runnable update_runnable = new Runnable() {
                         @Override
                         public void run() {
-                            if (MyDebug.LOG)
+                            if (CameraXDebug.LOG)
                                 Log.d(TAG, "update settings due to resolution change");
                             main_activity.updateForSettings(true, "", true); // keep the popupview open
                         }
@@ -423,7 +423,7 @@ public class PopupView extends LinearLayout {
                     }
                 });
             }
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "PopupView time 9: " + (System.nanoTime() - debug_time));
 
             if( preview.isVideo() ) {
@@ -450,7 +450,7 @@ public class PopupView extends LinearLayout {
                         break;
                     }
                 }
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "video_size_index:" + video_size_index);
                 final List<String> video_size_strings = new ArrayList<>();
                 for(String video_size : video_sizes) {
@@ -462,7 +462,7 @@ public class PopupView extends LinearLayout {
                     final Runnable update_runnable = new Runnable() {
                         @Override
                         public void run() {
-                            if( MyDebug.LOG )
+                            if( CameraXDebug.LOG )
                                 Log.d(TAG, "update settings due to video resolution change");
                             main_activity.updateForSettings(true, "", true); // keep the popupview open
                         }
@@ -503,11 +503,11 @@ public class PopupView extends LinearLayout {
                     }
                 });
             }
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "PopupView time 10: " + (System.nanoTime() - debug_time));
 
             if( preview.getSupportedApertures() != null ) {
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "add apertures");
 
                 addTitleToPopup(getResources().getString(R.string.aperture));
@@ -540,12 +540,12 @@ public class PopupView extends LinearLayout {
                 addButtonOptionsToPopup(apertures_strings, -1, -1, "", current_aperture_s, 0, "TEST_APERTURE", new ButtonOptionsPopupListener() {
                     @Override
                     public void onClick(String option) {
-                        if( MyDebug.LOG )
+                        if( CameraXDebug.LOG )
                             Log.d(TAG, "clicked aperture: " + option);
                         int index = apertures_strings.indexOf(option);
                         if( index != -1 ) {
                             float new_aperture = apertures.get(index);
-                            if( MyDebug.LOG )
+                            if( CameraXDebug.LOG )
                                 Log.d(TAG, "new_aperture: " + new_aperture);
                             preview.showToast(null, getResources().getString(R.string.aperture) + ": " + option);
                             main_activity.getApplicationInterface().setAperture(new_aperture);
@@ -561,8 +561,8 @@ public class PopupView extends LinearLayout {
                 });
             }
 
-            if( !preview.isVideo() && photo_mode == MyApplicationInterface.PhotoMode.FastBurst ) {
-                if( MyDebug.LOG )
+            if( !preview.isVideo() && photo_mode == CameraXApplicationInterface.PhotoMode.FastBurst ) {
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "add fast burst options");
 
                 final String [] all_burst_mode_values = getResources().getStringArray(R.array.preference_fast_burst_n_images_values);
@@ -577,7 +577,7 @@ public class PopupView extends LinearLayout {
 
                 int max_burst_images = main_activity.getApplicationInterface().getImageSaver().getQueueSize()+1;
                 max_burst_images = Math.max(2, max_burst_images); // make sure we at least allow the minimum of 2 burst images!
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "max_burst_images: " + max_burst_images);
 
                 // filter number of burst images - don't allow more than max_burst_images
@@ -594,11 +594,11 @@ public class PopupView extends LinearLayout {
                         continue;
                     }
                     if( n_images > max_burst_images ) {
-                        if( MyDebug.LOG )
+                        if( CameraXDebug.LOG )
                             Log.d(TAG, "n_images " + n_images + " is more than max_burst_images: " + max_burst_images);
                         continue;
                     }
-                    if( MyDebug.LOG )
+                    if( CameraXDebug.LOG )
                         Log.d(TAG, "n_images " + n_images);
                     burst_mode_values_l.add( all_burst_mode_values[i] );
                     burst_mode_entries_l.add( all_burst_mode_entries[i] );
@@ -609,7 +609,7 @@ public class PopupView extends LinearLayout {
                 String burst_mode_value = sharedPreferences.getString(PreferenceKeys.FastBurstNImagesPreferenceKey, "5");
                 burst_n_images_index = Arrays.asList(burst_mode_values).indexOf(burst_mode_value);
                 if( burst_n_images_index == -1 ) {
-                    if( MyDebug.LOG )
+                    if( CameraXDebug.LOG )
                         Log.d(TAG, "can't find burst_mode_value " + burst_mode_value + " in burst_mode_values!");
                     burst_n_images_index = 0;
                 }
@@ -646,8 +646,8 @@ public class PopupView extends LinearLayout {
                     }
                 });
             }
-            else if( !preview.isVideo() && photo_mode == MyApplicationInterface.PhotoMode.FocusBracketing ) {
-                if( MyDebug.LOG )
+            else if( !preview.isVideo() && photo_mode == CameraXApplicationInterface.PhotoMode.FocusBracketing ) {
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "add focus bracketing options");
 
                 final String [] burst_mode_values = getResources().getStringArray(R.array.preference_focus_bracketing_n_images_values);
@@ -661,7 +661,7 @@ public class PopupView extends LinearLayout {
                 String burst_mode_value = sharedPreferences.getString(PreferenceKeys.FocusBracketingNImagesPreferenceKey, "3");
                 burst_n_images_index = Arrays.asList(burst_mode_values).indexOf(burst_mode_value);
                 if( burst_n_images_index == -1 ) {
-                    if( MyDebug.LOG )
+                    if( CameraXDebug.LOG )
                         Log.d(TAG, "can't find burst_mode_value " + burst_mode_value + " in burst_mode_values!");
                     burst_n_images_index = 0;
                 }
@@ -735,7 +735,7 @@ public class PopupView extends LinearLayout {
             if( preview.isVideo() ) {
                 final List<Float> capture_rate_values = main_activity.getApplicationInterface().getSupportedVideoCaptureRates();
                 if( capture_rate_values.size() > 1 ) {
-                    if( MyDebug.LOG )
+                    if( CameraXDebug.LOG )
                         Log.d(TAG, "add slow motion / timelapse video options");
                     float capture_rate_value = sharedPreferences.getFloat(PreferenceKeys.getVideoCaptureRatePreferenceKey(preview.getCameraId()), 1.0f);
                     final List<String> capture_rate_str = new ArrayList<>();
@@ -754,7 +754,7 @@ public class PopupView extends LinearLayout {
                         }
                     }
                     if( video_capture_rate_index == -1 ) {
-                        if( MyDebug.LOG )
+                        if( CameraXDebug.LOG )
                             Log.d(TAG, "can't find video_capture_rate_index");
                         // default to no slow motion or timelapse
                         video_capture_rate_index = capture_rate_std_index;
@@ -770,7 +770,7 @@ public class PopupView extends LinearLayout {
                         final Runnable update_runnable = new Runnable() {
                             @Override
                             public void run() {
-                                if (MyDebug.LOG)
+                                if (CameraXDebug.LOG)
                                     Log.d(TAG, "update settings due to video capture rate change");
                                 main_activity.updateForSettings(true, "", true); // keep the popupview open
                             }
@@ -800,7 +800,7 @@ public class PopupView extends LinearLayout {
                                 else
                                     toast_message = getResources().getString(R.string.slow_motion_disabled);
                             }
-                            if( MyDebug.LOG ) {
+                            if( CameraXDebug.LOG ) {
                                 Log.d(TAG, "update settings due to capture rate change");
                                 Log.d(TAG, "old_capture_rate_value: " + old_capture_rate_value);
                                 Log.d(TAG, "new_capture_rate_value: " + new_capture_rate_value);
@@ -842,7 +842,7 @@ public class PopupView extends LinearLayout {
                 }
             }
 
-            if( photo_mode != MyApplicationInterface.PhotoMode.Panorama ) {
+            if( photo_mode != CameraXApplicationInterface.PhotoMode.Panorama ) {
                 // timer not supported with panorama
 
                 final String [] timer_values = getResources().getStringArray(R.array.preference_timer_values);
@@ -850,7 +850,7 @@ public class PopupView extends LinearLayout {
                 String timer_value = sharedPreferences.getString(PreferenceKeys.TimerPreferenceKey, "0");
                 timer_index = Arrays.asList(timer_values).indexOf(timer_value);
                 if( timer_index == -1 ) {
-                    if( MyDebug.LOG )
+                    if( CameraXDebug.LOG )
                         Log.d(TAG, "can't find timer_value " + timer_value + " in timer_values!");
                     timer_index = 0;
                 }
@@ -885,10 +885,10 @@ public class PopupView extends LinearLayout {
                     }
                 });
             }
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "PopupView time 11: " + (System.nanoTime() - debug_time));
 
-            if( photo_mode != MyApplicationInterface.PhotoMode.Panorama ) {
+            if( photo_mode != CameraXApplicationInterface.PhotoMode.Panorama ) {
                 // auto-repeat not supported with panorama
 
                 final String [] repeat_mode_values = getResources().getStringArray(R.array.preference_burst_mode_values);
@@ -896,7 +896,7 @@ public class PopupView extends LinearLayout {
                 String repeat_mode_value = sharedPreferences.getString(PreferenceKeys.RepeatModePreferenceKey, "1");
                 repeat_mode_index = Arrays.asList(repeat_mode_values).indexOf(repeat_mode_value);
                 if( repeat_mode_index == -1 ) {
-                    if( MyDebug.LOG )
+                    if( CameraXDebug.LOG )
                         Log.d(TAG, "can't find repeat_mode_value " + repeat_mode_value + " in repeat_mode_values!");
                     repeat_mode_index = 0;
                 }
@@ -931,7 +931,7 @@ public class PopupView extends LinearLayout {
                         return -1;
                     }
                 });
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "PopupView time 12: " + (System.nanoTime() - debug_time));
             }
 
@@ -940,7 +940,7 @@ public class PopupView extends LinearLayout {
             String grid_value = sharedPreferences.getString(PreferenceKeys.ShowGridPreferenceKey, "preference_grid_none");
             grid_index = Arrays.asList(grid_values).indexOf(grid_value);
             if( grid_index == -1 ) {
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "can't find grid_value " + grid_value + " in grid_values!");
                 grid_index = 0;
             }
@@ -978,7 +978,7 @@ public class PopupView extends LinearLayout {
                     return -1;
                 }
             });
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "PopupView time 13: " + (System.nanoTime() - debug_time));
 
             // popup should only be opened if we have a camera controller, but check just to be safe
@@ -998,7 +998,7 @@ public class PopupView extends LinearLayout {
                         switchToWhiteBalance(selected_value);
                     }
                 });
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "PopupView time 14: " + (System.nanoTime() - debug_time));
 
                 List<String> supported_scene_modes = preview.getSupportedSceneModes();
@@ -1026,7 +1026,7 @@ public class PopupView extends LinearLayout {
                         }
                     }
                 });
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "PopupView time 15: " + (System.nanoTime() - debug_time));
 
                 List<String> supported_color_effects = preview.getSupportedColorEffects();
@@ -1047,7 +1047,7 @@ public class PopupView extends LinearLayout {
                         // keep popup open
                     }
                 });
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "PopupView time 16: " + (System.nanoTime() - debug_time));
             }
 
@@ -1059,24 +1059,24 @@ public class PopupView extends LinearLayout {
         return (int) (total_width_dp * scale + 0.5f); // convert dps to pixels;
     }
 
-    private void changePhotoMode(List<String> photo_modes, List<MyApplicationInterface.PhotoMode> photo_mode_values, String option) {
-        if( MyDebug.LOG )
+    private void changePhotoMode(List<String> photo_modes, List<CameraXApplicationInterface.PhotoMode> photo_mode_values, String option) {
+        if( CameraXDebug.LOG )
             Log.d(TAG, "changePhotoMode: " + option);
 
-        final MainActivity main_activity = (MainActivity)this.getContext();
+        final CameraXActivity main_activity = (CameraXActivity)this.getContext();
         int option_id = -1;
         for(int i=0;i<photo_modes.size() && option_id==-1;i++) {
             if( option.equals( photo_modes.get(i) ) )
                 option_id = i;
         }
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "mode id: " + option_id);
         if( option_id == -1 ) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.e(TAG, "unknown mode id: " + option_id);
         }
         else {
-            MyApplicationInterface.PhotoMode new_photo_mode = photo_mode_values.get(option_id);
+            CameraXApplicationInterface.PhotoMode new_photo_mode = photo_mode_values.get(option_id);
             String toast_message = option;
             switch (new_photo_mode) {
                 case Standard:
@@ -1126,21 +1126,21 @@ public class PopupView extends LinearLayout {
                     editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_panorama");
                     break;
                 default:
-                    if (MyDebug.LOG)
+                    if (CameraXDebug.LOG)
                         Log.e(TAG, "unknown new_photo_mode: " + new_photo_mode);
                     break;
             }
             editor.apply();
 
             boolean done_dialog = false;
-            if( new_photo_mode == MyApplicationInterface.PhotoMode.HDR ) {
+            if( new_photo_mode == CameraXApplicationInterface.PhotoMode.HDR ) {
                 boolean done_hdr_info = sharedPreferences.contains(PreferenceKeys.HDRInfoPreferenceKey);
                 if( !done_hdr_info ) {
                     main_activity.getMainUI().showInfoDialog(R.string.photo_mode_hdr, R.string.hdr_info, PreferenceKeys.HDRInfoPreferenceKey);
                     done_dialog = true;
                 }
             }
-            else if( new_photo_mode == MyApplicationInterface.PhotoMode.Panorama ) {
+            else if( new_photo_mode == CameraXApplicationInterface.PhotoMode.Panorama ) {
                 boolean done_panorama_info = sharedPreferences.contains(PreferenceKeys.PanoramaInfoPreferenceKey);
                 if( !done_panorama_info ) {
                     main_activity.getMainUI().showInfoDialog(R.string.photo_mode_panorama_full, R.string.panorama_info, PreferenceKeys.PanoramaInfoPreferenceKey);
@@ -1160,9 +1160,9 @@ public class PopupView extends LinearLayout {
     }
 
     public void switchToWhiteBalance(String selected_value) {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "switchToWhiteBalance: " + selected_value);
-        final MainActivity main_activity = (MainActivity)this.getContext();
+        final CameraXActivity main_activity = (CameraXActivity)this.getContext();
         final Preview preview = main_activity.getPreview();
         boolean close_popup = false;
         int temperature = -1;
@@ -1171,12 +1171,12 @@ public class PopupView extends LinearLayout {
                 String current_white_balance = preview.getCameraController().getWhiteBalance();
                 if( current_white_balance == null || !current_white_balance.equals("manual") ) {
                     // try to choose a default manual white balance temperature as close as possible to the current auto
-                    if( MyDebug.LOG )
+                    if( CameraXDebug.LOG )
                         Log.d(TAG, "changed to manual white balance");
                     close_popup = true;
                     if( preview.getCameraController().captureResultHasWhiteBalanceTemperature() ) {
                         temperature = preview.getCameraController().captureResultWhiteBalanceTemperature();
-                        if( MyDebug.LOG )
+                        if( CameraXDebug.LOG )
                             Log.d(TAG, "default to manual white balance temperature: " + temperature);
                         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
                         SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -1220,29 +1220,29 @@ public class PopupView extends LinearLayout {
      *                            created if necessary.
      */
     private void addButtonOptionsToPopup(List<String> supported_options, int icons_id, int values_id, String prefix_string, String current_value, int max_buttons_per_row, String test_key, final ButtonOptionsPopupListener listener) {
-        if(MyDebug.LOG)
+        if(CameraXDebug.LOG)
             Log.d(TAG, "addButtonOptionsToPopup");
-        MainActivity main_activity = (MainActivity)this.getContext();
+        CameraXActivity main_activity = (CameraXActivity)this.getContext();
         createButtonOptions(this, this.getContext(), total_width_dp, main_activity.getMainUI().getTestUIButtonsMap(), supported_options, icons_id, values_id, prefix_string, true, current_value, max_buttons_per_row, test_key, listener);
     }
 
     static List<View> createButtonOptions(ViewGroup parent, Context context, int total_width_dp, Map<String, View> test_ui_buttons, List<String> supported_options, int icons_id, int values_id, String prefix_string, boolean include_prefix, String current_value, int max_buttons_per_row, String test_key, final ButtonOptionsPopupListener listener) {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "createButtonOptions");
         final List<View> buttons = new ArrayList<>();
         if( supported_options != null ) {
             final long debug_time = System.nanoTime();
             LinearLayout ll2 = new LinearLayout(context);
             ll2.setOrientation(LinearLayout.HORIZONTAL);
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "addButtonOptionsToPopup time 1: " + (System.nanoTime() - debug_time));
             String [] icons = icons_id != -1 ? context.getResources().getStringArray(icons_id) : null;
             String [] values = values_id != -1 ? context.getResources().getStringArray(values_id) : null;
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "addButtonOptionsToPopup time 2: " + (System.nanoTime() - debug_time));
 
             final float scale = context.getResources().getDisplayMetrics().density;
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "addButtonOptionsToPopup time 2.04: " + (System.nanoTime() - debug_time));
             int actual_max_per_row = supported_options.size();
             if( max_buttons_per_row > 0 )
@@ -1255,7 +1255,7 @@ public class PopupView extends LinearLayout {
                 use_scrollview = true;
             }
             int button_width = (int)(button_width_dp * scale + 0.5f); // convert dps to pixels
-            if( MyDebug.LOG ) {
+            if( CameraXDebug.LOG ) {
                 Log.d(TAG, "actual_max_per_row: " + actual_max_per_row);
                 Log.d(TAG, "button_width_dp: " + button_width_dp);
                 Log.d(TAG, "button_width: " + button_width);
@@ -1266,24 +1266,24 @@ public class PopupView extends LinearLayout {
                 @Override
                 public void onClick(View v) {
                     String supported_option = (String)v.getTag();
-                    if( MyDebug.LOG )
+                    if( CameraXDebug.LOG )
                         Log.d(TAG, "clicked: " + supported_option);
                     listener.onClick(supported_option);
                 }
             };
             View current_view = null;
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "addButtonOptionsToPopup time 2.05: " + (System.nanoTime() - debug_time));
 
             for(int button_indx=0;button_indx<supported_options.size();button_indx++) {
                 final String supported_option = supported_options.get(button_indx);
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "addButtonOptionsToPopup time 2.06: " + (System.nanoTime() - debug_time));
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "button_indx = " + button_indx);
 
                 if( max_buttons_per_row > 0 && button_indx > 0 && button_indx % max_buttons_per_row == 0 ) {
-                    if( MyDebug.LOG )
+                    if( CameraXDebug.LOG )
                         Log.d(TAG, "start a new row");
                     // add the previous row
                     // no need to handle use_scrollview, as we don't support scrollviews with multiple rows
@@ -1292,20 +1292,20 @@ public class PopupView extends LinearLayout {
                     ll2.setOrientation(LinearLayout.HORIZONTAL);
 
                     int n_remaining = supported_options.size() - button_indx;
-                    if( MyDebug.LOG )
+                    if( CameraXDebug.LOG )
                         Log.d(TAG, "n_remaining: " + n_remaining);
                     if( n_remaining <= max_buttons_per_row ) {
-                        if( MyDebug.LOG )
+                        if( CameraXDebug.LOG )
                             Log.d(TAG, "final row");
                         button_width_dp = total_width_dp/n_remaining;
                         button_width = (int)(button_width_dp * scale + 0.5f); // convert dps to pixels
                     }
                 }
 
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "supported_option: " + supported_option);
                 int resource = -1;
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "addButtonOptionsToPopup time 2.08: " + (System.nanoTime() - debug_time));
                 if( icons != null && values != null ) {
                     int index = -1;
@@ -1313,13 +1313,13 @@ public class PopupView extends LinearLayout {
                         if( values[i].equals(supported_option) )
                             index = i;
                     }
-                    if( MyDebug.LOG )
+                    if( CameraXDebug.LOG )
                         Log.d(TAG, "index: " + index);
                     if( index != -1 ) {
                         resource = context.getResources().getIdentifier(icons[index], null, context.getApplicationContext().getPackageName());
                     }
                 }
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "addButtonOptionsToPopup time 2.1: " + (System.nanoTime() - debug_time));
 
                 String button_string;
@@ -1337,31 +1337,31 @@ public class PopupView extends LinearLayout {
                 else {
                     button_string = (include_prefix ? prefix_string : "") + "\n" + supported_option;
                 }
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "button_string: " + button_string);
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "addButtonOptionsToPopup time 2.105: " + (System.nanoTime() - debug_time));
                 View view;
                 if( resource != -1 ) {
                     ImageButton image_button = new ImageButton(context);
-                    if( MyDebug.LOG )
+                    if( CameraXDebug.LOG )
                         Log.d(TAG, "addButtonOptionsToPopup time 2.11: " + (System.nanoTime() - debug_time));
                     view = image_button;
                     buttons.add(view);
                     ll2.addView(view);
-                    if( MyDebug.LOG )
+                    if( CameraXDebug.LOG )
                         Log.d(TAG, "addButtonOptionsToPopup time 2.12: " + (System.nanoTime() - debug_time));
 
                     //image_button.setImageResource(resource);
-                    final MainActivity main_activity = (MainActivity)context;
+                    final CameraXActivity main_activity = (CameraXActivity)context;
                     Bitmap bm = main_activity.getPreloadedBitmap(resource);
                     if( bm != null )
                         image_button.setImageBitmap(bm);
                     else {
-                        if( MyDebug.LOG )
+                        if( CameraXDebug.LOG )
                             Log.d(TAG, "failed to find bitmap for resource " + resource + "!");
                     }
-                    if( MyDebug.LOG )
+                    if( CameraXDebug.LOG )
                         Log.d(TAG, "addButtonOptionsToPopup time 2.13: " + (System.nanoTime() - debug_time));
                     image_button.setScaleType(ScaleType.FIT_CENTER);
                     image_button.setBackgroundColor(Color.TRANSPARENT);
@@ -1382,7 +1382,7 @@ public class PopupView extends LinearLayout {
                     final int padding = (int) (0 * scale + 0.5f); // convert dps to pixels
                     view.setPadding(padding, padding, padding, padding);
                 }
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "addButtonOptionsToPopup time 2.2: " + (System.nanoTime() - debug_time));
 
                 ViewGroup.LayoutParams params = view.getLayoutParams();
@@ -1400,25 +1400,25 @@ public class PopupView extends LinearLayout {
                 else {
                     setButtonSelected(view, false);
                 }
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "addButtonOptionsToPopup time 2.3: " + (System.nanoTime() - debug_time));
                 view.setTag(supported_option);
                 view.setOnClickListener(on_click_listener);
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "addButtonOptionsToPopup time 2.35: " + (System.nanoTime() - debug_time));
                 if( test_ui_buttons != null )
                     test_ui_buttons.put(test_key + "_" + supported_option, view);
-                if( MyDebug.LOG ) {
+                if( CameraXDebug.LOG ) {
                     Log.d(TAG, "addButtonOptionsToPopup time 2.4: " + (System.nanoTime() - debug_time));
                     Log.d(TAG, "added to popup_buttons: " + test_key + "_" + supported_option + " view: " + view);
                     if( test_ui_buttons != null )
                         Log.d(TAG, "test_ui_buttons is now: " + test_ui_buttons);
                 }
             }
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "addButtonOptionsToPopup time 3: " + (System.nanoTime() - debug_time));
             if( use_scrollview ) {
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "using scrollview");
                 final int total_width = (int) (total_width_dp * scale + 0.5f); // convert dps to pixels;
                 final HorizontalScrollView scroll = new HorizontalScrollView(context);
@@ -1451,11 +1451,11 @@ public class PopupView extends LinearLayout {
                 }
             }
             else {
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "not using scrollview");
                 parent.addView(ll2);
             }
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "addButtonOptionsToPopup time 4: " + (System.nanoTime() - debug_time));
         }
         return buttons;
@@ -1509,10 +1509,10 @@ public class PopupView extends LinearLayout {
      *                                  listener.
      */
     private void addRadioOptionsToPopup(final SharedPreferences sharedPreferences, final List<String> supported_options_entries, final List<String> supported_options_values, final String title, final String preference_key, final String default_value, final String current_option_value, final String test_key, final RadioOptionsListener listener) {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "addRadioOptionsToPopup: " + title);
         if( supported_options_entries != null ) {
-            final MainActivity main_activity = (MainActivity)this.getContext();
+            final CameraXActivity main_activity = (CameraXActivity)this.getContext();
             final long debug_time = System.nanoTime();
 
             final Button button = new Button(this.getContext());
@@ -1521,14 +1521,14 @@ public class PopupView extends LinearLayout {
             button.setAllCaps(false);
             button.setTextSize(TypedValue.COMPLEX_UNIT_DIP, title_text_size_dip);
             this.addView(button);
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "addRadioOptionsToPopup time 1: " + (System.nanoTime() - debug_time));
 
             final RadioGroup rg = new RadioGroup(this.getContext());
             rg.setOrientation(RadioGroup.VERTICAL);
             rg.setVisibility(View.GONE);
             main_activity.getMainUI().getTestUIButtonsMap().put(test_key, rg);
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "addRadioOptionsToPopup time 2: " + (System.nanoTime() - debug_time));
 
             button.setOnClickListener(new OnClickListener() {
@@ -1537,7 +1537,7 @@ public class PopupView extends LinearLayout {
 
                 @Override
                 public void onClick(View view) {
-                    if( MyDebug.LOG )
+                    if( CameraXDebug.LOG )
                         Log.d(TAG, "clicked to open radio buttons menu: " + title);
                     if( opened ) {
                         //rg.removeAllViews();
@@ -1558,7 +1558,7 @@ public class PopupView extends LinearLayout {
                                 new OnGlobalLayoutListener() {
                                     @Override
                                     public void onGlobalLayout() {
-                                        if( MyDebug.LOG )
+                                        if( CameraXDebug.LOG )
                                             Log.d(TAG, "onGlobalLayout()");
                                         // stop listening - only want to call this once!
                                         if( Build.VERSION.SDK_INT > Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1 ) {
@@ -1584,30 +1584,30 @@ public class PopupView extends LinearLayout {
             });
 
             this.addView(rg);
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "addRadioOptionsToPopup time 5: " + (System.nanoTime() - debug_time));
         }
     }
 
     private void addRadioOptionsToGroup(final RadioGroup rg, SharedPreferences sharedPreferences, List<String> supported_options_entries, List<String> supported_options_values, final String title, final String preference_key, final String default_value, String current_option_value, final String test_key, final RadioOptionsListener listener) {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "addRadioOptionsToGroup: " + title);
         if( preference_key != null )
             current_option_value = sharedPreferences.getString(preference_key, default_value);
         final long debug_time = System.nanoTime();
-        final MainActivity main_activity = (MainActivity)this.getContext();
+        final CameraXActivity main_activity = (CameraXActivity)this.getContext();
         int count = 0;
         for(int i=0;i<supported_options_entries.size();i++) {
             final String supported_option_entry = supported_options_entries.get(i);
             final String supported_option_value = supported_options_values.get(i);
-            if( MyDebug.LOG ) {
+            if( CameraXDebug.LOG ) {
                 Log.d(TAG, "supported_option_entry: " + supported_option_entry);
                 Log.d(TAG, "supported_option_value: " + supported_option_value);
             }
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "addRadioOptionsToGroup time 1: " + (System.nanoTime() - debug_time));
             RadioButton button = new RadioButton(this.getContext());
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "addRadioOptionsToGroup time 2: " + (System.nanoTime() - debug_time));
 
             button.setId(count);
@@ -1615,12 +1615,12 @@ public class PopupView extends LinearLayout {
             button.setText(supported_option_entry);
             button.setTextSize(TypedValue.COMPLEX_UNIT_DIP, standard_text_size_dip);
             button.setTextColor(Color.WHITE);
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "addRadioOptionsToGroup time 3: " + (System.nanoTime() - debug_time));
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "addRadioOptionsToGroup time 4: " + (System.nanoTime() - debug_time));
             rg.addView(button);
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "addRadioOptionsToGroup time 5: " + (System.nanoTime() - debug_time));
 
             if( supported_option_value.equals(current_option_value) ) {
@@ -1630,12 +1630,12 @@ public class PopupView extends LinearLayout {
             count++;
 
             button.setContentDescription(supported_option_entry);
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "addRadioOptionsToGroup time 6: " + (System.nanoTime() - debug_time));
             button.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if( MyDebug.LOG ) {
+                    if( CameraXDebug.LOG ) {
                         Log.d(TAG, "clicked current_option entry: " + supported_option_entry);
                         Log.d(TAG, "clicked current_option entry: " + supported_option_value);
                     }
@@ -1655,13 +1655,13 @@ public class PopupView extends LinearLayout {
                     }
                 }
             });
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "addRadioOptionsToGroup time 7: " + (System.nanoTime() - debug_time));
             main_activity.getMainUI().getTestUIButtonsMap().put(test_key + "_" + supported_option_value, button);
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "addRadioOptionsToGroup time 8: " + (System.nanoTime() - debug_time));
         }
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "addRadioOptionsToGroup time total: " + (System.nanoTime() - debug_time));
     }
 
@@ -1695,7 +1695,7 @@ public class PopupView extends LinearLayout {
                 addTitleToPopup(title);
             }
 
-            final MainActivity main_activity = (MainActivity)this.getContext();
+            final CameraXActivity main_activity = (CameraXActivity)this.getContext();
 			/*final Button prev_button = new Button(this.getContext());
 			//prev_button.setBackgroundResource(R.drawable.exposure);
 			prev_button.setBackgroundColor(Color.TRANSPARENT); // workaround for Android 6 crash!

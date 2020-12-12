@@ -1,6 +1,6 @@
 package net.sourceforge.opencamera.remotecontrol;
 
-import net.sourceforge.opencamera.MyDebug;
+import net.sourceforge.opencamera.CameraXDebug;
 
 import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
@@ -80,7 +80,7 @@ public class BluetoothLeService extends Service {
      * Android BLE stack and API (just knowing the MAC is not enough on
      * many phones).*/
     private void triggerScan() {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "triggerScan");
 
         if( !is_bound ) {
@@ -103,7 +103,7 @@ public class BluetoothLeService extends Service {
     }
 
     public void setRemoteDeviceType(String remote_device_type) {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "Setting remote type: " + remote_device_type);
         this.remote_device_type = remote_device_type;
     }
@@ -115,7 +115,7 @@ public class BluetoothLeService extends Service {
             if( newState == BluetoothProfile.STATE_CONNECTED ) {
                 intentAction = ACTION_GATT_CONNECTED;
                 broadcastUpdate(intentAction);
-                if( MyDebug.LOG ) {
+                if( CameraXDebug.LOG ) {
                     Log.d(TAG, "Connected to GATT server, call discoverServices()");
                 }
                 bluetoothGatt.discoverServices();
@@ -125,7 +125,7 @@ public class BluetoothLeService extends Service {
             }
             else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 intentAction = ACTION_GATT_DISCONNECTED;
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "Disconnected from GATT server, reattempting every 5 seconds.");
                 broadcastUpdate(intentAction);
                 attemptReconnect();
@@ -143,7 +143,7 @@ public class BluetoothLeService extends Service {
             Timer timer = new Timer();
             timer.schedule(new TimerTask() {
                 public void run() {
-                    if( MyDebug.LOG )
+                    if( CameraXDebug.LOG )
                         Log.d(TAG, "Attempting to reconnect to remote.");
                     connect(device_address);
                 }
@@ -157,7 +157,7 @@ public class BluetoothLeService extends Service {
                 subscribeToServices();
             }
             else {
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "onServicesDiscovered received: " + status);
             }
         }
@@ -171,7 +171,7 @@ public class BluetoothLeService extends Service {
 
         @Override
         public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG,"Got notification");
             broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic);
         }
@@ -212,7 +212,7 @@ public class BluetoothLeService extends Service {
             for(BluetoothGattCharacteristic gattCharacteristic : gattCharacteristics) {
                 UUID uuid = gattCharacteristic.getUuid();
                 if( mCharacteristicsWanted.contains(uuid) ) {
-                    if( MyDebug.LOG )
+                    if( CameraXDebug.LOG )
                         Log.d(TAG, "Found characteristic to subscribe to: " + uuid);
                     charsToSubscribe.add(gattCharacteristic);
                 }
@@ -233,10 +233,10 @@ public class BluetoothLeService extends Service {
         int remoteCommand = -1;
 
         if( KrakenGattAttributes.KRAKEN_BUTTONS_CHARACTERISTIC.equals(uuid) ) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG,"Got Kraken button press");
             final int buttonCode= characteristic.getIntValue(format_uint8, 0);
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, String.format("Received Button press: %d", buttonCode));
             // Note: we stay at a fairly generic level here and will manage variants
             // on the various button actions in MainActivity, because those will change depending
@@ -297,7 +297,7 @@ public class BluetoothLeService extends Service {
             currentDepth = depth;
             currentTemp = temperature;
 
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "Got new Kraken sensor reading. Temperature: " + temperature + " Depth:" + depth);
 
             final Intent intent = new Intent(ACTION_SENSOR_VALUE);
@@ -318,14 +318,14 @@ public class BluetoothLeService extends Service {
 
     @Override
     public IBinder onBind(Intent intent) {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "onBind");
         return mBinder;
     }
 
     @Override
     public boolean onUnbind(Intent intent) {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "onUnbind");
         this.is_bound = false;
         close();
@@ -335,7 +335,7 @@ public class BluetoothLeService extends Service {
     /** Only call this after service is bound (from ServiceConnection.onServiceConnected())!
      */
     public boolean initialize() {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "initialize");
 
         // in theory we'd put this in onBind(), to be more symmetric with onUnbind() where we
@@ -361,15 +361,15 @@ public class BluetoothLeService extends Service {
     }
 
 	public boolean connect(final String address) {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "connect: " + address);
         if( bluetoothAdapter == null ) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "bluetoothAdapter is null");
             return false;
         }
         else if( address == null ) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "address is null");
             return false;
         }
@@ -390,7 +390,7 @@ public class BluetoothLeService extends Service {
             Handler handler = new Handler();
             handler.postDelayed(new Runnable() {
                 public void run() {
-                    if( MyDebug.LOG )
+                    if( CameraXDebug.LOG )
                         Log.d(TAG, "trying connect again from postdelayed");
                     connect(address);
                 }
@@ -399,7 +399,7 @@ public class BluetoothLeService extends Service {
 
         if( address.equals("undefined") ) {
             // test - only needed if we've hacked BluetoothRemoteControl.remoteEnabled() to not check for being undefined
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "address is undefined");
             return false;
         }*/
@@ -412,12 +412,12 @@ public class BluetoothLeService extends Service {
 
         final BluetoothDevice device = bluetoothAdapter.getRemoteDevice(address);
         if( device == null ) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "device not found");
             Handler handler = new Handler();
             handler.postDelayed(new Runnable() {
                 public void run() {
-                    if( MyDebug.LOG )
+                    if( CameraXDebug.LOG )
                         Log.d(TAG, "attempt to connect to remote");
                     connect(address);
                 }
@@ -446,12 +446,12 @@ public class BluetoothLeService extends Service {
 
     private void setCharacteristicNotification(BluetoothGattCharacteristic characteristic, boolean enabled) {
         if( bluetoothAdapter == null ) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "bluetoothAdapter is null");
             return;
         }
         else if( bluetoothGatt == null ) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "bluetoothGatt is null");
             return;
         }

@@ -14,9 +14,9 @@ import android.preference.PreferenceManager;
 import androidx.annotation.RequiresApi;
 import android.util.Log;
 
-import net.sourceforge.opencamera.MainActivity;
-import net.sourceforge.opencamera.MyApplicationInterface;
-import net.sourceforge.opencamera.MyDebug;
+import net.sourceforge.opencamera.CameraXActivity;
+import net.sourceforge.opencamera.CameraXApplicationInterface;
+import net.sourceforge.opencamera.CameraXDebug;
 import net.sourceforge.opencamera.PreferenceKeys;
 import net.sourceforge.opencamera.ui.MainUI;
 
@@ -25,14 +25,14 @@ import net.sourceforge.opencamera.ui.MainUI;
 public class BluetoothRemoteControl {
     private final static String TAG = "BluetoothRemoteControl";
 
-    private final MainActivity main_activity;
+    private final CameraXActivity main_activity;
 
     private BluetoothLeService bluetoothLeService;
     private String remoteDeviceAddress;
     private String remoteDeviceType;
     private boolean is_connected;
 
-    public BluetoothRemoteControl(MainActivity main_activity) {
+    public BluetoothRemoteControl(CameraXActivity main_activity) {
         this.main_activity = main_activity;
     }
 
@@ -41,14 +41,14 @@ public class BluetoothRemoteControl {
 
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder service) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "onServiceConnected");
             if( Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR2 ) {
                 // BluetoothLeService requires Android 4.3+
                 return;
             }
             if( main_activity.isAppPaused() ) {
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "but app is now paused");
                 // Unclear if this could happen - possibly if app pauses immediately after starting
                 // the service, but before we connect? In theory we should then unbind the service,
@@ -76,7 +76,7 @@ public class BluetoothRemoteControl {
          */
         @Override
         public void onServiceDisconnected(ComponentName componentName) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "onServiceDisconnected");
             Handler handler = new Handler();
             handler.postDelayed(new Runnable() {
@@ -104,17 +104,17 @@ public class BluetoothRemoteControl {
                 return;
             }
             final String action = intent.getAction();
-            MyApplicationInterface applicationInterface = main_activity.getApplicationInterface();
+            CameraXApplicationInterface applicationInterface = main_activity.getApplicationInterface();
             MainUI mainUI = main_activity.getMainUI();
             if( BluetoothLeService.ACTION_GATT_CONNECTED.equals(action) ) {
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "Remote connected");
                 // Tell the Bluetooth service what type of remote we want to use
                 bluetoothLeService.setRemoteDeviceType(remoteDeviceType);
                 main_activity.setBrightnessForCamera(false);
             }
             else if( BluetoothLeService.ACTION_GATT_DISCONNECTED.equals(action) ) {
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "Remote disconnected");
                 is_connected = false;
                 applicationInterface.getDrawPreview().onExtraOSDValuesChanged("-- \u00B0C", "-- m");
@@ -124,7 +124,7 @@ public class BluetoothRemoteControl {
                     mainUI.toggleExposureUI();
             }
             else if( BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED.equals(action) ) {
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "Remote services discovered");
                 // We let the BluetoothLEService subscribe to what is relevant, so we
                 // do nothing here, but we wait until this is done to update the UI
@@ -136,7 +136,7 @@ public class BluetoothRemoteControl {
                 double temp = intent.getDoubleExtra(BluetoothLeService.SENSOR_TEMPERATURE, -1);
                 double depth = intent.getDoubleExtra(BluetoothLeService.SENSOR_DEPTH, -1) / main_activity.getWaterDensity();
                 depth = (Math.round(depth* 10)) / 10.0; // Round to 1 decimal
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "Sensor values: depth: " + depth + " - temp: " + temp);
                 // Create two OSD lines
                 String line1 = "" + temp + " \u00B0C";
@@ -218,7 +218,7 @@ public class BluetoothRemoteControl {
                 }
             }
             else {
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "Other remote event");
             }
         }
@@ -247,7 +247,7 @@ public class BluetoothRemoteControl {
      * Starts or stops the remote control layer
      */
     public void startRemoteControl() {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "BLE Remote control service start check...");
         if( Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR2 ) {
             // BluetoothLeService requires Android 4.3+
@@ -258,13 +258,13 @@ public class BluetoothRemoteControl {
         // start up the service if we're in background! (And we might as well then try to stop the
         // service instead.)
         if( !main_activity.isAppPaused() && remoteEnabled() ) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "Remote enabled, starting service");
             main_activity.bindService(gattServiceIntent, mServiceConnection, Context.BIND_AUTO_CREATE);
             main_activity.registerReceiver(remoteControlCommandReceiver, makeRemoteCommandIntentFilter());
         }
         else {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "Remote disabled, stopping service");
             // Stop the service if necessary
             try {
@@ -274,14 +274,14 @@ public class BluetoothRemoteControl {
                 main_activity.getMainUI().updateRemoteConnectionIcon();
             }
             catch(IllegalArgumentException e){
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "Remote Service was not running, that's fine");
             }
         }
     }
 
     public void stopRemoteControl() {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "BLE Remote control service shutdown...");
         if( remoteEnabled()) {
             // Stop the service if necessary

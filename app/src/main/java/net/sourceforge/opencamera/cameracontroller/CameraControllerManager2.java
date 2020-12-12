@@ -1,6 +1,6 @@
 package net.sourceforge.opencamera.cameracontroller;
 
-import net.sourceforge.opencamera.MyDebug;
+import net.sourceforge.opencamera.CameraXDebug;
 import net.sourceforge.opencamera.R;
 
 import android.annotation.TargetApi;
@@ -37,7 +37,7 @@ public class CameraControllerManager2 extends CameraControllerManager {
             // from some devices, e.g., AssertionError, IllegalArgumentException, RuntimeException, so just catch everything!
             // We don't want users to experience a crash just because of buggy camera2 drivers - instead the user can switch
             // back to old camera API.
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.e(TAG, "exception trying to get camera ids");
             e.printStackTrace();
         }
@@ -65,7 +65,7 @@ public class CameraControllerManager2 extends CameraControllerManager {
             // from some devices, e.g., AssertionError, IllegalArgumentException, RuntimeException, so just catch everything!
             // We don't want users to experience a crash just because of buggy camera2 drivers - instead the user can switch
             // back to old camera API.
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.e(TAG, "exception trying to get camera characteristics");
             e.printStackTrace();
         }
@@ -103,7 +103,7 @@ public class CameraControllerManager2 extends CameraControllerManager {
         }
         catch(Throwable e) {
             // see note under isFrontFacing() why we catch anything, not just CameraAccessException
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.e(TAG, "exception trying to get camera characteristics");
             e.printStackTrace();
         }
@@ -124,7 +124,7 @@ public class CameraControllerManager2 extends CameraControllerManager {
         if( active_size == null || physical_size == null || pixel_size == null || focal_lengths == null || focal_lengths.length == 0 ) {
             // in theory this should never happen according to the documentation, but I've had a report of physical_size (SENSOR_INFO_PHYSICAL_SIZE)
             // being null on an EXTERNAL Camera2 device, see https://sourceforge.net/p/opencamera/tickets/754/
-            if( MyDebug.LOG ) {
+            if( CameraXDebug.LOG ) {
                 Log.e(TAG, "can't get camera view angles");
             }
             // fall back to a default
@@ -136,7 +136,7 @@ public class CameraControllerManager2 extends CameraControllerManager {
         float frac_y = ((float)active_size.height())/(float)pixel_size.getHeight();
         float view_angle_x = (float)Math.toDegrees(2.0 * Math.atan2(physical_size.getWidth() * frac_x, (2.0 * focal_lengths[0])));
         float view_angle_y = (float)Math.toDegrees(2.0 * Math.atan2(physical_size.getHeight() * frac_y, (2.0 * focal_lengths[0])));
-        if( MyDebug.LOG ) {
+        if( CameraXDebug.LOG ) {
             Log.d(TAG, "frac_x: " + frac_x);
             Log.d(TAG, "frac_y: " + frac_y);
             Log.d(TAG, "view_angle_x: " + view_angle_x);
@@ -152,7 +152,7 @@ public class CameraControllerManager2 extends CameraControllerManager {
      */
     static boolean isHardwareLevelSupported(CameraCharacteristics c, int requiredLevel) {
         int deviceLevel = c.get(CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL);
-        if( MyDebug.LOG ) {
+        if( CameraXDebug.LOG ) {
             switch (deviceLevel) {
                 case CameraMetadata.INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY:
                     Log.d(TAG, "Camera has LEGACY Camera2 support");
@@ -207,7 +207,7 @@ public class CameraControllerManager2 extends CameraControllerManager {
             // from some devices, e.g., AssertionError, IllegalArgumentException, RuntimeException, so just catch everything!
             // We don't want users to experience a crash just because of buggy camera2 drivers - instead the user can switch
             // back to old camera API.
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.e(TAG, "exception trying to get camera characteristics");
             e.printStackTrace();
         }

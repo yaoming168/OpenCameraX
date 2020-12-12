@@ -1,6 +1,6 @@
 package net.sourceforge.opencamera.preview.camerasurface;
 
-import net.sourceforge.opencamera.MyDebug;
+import net.sourceforge.opencamera.CameraXDebug;
 import net.sourceforge.opencamera.cameracontroller.CameraController;
 import net.sourceforge.opencamera.cameracontroller.CameraControllerException;
 import net.sourceforge.opencamera.preview.Preview;
@@ -16,17 +16,17 @@ import android.view.View;
 
 /** Provides support for the surface used for the preview, using a TextureView.
  */
-public class MyTextureView extends TextureView implements CameraSurface {
-    private static final String TAG = "MyTextureView";
+public class CameraXTextureView extends TextureView implements CameraSurface {
+    private static final String TAG = "CameraXTextureView";
 
     private final Preview preview;
     private final int [] measure_spec = new int[2];
 
-    public MyTextureView(Context context, Preview preview) {
+    public CameraXTextureView(Context context, Preview preview) {
         super(context);
         this.preview = preview;
-        if( MyDebug.LOG ) {
-            Log.d(TAG, "new MyTextureView");
+        if( CameraXDebug.LOG ) {
+            Log.d(TAG, "new CameraXTextureView");
         }
 
         // Install a TextureView.SurfaceTextureListener so we get notified when the
@@ -41,13 +41,13 @@ public class MyTextureView extends TextureView implements CameraSurface {
 
     @Override
     public void setPreviewDisplay(CameraController camera_controller) {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "setPreviewDisplay");
         try {
             camera_controller.setPreviewTexture(this);
         }
         catch(CameraControllerException e) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.e(TAG, "Failed to set preview display: " + e.getMessage());
             e.printStackTrace();
         }
@@ -71,7 +71,7 @@ public class MyTextureView extends TextureView implements CameraSurface {
 
     @Override
     protected void onMeasure(int widthSpec, int heightSpec) {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "onMeasure: " + widthSpec + " x " + heightSpec);
         preview.getMeasureSpec(measure_spec, widthSpec, heightSpec);
         super.onMeasure(measure_spec[0], measure_spec[1]);

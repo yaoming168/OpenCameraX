@@ -1,6 +1,6 @@
 package net.sourceforge.opencamera.cameracontroller;
 
-import net.sourceforge.opencamera.MyDebug;
+import net.sourceforge.opencamera.CameraXDebug;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -103,18 +103,18 @@ public abstract class CameraController {
         /** Returns whether any of the supplied sizes support the requested fps.
          */
         public static boolean supportsFrameRate(List<Size> sizes, int fps) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "supportsFrameRate: " + fps);
             if( sizes == null )
                 return false;
             for(Size size : sizes) {
                 if( size.supportsFrameRate(fps) ) {
-                    if( MyDebug.LOG )
+                    if( CameraXDebug.LOG )
                         Log.d(TAG, "fps is supported");
                     return true;
                 }
             }
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "fps is NOT supported");
             return false;
         }
@@ -635,20 +635,20 @@ public abstract class CameraController {
     // gets the available values of a generic mode, e.g., scene, color etc, and makes sure the requested mode is available
     SupportedValues checkModeIsSupported(List<String> values, String value, String default_value) {
         if( values != null && values.size() > 1 ) { // n.b., if there is only 1 supported value, we also return null, as no point offering the choice to the user (there are some devices, e.g., Samsung, that only have a scene mode of "auto")
-            if( MyDebug.LOG ) {
+            if( CameraXDebug.LOG ) {
                 for(int i=0;i<values.size();i++) {
                     Log.d(TAG, "supported value: " + values.get(i));
                 }
             }
             // make sure result is valid
             if( !values.contains(value) ) {
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "value not valid!");
                 if( values.contains(default_value) )
                     value = default_value;
                 else
                     value = values.get(0);
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "value is now: " + value);
             }
             return new SupportedValues(values, value);

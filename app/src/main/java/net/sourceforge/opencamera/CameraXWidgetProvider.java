@@ -1,9 +1,5 @@
 package net.sourceforge.opencamera;
 
-import net.sourceforge.opencamera.MyDebug;
-import net.sourceforge.opencamera.MainActivity;
-import net.sourceforge.opencamera.R;
-
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
@@ -17,34 +13,34 @@ import android.widget.RemoteViews;
  *  from the lock screen using the standard camera icon), but this is kept here
  *  for older Android versions.
  */
-public class MyWidgetProvider extends AppWidgetProvider {
-    private static final String TAG = "MyWidgetProvider";
+public class CameraXWidgetProvider extends AppWidgetProvider {
+    private static final String TAG = "CameraXWidgetProvider";
     
     // see http://developer.android.com/guide/topics/appwidgets/index.html
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int [] appWidgetIds) {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "onUpdate");
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "length = " + appWidgetIds.length);
 
         for(int appWidgetId : appWidgetIds) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "appWidgetId: " + appWidgetId);
 
             PendingIntent pendingIntent;
             // for now, always put up the keyguard if the device is PIN locked etc
             /*SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
             if( sharedPreferences.getBoolean(MainActivity.getShowWhenLockedPreferenceKey(), true) ) {
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "do show above lock screen");
-                Intent intent = new Intent(context, MyWidgetProvider.class);
+                Intent intent = new Intent(context, CameraXWidgetProvider.class);
                 intent.setAction("net.sourceforge.opencamera.LAUNCH_OPEN_CAMERA");
                 pendingIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
             }
             else*/ {
-                /*if( MyDebug.LOG )
+                /*if( CameraXDebug.LOG )
                     Log.d(TAG, "don't show above lock screen");*/
-                Intent intent = new Intent(context, MainActivity.class);
+                Intent intent = new Intent(context, CameraXActivity.class);
                 pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
             }
 
@@ -63,16 +59,16 @@ public class MyWidgetProvider extends AppWidgetProvider {
 
     /*@Override
     public void onReceive(Context context, Intent intent) {
-        if( MyDebug.LOG ) {
+        if( CameraXDebug.LOG ) {
             Log.d(TAG, "onReceive " + intent);
         }
         if (intent.getAction().equals("net.sourceforge.opencamera.LAUNCH_OPEN_CAMERA")) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "Launching MainActivity");
             final Intent activity = new Intent(context, MainActivity.class);
             activity.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(activity);
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "done");
         }
         super.onReceive(context, intent);

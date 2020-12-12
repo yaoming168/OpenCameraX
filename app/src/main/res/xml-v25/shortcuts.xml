@@ -8,7 +8,7 @@
         <intent
             android:action="net.sourceforge.opencamera.SHORTCUT_SETTINGS"
             android:targetPackage="net.sourceforge.opencamera"
-            android:targetClass="net.sourceforge.opencamera.MainActivity"
+            android:targetClass="net.sourceforge.opencamera.CameraXActivity"
         />
     </shortcut>
     <shortcut
@@ -20,7 +20,7 @@
         <intent
             android:action="net.sourceforge.opencamera.SHORTCUT_GALLERY"
             android:targetPackage="net.sourceforge.opencamera"
-            android:targetClass="net.sourceforge.opencamera.MainActivity"
+            android:targetClass="net.sourceforge.opencamera.CameraXActivity"
         />
     </shortcut>
     <shortcut
@@ -32,7 +32,7 @@
         <intent
             android:action="net.sourceforge.opencamera.SHORTCUT_VIDEO"
             android:targetPackage="net.sourceforge.opencamera"
-            android:targetClass="net.sourceforge.opencamera.MainActivity"
+            android:targetClass="net.sourceforge.opencamera.CameraXActivity"
         />
     </shortcut>
     <shortcut
@@ -44,7 +44,7 @@
         <intent
             android:action="net.sourceforge.opencamera.SHORTCUT_SELFIE"
             android:targetPackage="net.sourceforge.opencamera"
-            android:targetClass="net.sourceforge.opencamera.MainActivity"
+            android:targetClass="net.sourceforge.opencamera.CameraXActivity"
         />
     </shortcut>
     <shortcut
@@ -56,7 +56,7 @@
         <intent
             android:action="net.sourceforge.opencamera.SHORTCUT_CAMERA"
             android:targetPackage="net.sourceforge.opencamera"
-            android:targetClass="net.sourceforge.opencamera.MainActivity"
+            android:targetClass="net.sourceforge.opencamera.CameraXActivity"
         />
     </shortcut>
 </shortcuts>

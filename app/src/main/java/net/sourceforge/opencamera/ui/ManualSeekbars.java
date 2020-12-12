@@ -3,7 +3,7 @@ package net.sourceforge.opencamera.ui;
 import android.util.Log;
 import android.widget.SeekBar;
 
-import net.sourceforge.opencamera.MyDebug;
+import net.sourceforge.opencamera.CameraXDebug;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -79,22 +79,22 @@ public class ManualSeekbars {
     }
 
     private void setProgressBarToClosest(SeekBar seekBar, List<Long> seekbar_values, long current_value) {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "setProgressBarToClosest");
         int closest_indx = -1;
         long min_dist = 0;
         for(int i=0;i<seekbar_values.size();i++) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "seekbar_values[" + i + "]: " + seekbar_values.get(i));
             long dist = Math.abs(seekbar_values.get(i) - current_value);
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "    dist: " + dist);
             if( closest_indx == -1 || dist < min_dist ) {
                 closest_indx = i;
                 min_dist = dist;
             }
         }
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "closest_indx: " + closest_indx);
         if( closest_indx != -1 )
             seekBar.setProgress(closest_indx);
@@ -105,7 +105,7 @@ public class ManualSeekbars {
     }
 
     public void setProgressSeekbarWhiteBalance(SeekBar seekBar, long min_white_balance, long max_white_balance, long current_white_balance) {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "setProgressSeekbarWhiteBalance");
         seekbar_values_white_balance = new ArrayList<>();
         List<Long> seekbar_values = seekbar_values_white_balance;
@@ -123,7 +123,7 @@ public class ManualSeekbars {
     }
 
     public void setProgressSeekbarISO(SeekBar seekBar, long min_iso, long max_iso, long current_iso) {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "setProgressSeekbarISO");
         seekbar_values_iso = new ArrayList<>();
         List<Long> seekbar_values = seekbar_values_iso;
@@ -168,7 +168,7 @@ public class ManualSeekbars {
     }
 
     public void setProgressSeekbarShutterSpeed(SeekBar seekBar, long min_exposure_time, long max_exposure_time, long current_exposure_time) {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "setProgressSeekbarShutterSpeed");
         seekbar_values_shutter_speed = new ArrayList<>();
         List<Long> seekbar_values = seekbar_values_shutter_speed;

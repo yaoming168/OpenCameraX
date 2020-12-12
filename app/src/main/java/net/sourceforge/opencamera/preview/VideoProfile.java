@@ -6,11 +6,16 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
-import net.sourceforge.opencamera.MyDebug;
+import net.sourceforge.opencamera.CameraXDebug;
 
 /** This is essentially similar to CamcorderProfile in that it encapsulates a set of video settings
      *  to be passed to MediaRecorder, but allows us to store additional fields.
      */
+
+/*
+* 这本质上类似于CamcorderProfile，因为它封装了一组视频设置
+传递给MediaRecorder，但允许我们存储其他字段。
+* */
 public class VideoProfile {
     private static final String TAG = "VideoProfile";
 
@@ -79,10 +84,10 @@ public class VideoProfile {
      * Copies the fields of this profile to a MediaRecorder instance.
      */
     public void copyToMediaRecorder(MediaRecorder media_recorder) {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "copyToMediaRecorder: " + media_recorder);
         if( record_audio ) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "record audio");
             media_recorder.setAudioSource(this.audioSource);
         }
@@ -93,7 +98,7 @@ public class VideoProfile {
         media_recorder.setVideoFrameRate(this.videoFrameRate);
         // it's probably safe to always call setCaptureRate, but to be safe (and keep compatibility with old Open Camera versions), we only do so when needed
         if( this.videoCaptureRate != (double)this.videoFrameRate ) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "set capture rate");
             media_recorder.setCaptureRate(this.videoCaptureRate);
         }
@@ -106,7 +111,7 @@ public class VideoProfile {
             media_recorder.setAudioSamplingRate(this.audioSampleRate);
             media_recorder.setAudioEncoder(this.audioCodec);
         }
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "done: " + media_recorder);
     }
 }

@@ -9,9 +9,9 @@ import android.util.Log;
 /** Provides service for quick settings tile.
  */
 @RequiresApi(api = Build.VERSION_CODES.N)
-public class MyTileServiceVideo extends TileService {
-    private static final String TAG = "MyTileServiceVideo";
-    public static final String TILE_ID = "net.sourceforge.opencamera.TILE_VIDEO";
+public class CameraXTileServiceFrontCamera extends TileService {
+    private static final String TAG = "CameraXTileServiceFrontCam";
+    public static final String TILE_ID = "net.sourceforge.opencamera.TILE_FRONT_CAMERA";
 
     @Override
     public void onDestroy() {
@@ -40,10 +40,10 @@ public class MyTileServiceVideo extends TileService {
 
     @Override
     public void onClick() {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "onClick");
         super.onClick();
-        Intent intent = new Intent(this, MainActivity.class);
+        Intent intent = new Intent(this, CameraXActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         intent.setAction(TILE_ID);
         startActivity(intent);

@@ -13,7 +13,7 @@ import android.util.Log;
 import android.util.Pair;
 import android.view.MotionEvent;
 
-import net.sourceforge.opencamera.MyDebug;
+import net.sourceforge.opencamera.CameraXDebug;
 import net.sourceforge.opencamera.cameracontroller.CameraController;
 import net.sourceforge.opencamera.cameracontroller.RawImage;
 
@@ -22,6 +22,12 @@ import net.sourceforge.opencamera.cameracontroller.RawImage;
  *  into a new application, by providing an appropriate implementation of this
  *  ApplicationInterface.
  */
+
+/*
+* 提供预览和应用程序的其余部分之间的通信
+* -所以理论上可以把Preview/(和CameraController/)类放到一个新的应用程序中，
+* 通过提供一个适当的实现ApplicationInterface。
+* */
 public interface ApplicationInterface {
     class NoFreeStorageException extends Exception {
         private static final long serialVersionUID = -2021932609486148748L;
@@ -76,7 +82,7 @@ public interface ApplicationInterface {
 
         boolean satisfies(CameraController.Size size) {
             if( this.has_max_mp && size.width * size.height > this.max_mp ) {
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "size index larger than max_mp: " + this.max_mp);
                 return false;
             }

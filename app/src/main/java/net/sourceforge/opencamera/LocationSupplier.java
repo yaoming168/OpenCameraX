@@ -21,7 +21,7 @@ public class LocationSupplier {
 
     private final Context context;
     private final LocationManager locationManager;
-    private MyLocationListener [] locationListeners;
+    private CameraXLocationListener [] locationListeners;
     private volatile boolean test_force_no_location; // if true, always return null location; must be volatile for test project setting the state
 
     private Location cached_location;
@@ -50,7 +50,7 @@ public class LocationSupplier {
      *  coarse location overriding a better fine location.
      */
     private void cacheLocation() {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "cacheLocation");
         Location location = getLocation();
         if( location == null ) {
@@ -100,7 +100,7 @@ public class LocationSupplier {
         if( test_force_no_location )
             return null;
         // location listeners should be stored in order best to worst
-        for(MyLocationListener locationListener : locationListeners) {
+        for(CameraXLocationListener locationListener : locationListeners) {
             Location location = locationListener.getLocation();
             if( location != null )
                 return location;
@@ -111,7 +111,7 @@ public class LocationSupplier {
         return location;
     }
 
-    private class MyLocationListener implements LocationListener {
+    private class CameraXLocationListener implements LocationListener {
         private Location location;
         volatile boolean test_has_received_location; // must be volatile for test project reading the state
 
@@ -120,13 +120,13 @@ public class LocationSupplier {
         }
 
         public void onLocationChanged(Location location) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "onLocationChanged");
             this.test_has_received_location = true;
             // Android camera source claims we need to check lat/long != 0.0d
             // also check for not being null just in case - had a nullpointerexception on Google Play!
             if( location != null && ( location.getLatitude() != 0.0d || location.getLongitude() != 0.0d ) ) {
-                if( MyDebug.LOG ) {
+                if( CameraXDebug.LOG ) {
                     Log.d(TAG, "received location:");
                     Log.d(TAG, "lat " + location.getLatitude() + " long " + location.getLongitude() + " accuracy " + location.getAccuracy());
                 }
@@ -140,7 +140,7 @@ public class LocationSupplier {
                 case LocationProvider.OUT_OF_SERVICE:
                 case LocationProvider.TEMPORARILY_UNAVAILABLE:
                 {
-                    if( MyDebug.LOG ) {
+                    if( CameraXDebug.LOG ) {
                         if( status == LocationProvider.OUT_OF_SERVICE )
                             Log.d(TAG, "location provider out of service");
                         else if( status == LocationProvider.TEMPORARILY_UNAVAILABLE )
@@ -160,7 +160,7 @@ public class LocationSupplier {
         }
 
         public void onProviderDisabled(String provider) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "onProviderDisabled");
             this.location = null;
             this.test_has_received_location = false;
@@ -172,7 +172,7 @@ public class LocationSupplier {
      * @return Returns false if location permission not available for either coarse or fine.
      */
     boolean setupLocationListener() {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "setupLocationListener");
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         // Define a listener that responds to location updates
@@ -185,46 +185,46 @@ public class LocationSupplier {
             // PERMISSION_DENIED! So we keep the checks to Android Marshmallow or later (where we need them), and avoid
             // checking behaviour for earlier devices.
             if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ) {
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "check for location permissions");
                 boolean has_coarse_location_permission = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
                 boolean has_fine_location_permission = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
-                if( MyDebug.LOG ) {
+                if( CameraXDebug.LOG ) {
                     Log.d(TAG, "has_coarse_location_permission? " + has_coarse_location_permission);
                     Log.d(TAG, "has_fine_location_permission? " + has_fine_location_permission);
                 }
                 // require both permissions to be present
                 if( !has_coarse_location_permission || !has_fine_location_permission ) {
-                    if( MyDebug.LOG )
+                    if( CameraXDebug.LOG )
                         Log.d(TAG, "location permission not available");
                     // return false, which tells caller to request permission - we'll call this function again if permission is granted
                     return false;
                 }
             }
 
-            locationListeners = new MyLocationListener[2];
-            locationListeners[0] = new MyLocationListener();
-            locationListeners[1] = new MyLocationListener();
+            locationListeners = new CameraXLocationListener[2];
+            locationListeners[0] = new CameraXLocationListener();
+            locationListeners[1] = new CameraXLocationListener();
 
             // location listeners should be stored in order best to worst
             // also see https://sourceforge.net/p/opencamera/tickets/1/ - need to check provider is available
             // now also need to check for permissions - need to support devices that might have one but not both of fine and coarse permissions supplied
             if( locationManager.getAllProviders().contains(LocationManager.NETWORK_PROVIDER) ) {
                 locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 0, locationListeners[1]);
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "created coarse (network) location listener");
             }
             else {
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.e(TAG, "don't have a NETWORK_PROVIDER");
             }
             if( locationManager.getAllProviders().contains(LocationManager.GPS_PROVIDER) ) {
                 locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, locationListeners[0]);
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "created fine (gps) location listener");
             }
             else {
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.e(TAG, "don't have a GPS_PROVIDER");
             }
         }
@@ -235,23 +235,23 @@ public class LocationSupplier {
     }
 
     void freeLocationListeners() {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "freeLocationListeners");
         if( locationListeners != null ) {
             if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ) {
                 // Android Lint claims we need location permission for LocationManager.removeUpdates().
                 // also see http://stackoverflow.com/questions/32715189/location-manager-remove-updates-permission
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "check for location permissions");
                 boolean has_coarse_location_permission = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
                 boolean has_fine_location_permission = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
-                if( MyDebug.LOG ) {
+                if( CameraXDebug.LOG ) {
                     Log.d(TAG, "has_coarse_location_permission? " + has_coarse_location_permission);
                     Log.d(TAG, "has_fine_location_permission? " + has_fine_location_permission);
                 }
                 // require at least one permission to be present
                 if( !has_coarse_location_permission && !has_fine_location_permission ) {
-                    if( MyDebug.LOG )
+                    if( CameraXDebug.LOG )
                         Log.d(TAG, "location permission not available");
                     return;
                 }
@@ -261,7 +261,7 @@ public class LocationSupplier {
                 locationListeners[i] = null;
             }
             locationListeners = null;
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "location listeners now freed");
         }
     }
@@ -271,7 +271,7 @@ public class LocationSupplier {
     public boolean testHasReceivedLocation() {
         if( locationListeners == null )
             return false;
-        for(MyLocationListener locationListener : locationListeners) {
+        for(CameraXLocationListener locationListener : locationListeners) {
             if( locationListener.test_has_received_location )
                 return true;
         }
@@ -290,7 +290,7 @@ public class LocationSupplier {
             return false;
         if( this.locationListeners.length != 2 )
             return false;
-        for(MyLocationListener locationListener : locationListeners) {
+        for(CameraXLocationListener locationListener : locationListeners) {
             if( locationListener == null )
                 return false;
         }

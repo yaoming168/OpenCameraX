@@ -77,7 +77,7 @@ public class GyroSensor implements SensorEventListener {
         //mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_GAME_ROTATION_VECTOR);
         //mSensorAccel = null;
 
-        if( MyDebug.LOG ) {
+        if( CameraXDebug.LOG ) {
             Log.d(TAG, "GyroSensor");
             if( mSensor == null )
                 Log.d(TAG, "gyroscope not available");
@@ -159,7 +159,7 @@ public class GyroSensor implements SensorEventListener {
      * This should be limited to when we might want to use the gyro, to help battery life.
      */
     void enableSensors() {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "enableSensors");
         has_rotationVector = false;
         has_gyroVector = false;
@@ -176,13 +176,13 @@ public class GyroSensor implements SensorEventListener {
     }
 
     void disableSensors() {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "disableSensors");
         mSensorManager.unregisterListener(this);
     }
 
     void startRecording() {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "startRecording");
         is_recording = true;
         timestamp = 0;
@@ -191,7 +191,7 @@ public class GyroSensor implements SensorEventListener {
 
     void stopRecording() {
         if( is_recording ) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "stopRecording");
             is_recording = false;
             timestamp = 0;
@@ -264,7 +264,7 @@ public class GyroSensor implements SensorEventListener {
         transformVector(tempVector, currentRotationMatrix, accelVector);
         // tempVector is now the accelVector transformed by the gyro matrix
         double cos_angle = (tempVector[0] * initAccelVector[0] + tempVector[1] * initAccelVector[1] + tempVector[2] * initAccelVector[2]);
-        /*if( MyDebug.LOG ) {
+        /*if( CameraXDebug.LOG ) {
             Log.d(TAG, "adjustGyroForAccel:");
             Log.d(TAG, "### currentRotationMatrix row 0: " + currentRotationMatrix[0] + " , " + currentRotationMatrix[1] + " , " + currentRotationMatrix[2]);
             Log.d(TAG, "### currentRotationMatrix row 1: " + currentRotationMatrix[3] + " , " + currentRotationMatrix[4] + " , " + currentRotationMatrix[5]);
@@ -314,7 +314,7 @@ public class GyroSensor implements SensorEventListener {
         setMatrixComponent(tempMatrix, 2, 0, (float)(a_x*a_z*(1.0-cos_angle)-sin_angle*a_y));
         setMatrixComponent(tempMatrix, 2, 1, (float)(a_y*a_z*(1.0-cos_angle)+sin_angle*a_x));
         setMatrixComponent(tempMatrix, 2, 2, (float)(a_z*a_z*(1.0-cos_angle)+cos_angle));
-        /*if( MyDebug.LOG ) {
+        /*if( CameraXDebug.LOG ) {
             // test:
             System.arraycopy(tempVector, 0, inVector, 0, 3);
             transformVector(tempVector, tempMatrix, inVector);
@@ -339,7 +339,7 @@ public class GyroSensor implements SensorEventListener {
 
         System.arraycopy(temp2Matrix, 0, currentRotationMatrix, 0, 9);
 
-        /*if( MyDebug.LOG ) {
+        /*if( CameraXDebug.LOG ) {
             // test:
             //transformVector(tempVector, temp2Matrix, initAccelVector);
             //transformTransposeVector(tempVector, currentRotationMatrix, initAccelVector);
@@ -353,7 +353,7 @@ public class GyroSensor implements SensorEventListener {
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        /*if( MyDebug.LOG )
+        /*if( CameraXDebug.LOG )
             Log.d(TAG, "onSensorChanged: " + event);*/
         if( event.sensor.getType() == Sensor.TYPE_ACCELEROMETER ) {
             final float sensor_alpha = 0.8f; // for filter
@@ -420,7 +420,7 @@ public class GyroSensor implements SensorEventListener {
                 deltaRotationVector[1] = sinThetaOverTwo * axisY;
                 deltaRotationVector[2] = sinThetaOverTwo * axisZ;
                 deltaRotationVector[3] = cosThetaOverTwo;
-                /*if( MyDebug.LOG ) {
+                /*if( CameraXDebug.LOG ) {
                     Log.d(TAG, "### values: " + event.values[0] + " , " + event.values[1] + " , " + event.values[2]);
                     Log.d(TAG, "smoothed values: " + gyroVector[0] + " , " + gyroVector[1] + " , " + gyroVector[2]);
                 }*/
@@ -455,7 +455,7 @@ public class GyroSensor implements SensorEventListener {
                 System.arraycopy(tempMatrix, 0, currentRotationMatrixGyroOnly, 0, 9);
 
 
-                /*if( MyDebug.LOG ) {
+                /*if( CameraXDebug.LOG ) {
                     setVector(inVector, 0.0f, 0.0f, -1.0f); // vector pointing behind the device's screen
                     transformVector(tempVector, currentRotationMatrix, inVector);
                     //transformTransposeVector(tempVector, currentRotationMatrix, inVector);
@@ -501,7 +501,7 @@ public class GyroSensor implements SensorEventListener {
                 }
             }
 
-            if( MyDebug.LOG ) {
+            if( CameraXDebug.LOG ) {
                 Log.d(TAG, "### values: " + event.values[0] + " , " + event.values[1] + " , " + event.values[2] + " , " + event.values[3]);
                 Log.d(TAG, "    " + currentRotationMatrix[0] + " , " + currentRotationMatrix[1] + " , " + currentRotationMatrix[2]);
                 Log.d(TAG, "    " + currentRotationMatrix[3] + " , " + currentRotationMatrix[4] + " , " + currentRotationMatrix[5]);
@@ -517,7 +517,7 @@ public class GyroSensor implements SensorEventListener {
                 // first check if we are still "upright"
                 setVector(inVector, 0.0f, 1.0f, 0.0f); // vector pointing in "up" direction
                 transformVector(tempVector, currentRotationMatrix, inVector);
-                /*if( MyDebug.LOG ) {
+                /*if( CameraXDebug.LOG ) {
                     Log.d(TAG, "### transformed vector up: " + tempVector[0] + " , " + tempVector[1] + " , " + tempVector[2]);
                 }*/
                 /*float sin_angle_up = tempVector[0];
@@ -539,13 +539,13 @@ public class GyroSensor implements SensorEventListener {
                 float p_ux = ux - u_dot_n * targetVector[0];
                 float p_uy = uy - u_dot_n * targetVector[1];
                 float p_uz = uz - u_dot_n * targetVector[2];
-                /*if( MyDebug.LOG ) {
+                /*if( CameraXDebug.LOG ) {
                     Log.d(TAG, "    u: " + ux + " , " + uy + " , " + uz);
                     Log.d(TAG, "    p_u: " + p_ux + " , " + p_uy + " , " + p_uz);
                 }*/
                 double p_u_mag = Math.sqrt(p_ux*p_ux + p_uy*p_uy + p_uz*p_uz);
                 if( p_u_mag > 1.0e-5 ) {
-                    /*if( MyDebug.LOG ) {
+                    /*if( CameraXDebug.LOG ) {
                         Log.d(TAG, "    p_u norm: " + p_ux/p_u_mag + " , " + p_uy/p_u_mag + " , " + p_uz/p_u_mag);
                     }*/
                     // normalise p_u
@@ -557,7 +557,7 @@ public class GyroSensor implements SensorEventListener {
                     float cx = - p_uz;
                     float cy = 0.0f;
                     float cz = p_ux;
-                    /*if( MyDebug.LOG ) {
+                    /*if( CameraXDebug.LOG ) {
                         Log.d(TAG, "    c: " + cx + " , " + cy + " , " + cz);
                     }*/
                     float sin_angle_up = (float)Math.sqrt(cx*cx + cy*cy + cz*cz);
@@ -575,16 +575,16 @@ public class GyroSensor implements SensorEventListener {
                 float cos_angle = tempVector[0] * targetVector[0] + tempVector[1] * targetVector[1] + tempVector[2] * targetVector[2];
                 float angle = (float)Math.acos(cos_angle);
                 if( is_upright == 0 ) {
-                    /*if( MyDebug.LOG )
+                    /*if( CameraXDebug.LOG )
                         Log.d(TAG, "gyro vector angle with target: " + Math.toDegrees(angle) + " degrees");*/
                     if( angle <= targetAngle ) {
-                        if( MyDebug.LOG )
+                        if( CameraXDebug.LOG )
                             Log.d(TAG, "    ### achieved target angle: " + Math.toDegrees(angle) + " degrees");
                         targetAchieved = true;
                         if( targetCallback != null ) {
                             //targetCallback.onAchieved(indx);
                             if( has_lastTargetAngle ) {
-                                if( MyDebug.LOG )
+                                if( CameraXDebug.LOG )
                                     Log.d(TAG, "        last target angle: " + Math.toDegrees(lastTargetAngle) + " degrees");
                                 if( angle > lastTargetAngle ) {
                                     // started to get worse, so call callback
@@ -602,7 +602,7 @@ public class GyroSensor implements SensorEventListener {
                 if( angle > tooFarAngle ) {
                     n_too_far++;
                 }
-            /*if( MyDebug.LOG )
+            /*if( CameraXDebug.LOG )
                 Log.d(TAG, "targetAchieved? " + targetAchieved);*/
             }
             if( n_too_far > 0 && n_too_far == targetVectors.size() ) {
@@ -648,7 +648,7 @@ public class GyroSensor implements SensorEventListener {
     // for testing
 
     public void testForceTargetAchieved(int indx) {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "testForceTargetAchieved: " + indx);
         if( targetCallback != null ) {
             targetCallback.onAchieved(indx);

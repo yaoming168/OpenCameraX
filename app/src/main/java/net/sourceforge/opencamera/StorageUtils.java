@@ -53,7 +53,7 @@ public class StorageUtils {
     static final int MEDIA_TYPE_GYRO_INFO = 4;
 
     private final Context context;
-    private final MyApplicationInterface applicationInterface;
+    private final CameraXApplicationInterface applicationInterface;
     private Uri last_media_scanned;
 
     private final static String RELATIVE_FOLDER_BASE = Environment.DIRECTORY_DCIM;
@@ -61,7 +61,7 @@ public class StorageUtils {
     // for testing:
     public volatile boolean failed_to_scan;
 
-    StorageUtils(Context context, MyApplicationInterface applicationInterface) {
+    StorageUtils(Context context, CameraXApplicationInterface applicationInterface) {
         this.context = context;
         this.applicationInterface = applicationInterface;
     }
@@ -76,7 +76,7 @@ public class StorageUtils {
 
     void setLastMediaScanned(Uri uri) {
         last_media_scanned = uri;
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "set last_media_scanned to " + last_media_scanned);
     }
 
@@ -89,10 +89,10 @@ public class StorageUtils {
      *  See https://github.com/owncloud/android/issues/1675 for OwnCloud's discussion on this.
      */
     void announceUri(Uri uri, boolean is_new_picture, boolean is_new_video) {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "announceUri: " + uri);
         if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.N ) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "broadcasts deprecated on Android 7 onwards, so don't send them");
             // see note above; the intents won't be delivered, so might as well save the trouble of trying to send them
         }
@@ -102,17 +102,17 @@ public class StorageUtils {
             // for compatibility with some apps - apparently this is what used to be broadcast on Android?
             context.sendBroadcast(new Intent("com.android.camera.NEW_PICTURE", uri));
 
-            if( MyDebug.LOG ) // this code only used for debugging/logging
+            if( CameraXDebug.LOG ) // this code only used for debugging/logging
             {
                 @SuppressLint("InlinedApi") // complains this constant only available on API 29 (even though it was available on older versions, but looks like it was moved?)
                 String[] CONTENT_PROJECTION = { Images.Media.DATA, Images.Media.DISPLAY_NAME, Images.Media.MIME_TYPE, Images.Media.SIZE, Images.Media.DATE_TAKEN, Images.Media.DATE_ADDED };
                 Cursor c = context.getContentResolver().query(uri, CONTENT_PROJECTION, null, null, null);
                 if( c == null ) {
-                    if( MyDebug.LOG )
+                    if( CameraXDebug.LOG )
                         Log.e(TAG, "Couldn't resolve given uri [1]: " + uri);
                 }
                 else if( !c.moveToFirst() ) {
-                    if( MyDebug.LOG )
+                    if( CameraXDebug.LOG )
                         Log.e(TAG, "Couldn't resolve given uri [2]: " + uri);
                 }
                 else {
@@ -137,16 +137,16 @@ public class StorageUtils {
     	        String[] CONTENT_PROJECTION = { Images.Media.DATE_ADDED }; 
     	        Cursor c = context.getContentResolver().query(uri, CONTENT_PROJECTION, null, null, null); 
     	        if( c == null ) { 
-		 			if( MyDebug.LOG )
+		 			if( CameraXDebug.LOG )
 		 				Log.e(TAG, "Couldn't resolve given uri [1]: " + uri); 
     	        }
     	        else if( !c.moveToFirst() ) { 
-		 			if( MyDebug.LOG )
+		 			if( CameraXDebug.LOG )
 		 				Log.e(TAG, "Couldn't resolve given uri [2]: " + uri); 
     	        }
     	        else {
         	        long date_added = c.getLong(c.getColumnIndex(Images.Media.DATE_ADDED)); 
-		 			if( MyDebug.LOG )
+		 			if( CameraXDebug.LOG )
 		 				Log.e(TAG, "replace date_taken with date_added: " + date_added); 
 					ContentValues values = new ContentValues(); 
 					values.put(Images.Media.DATE_TAKEN, date_added*1000); 
@@ -161,16 +161,16 @@ public class StorageUtils {
     		/*String[] CONTENT_PROJECTION = { Video.Media.DURATION }; 
 	        Cursor c = context.getContentResolver().query(uri, CONTENT_PROJECTION, null, null, null); 
 	        if( c == null ) { 
-	 			if( MyDebug.LOG )
+	 			if( CameraXDebug.LOG )
 	 				Log.e(TAG, "Couldn't resolve given uri [1]: " + uri); 
 	        }
 	        else if( !c.moveToFirst() ) { 
-	 			if( MyDebug.LOG )
+	 			if( CameraXDebug.LOG )
 	 				Log.e(TAG, "Couldn't resolve given uri [2]: " + uri); 
 	        }
 	        else {
     	        long duration = c.getLong(c.getColumnIndex(Video.Media.DURATION)); 
-	 			if( MyDebug.LOG )
+	 			if( CameraXDebug.LOG )
 	 				Log.e(TAG, "replace duration: " + duration); 
 				ContentValues values = new ContentValues(); 
 				values.put(Video.Media.DURATION, 1000); 
@@ -181,7 +181,7 @@ public class StorageUtils {
     }
 	
 	/*public Uri broadcastFileRaw(File file, Date current_date, Location location) {
-		if( MyDebug.LOG )
+		if( CameraXDebug.LOG )
 			Log.d(TAG, "broadcastFileRaw: " + file.getAbsolutePath());
         ContentValues values = new ContentValues(); 
         values.put(ImageColumns.TITLE, file.getName().substring(0, file.getName().lastIndexOf(".")));
@@ -199,7 +199,7 @@ public class StorageUtils {
         Uri uri = null;
         try {
     		uri = context.getContentResolver().insert(Images.Media.EXTERNAL_CONTENT_URI, values); 
- 			if( MyDebug.LOG )
+ 			if( CameraXDebug.LOG )
  				Log.d(TAG, "inserted media uri: " + uri);
     		context.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, uri));
         }
@@ -224,7 +224,7 @@ public class StorageUtils {
      *    call this function for DNGs, so that they show up on MTP.
      */
     public void broadcastFile(final File file, final boolean is_new_picture, final boolean is_new_video, final boolean set_last_scanned) {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "broadcastFile: " + file.getAbsolutePath());
         // note that the new method means that the new folder shows up as a file when connected to a PC via MTP (at least tested on Windows 8)
         if( file.isDirectory() ) {
@@ -237,13 +237,13 @@ public class StorageUtils {
             // both of these work fine, but using MediaScannerConnection.scanFile() seems to be preferred over sending an intent
             //context.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(file)));
             failed_to_scan = true; // set to true until scanned okay
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "failed_to_scan set to true");
             MediaScannerConnection.scanFile(context, new String[] { file.getAbsolutePath() }, null,
                     new MediaScannerConnection.OnScanCompletedListener() {
                         public void onScanCompleted(String path, Uri uri) {
                             failed_to_scan = false;
-                            if( MyDebug.LOG ) {
+                            if( CameraXDebug.LOG ) {
                                 Log.d(TAG, "Scanned " + path + ":");
                                 Log.d(TAG, "-> uri=" + uri);
                             }
@@ -254,13 +254,13 @@ public class StorageUtils {
                             applicationInterface.scannedFile(file, uri);
 
                             // If called from video intent, if not using scoped-storage, we'll have saved using File API (even if user preference is SAF), see
-                            // MyApplicationInterface.createOutputVideoMethod().
+                            // CameraXApplicationInterface.createOutputVideoMethod().
                             // It seems caller apps seem to prefer the content:// Uri rather than one based on a File
                             // update for Android 7: seems that passing file uris is now restricted anyway, see https://code.google.com/p/android/issues/detail?id=203555
                             // So we pass the uri back to the caller here.
                             Activity activity = (Activity)context;
                             String action = activity.getIntent().getAction();
-                            if( !MainActivity.useScopedStorage() && MediaStore.ACTION_VIDEO_CAPTURE.equals(action) ) {
+                            if( !CameraXActivity.useScopedStorage() && MediaStore.ACTION_VIDEO_CAPTURE.equals(action) ) {
                                 applicationInterface.finishVideoIntent(uri);
                             }
                         }
@@ -272,7 +272,7 @@ public class StorageUtils {
     /** Wrapper for broadcastFile, when we only have a Uri (e.g., for SAF)
      */
     public void broadcastUri(final Uri uri, final boolean is_new_picture, final boolean is_new_video, final boolean set_last_scanned, final boolean image_capture_intent) {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "broadcastUri: " + uri);
         /* We still need to broadcastFile for SAF for two reasons:
             1. To call storageUtils.announceUri() to broadcast NEW_PICTURE etc.
@@ -284,17 +284,17 @@ public class StorageUtils {
                scan.
         */
         File real_file = getFileFromDocumentUriSAF(uri, false);
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "real_file: " + real_file);
         if( real_file != null ) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "broadcast file");
             //Uri media_uri = broadcastFileRaw(real_file, current_date, location);
             //announceUri(media_uri, is_new_picture, is_new_video);
             broadcastFile(real_file, is_new_picture, is_new_video, set_last_scanned);
         }
         else if( !image_capture_intent ) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "announce SAF uri");
             // shouldn't do this for an image capture intent - e.g., causes crash when calling from Google Keep
             announceUri(uri, is_new_picture, is_new_video);
@@ -356,7 +356,7 @@ public class StorageUtils {
         File file;
         if( isUsingSAF() ) {
             Uri uri = getTreeUriSAF();
-    		/*if( MyDebug.LOG )
+    		/*if( CameraXDebug.LOG )
     			Log.d(TAG, "uri: " + uri);*/
             file = getFileFromDocumentUriSAF(uri, true);
         }
@@ -437,12 +437,12 @@ public class StorageUtils {
      */
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public File getFileFromDocumentUriSAF(Uri uri, boolean is_folder) {
-        if( MyDebug.LOG ) {
+        if( CameraXDebug.LOG ) {
             Log.d(TAG, "getFileFromDocumentUriSAF: " + uri);
             Log.d(TAG, "is_folder?: " + is_folder);
         }
         String authority = uri.getAuthority();
-        if( MyDebug.LOG ) {
+        if( CameraXDebug.LOG ) {
             Log.d(TAG, "authority: " + authority);
             Log.d(TAG, "scheme: " + uri.getScheme());
             Log.d(TAG, "fragment: " + uri.getFragment());
@@ -452,13 +452,13 @@ public class StorageUtils {
         File file = null;
         if( "com.android.externalstorage.documents".equals(authority) ) {
             final String id = is_folder ? DocumentsContract.getTreeDocumentId(uri) : DocumentsContract.getDocumentId(uri);
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "id: " + id);
             String [] split = id.split(":");
             if( split.length >= 1 ) {
                 String type = split[0];
                 String path = split.length >= 2 ? split[1] : "";
-				/*if( MyDebug.LOG ) {
+				/*if( CameraXDebug.LOG ) {
 					Log.d(TAG, "type: " + type);
 					Log.d(TAG, "path: " + path);
 				}*/
@@ -506,7 +506,7 @@ public class StorageUtils {
                 }
             }
             else {
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "downloads uri not supported for folders");
                 // This codepath can be reproduced by enabling SAF and selecting Downloads.
                 // DocumentsContract.getDocumentId() throws IllegalArgumentException for
@@ -543,7 +543,7 @@ public class StorageUtils {
                 file = new File(filename);
         }
 
-        if( MyDebug.LOG ) {
+        if( CameraXDebug.LOG ) {
             if( file != null )
                 Log.d(TAG, "file: " + file.getAbsolutePath());
             else
@@ -586,7 +586,7 @@ public class StorageUtils {
      * http://stackoverflow.com/questions/5568874/how-to-extract-the-file-name-from-uri-returned-from-intent-action-get-content .
      */
     public String getFileName(Uri uri) {
-        if( MyDebug.LOG ) {
+        if( CameraXDebug.LOG ) {
             Log.d(TAG, "getFileName: " + uri);
             Log.d(TAG, "uri has path: " + uri.getPath());
         }
@@ -598,12 +598,12 @@ public class StorageUtils {
                 if( cursor != null && cursor.moveToFirst() ) {
                     final int column_index = cursor.getColumnIndexOrThrow(OpenableColumns.DISPLAY_NAME);
                     result = cursor.getString(column_index);
-                    if( MyDebug.LOG )
+                    if( CameraXDebug.LOG )
                         Log.d(TAG, "found name from database: " + result);
                 }
             }
             catch(Exception e) {
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.e(TAG, "Exception trying to find filename");
                 e.printStackTrace();
             }
@@ -613,13 +613,13 @@ public class StorageUtils {
             }
         }
         if( result == null ) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "resort to checking the uri's path");
             result = uri.getPath();
             int cut = result.lastIndexOf('/');
             if( cut != -1 ) {
                 result = result.substring(cut + 1);
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "found name from path: " + result);
             }
         }
@@ -664,7 +664,7 @@ public class StorageUtils {
             }
             default:
                 // throw exception as this is a programming error
-                if (MyDebug.LOG)
+                if (CameraXDebug.LOG)
                     Log.e(TAG, "unknown type: " + type);
                 throw new RuntimeException();
         }
@@ -681,7 +681,7 @@ public class StorageUtils {
      */
     void createFolderIfRequired(File folder) throws IOException {
         if( !folder.exists() ) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "create directory: " + folder);
             if( !folder.mkdirs() ) {
                 Log.e(TAG, "failed to create directory");
@@ -705,7 +705,7 @@ public class StorageUtils {
 				File burstFolder = new File(mediaStorageDir.getPath() + File.separator + burstFolderName);
 				if( !burstFolder.exists() ) {
 					if( !burstFolder.mkdirs() ) {
-						if( MyDebug.LOG )
+						if( CameraXDebug.LOG )
 							Log.e(TAG, "failed to create burst sub-directory");
 						throw new IOException();
 					}
@@ -728,7 +728,7 @@ public class StorageUtils {
             }
         }
 
-        if( MyDebug.LOG ) {
+        if( CameraXDebug.LOG ) {
             Log.d(TAG, "getOutputMediaFile returns: " + mediaFile);
         }
         if( mediaFile == null )
@@ -741,14 +741,14 @@ public class StorageUtils {
     Uri createOutputFileSAF(String filename, String mimeType) throws IOException {
         try {
             Uri treeUri = getTreeUriSAF();
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "treeUri: " + treeUri);
             Uri docUri = DocumentsContract.buildDocumentUriUsingTree(treeUri, DocumentsContract.getTreeDocumentId(treeUri));
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "docUri: " + docUri);
             // note that DocumentsContract.createDocument will automatically append to the filename if it already exists
             Uri fileUri = DocumentsContract.createDocument(context.getContentResolver(), docUri, mimeType, filename);
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "returned fileUri: " + fileUri);
 			/*if( true )
 				throw new SecurityException(); // test*/
@@ -758,21 +758,21 @@ public class StorageUtils {
         }
         catch(IllegalArgumentException e) {
             // DocumentsContract.getTreeDocumentId throws this if URI is invalid
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.e(TAG, "createOutputMediaFileSAF failed with IllegalArgumentException");
             e.printStackTrace();
             throw new IOException();
         }
         catch(IllegalStateException e) {
             // Have reports of this from Google Play for DocumentsContract.createDocument - better to fail gracefully and tell user rather than crash!
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.e(TAG, "createOutputMediaFileSAF failed with IllegalStateException");
             e.printStackTrace();
             throw new IOException();
         }
         catch(SecurityException e) {
             // Have reports of this from Google Play - better to fail gracefully and tell user rather than crash!
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.e(TAG, "createOutputMediaFileSAF failed with SecurityException");
             e.printStackTrace();
             throw new IOException();
@@ -836,7 +836,7 @@ public class StorageUtils {
                 break;
             default:
                 // throw exception as this is a programming error
-                if (MyDebug.LOG)
+                if (CameraXDebug.LOG)
                     Log.e(TAG, "unknown type: " + type);
                 throw new RuntimeException();
         }
@@ -904,7 +904,7 @@ public class StorageUtils {
 
     @SuppressLint("InlinedApi") // complains MediaColumns constants only available on API 29 (even though it was available on older versions, but looks like it was moved?); for some reason doesn't allow putting this at the actual comments?!
     private Media getLatestMediaCore(Uri baseUri, String bucket_id, UriType uri_type) {
-        if( MyDebug.LOG ) {
+        if( CameraXDebug.LOG ) {
             Log.d(TAG, "getLatestMediaCore");
             Log.d(TAG, "baseUri: " + baseUri);
             Log.d(TAG, "bucket_id: " + bucket_id);
@@ -960,7 +960,7 @@ public class StorageUtils {
             default:
                 throw new RuntimeException("unknown uri_type: " + uri_type);
         }
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "selection: " + selection);
         String order;
         switch( uri_type ) {
@@ -980,13 +980,13 @@ public class StorageUtils {
         // an equivalent non-RAW image
         // request 3, just in case
         Uri queryUri = baseUri.buildUpon().appendQueryParameter("limit", "3").build();
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "queryUri: " + queryUri);
 
         try {
             cursor = context.getContentResolver().query(queryUri, projection, selection, null, order);
             if( cursor != null && cursor.moveToFirst() ) {
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "found: " + cursor.getCount());
 
                 // now sorted in order of date - so just pick the most recent one
@@ -996,22 +996,22 @@ public class StorageUtils {
                 boolean found = false;
                 //File save_folder = getImageFolder(); // may be null if using SAF
                 String save_folder_string = save_folder == null ? null : save_folder.getAbsolutePath() + File.separator;
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "save_folder_string: " + save_folder_string);
                 do {
                     String path = cursor.getString(column_data_c);
-                    if( MyDebug.LOG )
+                    if( CameraXDebug.LOG )
                         Log.d(TAG, "path: " + path);
                     // path may be null on Android 4.4!: http://stackoverflow.com/questions/3401579/get-filename-and-path-from-uri-from-mediastore
                     if( save_folder_string == null || (path != null && path.contains(save_folder_string) ) ) {
-                        if( MyDebug.LOG )
+                        if( CameraXDebug.LOG )
                             Log.d(TAG, "found most recent in Open Camera folder");
                         // we filter files with dates in future, in case there exists an image in the folder with incorrect datestamp set to the future
                         // we allow up to 2 days in future, to avoid risk of issues to do with timezone etc
                         long date = cursor.getLong(column_date_taken_c);
                         long current_time = System.currentTimeMillis();
                         if( date > current_time + 172800000 ) {
-                            if( MyDebug.LOG )
+                            if( CameraXDebug.LOG )
                                 Log.d(TAG, "skip date in the future!");
                         }
                         else {
@@ -1023,7 +1023,7 @@ public class StorageUtils {
                 while( cursor.moveToNext() );
 
                 if( !found ) {
-                    if( MyDebug.LOG )
+                    if( CameraXDebug.LOG )
                         Log.d(TAG, "can't find suitable in Open Camera folder, so just go with most recent");
                     cursor.moveToFirst();
                 }
@@ -1033,33 +1033,33 @@ public class StorageUtils {
                     // make sure we prefer JPEG/etc (non RAW) if there's a JPEG/etc version of this image
                     // this is because we want to support RAW only and JPEG+RAW modes
                     String filename = cursor.getString(column_name_c);
-                    if( MyDebug.LOG ) {
+                    if( CameraXDebug.LOG ) {
                         Log.d(TAG, "filename: " + filename);
                     }
                     // in theory now that we use DISPLAY_NAME instead of DATA (for path), this should always be non-null, but check just in case
                     if( filename != null && filenameIsRaw(filename) ) {
-                        if( MyDebug.LOG )
+                        if( CameraXDebug.LOG )
                             Log.d(TAG, "try to find a non-RAW version of the DNG");
                         int dng_pos = cursor.getPosition();
                         boolean found_non_raw = false;
                         String filename_without_ext = filenameWithoutExtension(filename);
-                        if( MyDebug.LOG )
+                        if( CameraXDebug.LOG )
                             Log.d(TAG, "filename_without_ext: " + filename_without_ext);
                         while( cursor.moveToNext() ) {
                             String next_filename = cursor.getString(column_name_c);
-                            if( MyDebug.LOG )
+                            if( CameraXDebug.LOG )
                                 Log.d(TAG, "next_filename: " + next_filename);
                             if( next_filename == null ) {
-                                if( MyDebug.LOG )
+                                if( CameraXDebug.LOG )
                                     Log.d(TAG, "done scanning, couldn't find filename");
                                 break;
                             }
                             String next_filename_without_ext = filenameWithoutExtension(next_filename);
-                            if( MyDebug.LOG )
+                            if( CameraXDebug.LOG )
                                 Log.d(TAG, "next_filename_without_ext: " + next_filename_without_ext);
                             if( !filename_without_ext.equals(next_filename_without_ext) ) {
                                 // no point scanning any further as sorted by date - and we don't want to read through the entire set!
-                                if( MyDebug.LOG )
+                                if( CameraXDebug.LOG )
                                     Log.d(TAG, "done scanning");
                                 break;
                             }
@@ -1068,18 +1068,18 @@ public class StorageUtils {
                             // only need to check that it isn't another DNG (which would be strange, as it
                             // would mean a duplicate filename, but check just in case!)
                             if( filenameIsRaw(next_filename) ) {
-                                if( MyDebug.LOG )
+                                if( CameraXDebug.LOG )
                                     Log.d(TAG, "found another dng!");
                             }
                             else {
-                                if( MyDebug.LOG )
+                                if( CameraXDebug.LOG )
                                     Log.d(TAG, "found equivalent non-dng");
                                 found_non_raw = true;
                                 break;
                             }
                         }
                         if( !found_non_raw ) {
-                            if( MyDebug.LOG )
+                            if( CameraXDebug.LOG )
                                 Log.d(TAG, "can't find equivalent jpeg/etc");
                             cursor.moveToPosition(dng_pos);
                         }
@@ -1091,7 +1091,7 @@ public class StorageUtils {
                 int orientation = (uri_type == UriType.MEDIASTORE_IMAGES) ? cursor.getInt(column_orientation_c) : 0;
                 Uri uri = ContentUris.withAppendedId(baseUri, id);
                 String filename = cursor.getString(column_name_c);
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "found most recent uri for " + uri_type + ": " + uri);
 
                 boolean video;
@@ -1105,12 +1105,12 @@ public class StorageUtils {
                     default:
                         throw new RuntimeException("unknown uri_type: " + uri_type);
                 }
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "video: " + video);
 
                 media = new Media(true, id, video, uri, date, orientation, filename);
 
-                if( MyDebug.LOG ) {
+                if( CameraXDebug.LOG ) {
                     // debug
                     if( cursor.moveToFirst() ) {
                         do {
@@ -1125,13 +1125,13 @@ public class StorageUtils {
                 }
             }
             else {
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "mediastore returned no media");
             }
         }
         catch(Exception e) {
             // have had exceptions such as SQLiteException, NullPointerException reported on Google Play from within getContentResolver().query() call
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.e(TAG, "Exception trying to find latest media");
             e.printStackTrace();
         }
@@ -1141,7 +1141,7 @@ public class StorageUtils {
             }
         }
 
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "return latest media: " + media);
         return media;
     }
@@ -1157,7 +1157,7 @@ public class StorageUtils {
      */
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     private Media getLatestMediaSAF(Uri treeUri) {
-        if (MyDebug.LOG)
+        if (CameraXDebug.LOG)
             Log.d(TAG, "getLatestMedia: " + treeUri);
 
         Media media = null;
@@ -1179,7 +1179,7 @@ public class StorageUtils {
             Log.e(TAG, "Exception using treeUri: " + treeUri);
             return media;
         }
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "baseUri: " + baseUri);
 
         final int column_id_c = 0;
@@ -1197,7 +1197,7 @@ public class StorageUtils {
         try {
             cursor = context.getContentResolver().query(baseUri, projection, null, null, null);
             if( cursor != null && cursor.moveToFirst() ) {
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "found: " + cursor.getCount());
 
                 Uri latest_uri = null;
@@ -1247,7 +1247,7 @@ public class StorageUtils {
                     }
 
                     String this_filename = cursor.getString(column_name_c);
-                    if( MyDebug.LOG ) {
+                    if( CameraXDebug.LOG ) {
                         Log.d(TAG, "Date: " + this_date + " doc_id: " + doc_id + " Name: " + this_filename + " Uri: " + this_uri);
                     }
 
@@ -1268,11 +1268,11 @@ public class StorageUtils {
                 while( cursor.moveToNext() );
 
                 if( latest_uri == null ) {
-                    if( MyDebug.LOG )
+                    if( CameraXDebug.LOG )
                         Log.e(TAG, "couldn't find latest uri");
                 }
                 else {
-                    if( MyDebug.LOG ) {
+                    if( CameraXDebug.LOG ) {
                         Log.d(TAG, "latest_uri: " + latest_uri);
                         Log.d(TAG, "nonraw_latest_uri: " + nonraw_latest_uri);
                     }
@@ -1281,12 +1281,12 @@ public class StorageUtils {
                         // prefer non-RAW to RAW? check filenames without extensions match
                         String filename_without_ext = filenameWithoutExtension(latest_filename);
                         String next_filename_without_ext = filenameWithoutExtension(nonraw_latest_filename);
-                        if( MyDebug.LOG ) {
+                        if( CameraXDebug.LOG ) {
                             Log.d(TAG, "filename_without_ext: " + filename_without_ext);
                             Log.d(TAG, "next_filename_without_ext: " + next_filename_without_ext);
                         }
                         if( filename_without_ext.equals(next_filename_without_ext) ) {
-                            if( MyDebug.LOG )
+                            if( CameraXDebug.LOG )
                                 Log.d(TAG, "prefer non-RAW to RAW");
                             latest_uri = nonraw_latest_uri;
                             latest_date = nonraw_latest_date;
@@ -1298,7 +1298,7 @@ public class StorageUtils {
                     media = new Media(false,0, latest_is_video, latest_uri, latest_date, 0, latest_filename);
                 }
 
-                /*if( MyDebug.LOG ) {
+                /*if( CameraXDebug.LOG ) {
                     // debug
                     if( cursor.moveToFirst() ) {
                         do {
@@ -1313,12 +1313,12 @@ public class StorageUtils {
                 }*/
             }
             else {
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "mediastore returned no media");
             }
         }
         catch(Exception e) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.e(TAG, "Exception trying to find latest media");
             e.printStackTrace();
         }
@@ -1328,34 +1328,34 @@ public class StorageUtils {
             }
         }
 
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "return latest media: " + media);
         return media;
     }
 
     private Media getLatestMedia(UriType uri_type) {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "getLatestMedia: " + uri_type);
-        if( !MainActivity.useScopedStorage() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ) {
+        if( !CameraXActivity.useScopedStorage() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ) {
             // needed for Android 6, in case users deny storage permission, otherwise we get java.lang.SecurityException from ContentResolver.query()
             // see https://developer.android.com/training/permissions/requesting.html
             // we now request storage permission before opening the camera, but keep this here just in case
             // we restrict check to Android 6 or later just in case, see note in LocationSupplier.setupLocationListener()
             // update for scoped storage: here we should no longer need READ_EXTERNAL_STORAGE (which we won't have), instead we'll only be able to see
             // media created by Open Camera, which is fine
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.e(TAG, "don't have READ_EXTERNAL_STORAGE permission");
             return null;
         }
 
         String save_folder = getImageFolderPath(); // may be null if using SAF
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "save_folder: " + save_folder);
         String bucket_id = null;
         if( save_folder != null ) {
             bucket_id = String.valueOf(save_folder.toLowerCase().hashCode());
         }
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "bucket_id: " + bucket_id);
 
         Uri baseUri;
@@ -1370,11 +1370,11 @@ public class StorageUtils {
                 throw new RuntimeException("unknown uri_type: " + uri_type);
         }
 
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "baseUri: " + baseUri);
         Media media = getLatestMediaCore(baseUri, bucket_id, uri_type);
         if( media == null && bucket_id != null ) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "fall back to checking any folder");
             media = getLatestMediaCore(baseUri, null, uri_type);
         }
@@ -1383,7 +1383,7 @@ public class StorageUtils {
     }
 
     Media getLatestMedia() {
-        if( MainActivity.useScopedStorage() && this.isUsingSAF() ) {
+        if( CameraXActivity.useScopedStorage() && this.isUsingSAF() ) {
             Uri treeUri = this.getTreeUriSAF();
             return getLatestMediaSAF(treeUri);
         }
@@ -1392,33 +1392,33 @@ public class StorageUtils {
         Media video_media = getLatestMedia(UriType.MEDIASTORE_VIDEOS);
         Media media = null;
         if( image_media != null && video_media == null ) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "only found images");
             media = image_media;
         }
         else if( image_media == null && video_media != null ) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "only found videos");
             media = video_media;
         }
         else if( image_media != null && video_media != null ) {
-            if( MyDebug.LOG ) {
+            if( CameraXDebug.LOG ) {
                 Log.d(TAG, "found images and videos");
                 Log.d(TAG, "latest image date: " + image_media.date);
                 Log.d(TAG, "latest video date: " + video_media.date);
             }
             if( image_media.date >= video_media.date ) {
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "latest image is newer");
                 media = image_media;
             }
             else {
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "latest video is newer");
                 media = video_media;
             }
         }
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "return latest media: " + media);
         return media;
     }
@@ -1428,18 +1428,18 @@ public class StorageUtils {
     private long freeMemorySAF() {
         Uri treeUri = applicationInterface.getStorageUtils().getTreeUriSAF();
         ParcelFileDescriptor pfd = null;
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "treeUri: " + treeUri);
         try {
             Uri docUri = DocumentsContract.buildDocumentUriUsingTree(treeUri, DocumentsContract.getTreeDocumentId(treeUri));
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "docUri: " + docUri);
             pfd = context.getContentResolver().openFileDescriptor(docUri, "r");
             if( pfd == null ) { // just in case
                 Log.e(TAG, "pfd is null!");
                 throw new FileNotFoundException();
             }
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "read direct from SAF uri");
             StructStatVfs statFs = Os.fstatvfs(pfd.getFileDescriptor());
             long blocks = statFs.f_bavail;
@@ -1475,7 +1475,7 @@ public class StorageUtils {
     /** Return free memory in MB, or -1 if this was unable to be found.
      */
     public long freeMemory() { // return free memory in MB
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "freeMemory");
         if( applicationInterface.getStorageUtils().isUsingSAF() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ) {
             // if we fail for SAF, don't fall back to the methods below, as this may be incorrect (especially for external SD card)

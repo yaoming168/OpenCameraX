@@ -29,9 +29,9 @@ import java.util.Set;
 public class SettingsManager {
     private static final String TAG = "SettingsManager";
 
-    private final MainActivity main_activity;
+    private final CameraXActivity main_activity;
 
-    SettingsManager(MainActivity main_activity) {
+    SettingsManager(CameraXActivity main_activity) {
         this.main_activity = main_activity;
     }
 
@@ -43,7 +43,7 @@ public class SettingsManager {
     private final static String string_tag = "string";
 
     public boolean loadSettings(String file) {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "loadSettings: " + file);
         InputStream inputStream;
         try {
@@ -59,7 +59,7 @@ public class SettingsManager {
     }
 
     public boolean loadSettings(Uri uri) {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "loadSettings: " + uri);
         InputStream inputStream;
         try {
@@ -79,7 +79,7 @@ public class SettingsManager {
      * @return Whether the operation was succesful.
      */
     private boolean loadSettings(InputStream inputStream) {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "loadSettings: " + inputStream);
         try {
             XmlPullParser parser = Xml.newPullParser();
@@ -101,7 +101,7 @@ public class SettingsManager {
                 }
                 String name = parser.getName();
                 String key = parser.getAttributeValue(null, "key");
-                if( MyDebug.LOG ) {
+                if( CameraXDebug.LOG ) {
                     Log.d(TAG, "name: " + name);
                     Log.d(TAG, "    key: " + key);
                     Log.d(TAG, "    value: " + parser.getAttributeValue(null, "value"));
@@ -139,7 +139,7 @@ public class SettingsManager {
                 editor.putInt(PreferenceKeys.LatestVersionPreferenceKey, version_code);
             }
             catch(PackageManager.NameNotFoundException e) {
-                if (MyDebug.LOG)
+                if (CameraXDebug.LOG)
                     Log.d(TAG, "NameNotFoundException exception trying to get version number");
                 e.printStackTrace();
             }
@@ -184,7 +184,7 @@ public class SettingsManager {
     }
 
     public void saveSettings(String filename) {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "saveSettings: " + filename);
         OutputStream outputStream = null;
         try {

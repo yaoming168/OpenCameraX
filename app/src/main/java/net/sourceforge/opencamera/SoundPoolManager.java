@@ -24,7 +24,7 @@ class SoundPoolManager {
 
     void initSound() {
         if( sound_pool == null ) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "create new sound_pool");
             if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ) {
                 AudioAttributes audio_attributes = new AudioAttributes.Builder()
@@ -45,7 +45,7 @@ class SoundPoolManager {
 
     void releaseSound() {
         if( sound_pool != null ) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "release sound_pool");
             sound_pool.release();
             sound_pool = null;
@@ -57,10 +57,10 @@ class SoundPoolManager {
      */
     void loadSound(int resource_id) {
         if( sound_pool != null ) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "loading sound resource: " + resource_id);
             int sound_id = sound_pool.load(context, resource_id, 1);
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "    loaded sound: " + sound_id);
             sound_ids.put(resource_id, sound_id);
         }
@@ -71,12 +71,12 @@ class SoundPoolManager {
     void playSound(int resource_id) {
         if( sound_pool != null ) {
             if( sound_ids.indexOfKey(resource_id) < 0 ) {
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "resource not loaded: " + resource_id);
             }
             else {
                 int sound_id = sound_ids.get(resource_id);
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "play sound: " + sound_id);
                 sound_pool.play(sound_id, 1.0f, 1.0f, 0, 0, 1);
             }

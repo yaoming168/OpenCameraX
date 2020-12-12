@@ -1,6 +1,6 @@
 package net.sourceforge.opencamera.cameracontroller;
 
-import net.sourceforge.opencamera.MyDebug;
+import net.sourceforge.opencamera.CameraXDebug;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -55,14 +55,14 @@ public class CameraController1 extends CameraController {
      */
     public CameraController1(int cameraId, final ErrorCallback camera_error_cb) throws CameraControllerException {
         super(cameraId);
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "create new CameraController1: " + cameraId);
         this.camera_error_cb = camera_error_cb;
         try {
             camera = Camera.open(cameraId);
         }
         catch(RuntimeException e) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.e(TAG, "failed to open camera");
             e.printStackTrace();
             throw new CameraControllerException();
@@ -71,7 +71,7 @@ public class CameraController1 extends CameraController {
             // Although the documentation says Camera.open() should throw a RuntimeException, it seems that it some cases it can return null
             // I've seen this in some crashes reported in Google Play; also see:
             // http://stackoverflow.com/questions/12054022/camera-open-returns-null
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.e(TAG, "camera.open returned null");
             throw new CameraControllerException();
         }
@@ -81,7 +81,7 @@ public class CameraController1 extends CameraController {
         catch(RuntimeException e) {
             // Had reported RuntimeExceptions from Google Play
             // also see http://stackoverflow.com/questions/22383708/java-lang-runtimeexception-fail-to-get-camera-info
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.e(TAG, "failed to get camera info");
             e.printStackTrace();
             this.release();
@@ -97,7 +97,7 @@ public class CameraController1 extends CameraController {
 			handler.postDelayed(new Runnable() {
 				@Override
 				public void run() {
-					if( MyDebug.LOG )
+					if( CameraXDebug.LOG )
 						Log.d(TAG, "test camera error");
 					camera_error_callback.onError(Camera.CAMERA_ERROR_SERVER_DIED, camera);
 				}
@@ -121,7 +121,7 @@ public class CameraController1 extends CameraController {
     private class CameraErrorCallback implements Camera.ErrorCallback {
         @Override
         public void onError(int error, Camera cam) {
-            // n.b., as this is potentially serious error, we always log even if MyDebug.LOG is false
+            // n.b., as this is potentially serious error, we always log even if CameraXDebug.LOG is false
             Log.e(TAG, "camera onError: " + error);
             if( error == Camera.CAMERA_ERROR_SERVER_DIED ) {
                 Log.e(TAG, "    CAMERA_ERROR_SERVER_DIED");
@@ -142,22 +142,22 @@ public class CameraController1 extends CameraController {
     }
 
     private Camera.Parameters getParameters() {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "getParameters");
         return camera.getParameters();
     }
 
     private void setCameraParameters(Camera.Parameters parameters) {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "setCameraParameters");
         try {
             camera.setParameters(parameters);
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "done");
         }
         catch(RuntimeException e) {
             // just in case something has gone wrong
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "failed to set parameters");
             e.printStackTrace();
             count_camera_parameters_exception++;
@@ -165,7 +165,7 @@ public class CameraController1 extends CameraController {
     }
 
     private List<String> convertFlashModesToValues(List<String> supported_flash_modes) {
-        if( MyDebug.LOG ) {
+        if( CameraXDebug.LOG ) {
             Log.d(TAG, "convertFlashModesToValues()");
             Log.d(TAG, "supported_flash_modes: " + supported_flash_modes);
         }
@@ -174,27 +174,27 @@ public class CameraController1 extends CameraController {
             // also resort as well as converting
             if( supported_flash_modes.contains(Camera.Parameters.FLASH_MODE_OFF) ) {
                 output_modes.add("flash_off");
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, " supports flash_off");
             }
             if( supported_flash_modes.contains(Camera.Parameters.FLASH_MODE_AUTO) ) {
                 output_modes.add("flash_auto");
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, " supports flash_auto");
             }
             if( supported_flash_modes.contains(Camera.Parameters.FLASH_MODE_ON) ) {
                 output_modes.add("flash_on");
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, " supports flash_on");
             }
             if( supported_flash_modes.contains(Camera.Parameters.FLASH_MODE_TORCH) ) {
                 output_modes.add("flash_torch");
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, " supports flash_torch");
             }
             if( supported_flash_modes.contains(Camera.Parameters.FLASH_MODE_RED_EYE) ) {
                 output_modes.add("flash_red_eye");
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, " supports flash_red_eye");
             }
         }
@@ -204,12 +204,12 @@ public class CameraController1 extends CameraController {
         // this is always why we check whether the size is greater than 1, rather than 0 (this also matches
         // the check we do in Preview.setupCameraParameters()).
         if( output_modes.size() > 1 ) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "flash supported");
         }
         else {
             if( getFacing() == Facing.FACING_FRONT ) {
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "front-screen with no flash");
                 output_modes.clear(); // clear any pre-existing mode (see note above about Samsung Galaxy S7)
                 output_modes.add("flash_off");
@@ -217,7 +217,7 @@ public class CameraController1 extends CameraController {
                 output_modes.add("flash_frontscreen_torch");
             }
             else {
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "no flash");
                 // probably best to not return any modes, rather than one mode (see note about about Samsung Galaxy S7)
                 output_modes.clear();
@@ -228,51 +228,51 @@ public class CameraController1 extends CameraController {
     }
 
     private List<String> convertFocusModesToValues(List<String> supported_focus_modes) {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "convertFocusModesToValues()");
         List<String> output_modes = new ArrayList<>();
         if( supported_focus_modes != null ) {
             // also resort as well as converting
             if( supported_focus_modes.contains(Camera.Parameters.FOCUS_MODE_AUTO) ) {
                 output_modes.add("focus_mode_auto");
-                if( MyDebug.LOG ) {
+                if( CameraXDebug.LOG ) {
                     Log.d(TAG, " supports focus_mode_auto");
                 }
             }
             if( supported_focus_modes.contains(Camera.Parameters.FOCUS_MODE_INFINITY) ) {
                 output_modes.add("focus_mode_infinity");
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, " supports focus_mode_infinity");
             }
             if( supported_focus_modes.contains(Camera.Parameters.FOCUS_MODE_MACRO) ) {
                 output_modes.add("focus_mode_macro");
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, " supports focus_mode_macro");
             }
             if( supported_focus_modes.contains(Camera.Parameters.FOCUS_MODE_AUTO) ) {
                 output_modes.add("focus_mode_locked");
-                if( MyDebug.LOG ) {
+                if( CameraXDebug.LOG ) {
                     Log.d(TAG, " supports focus_mode_locked");
                 }
             }
             if( supported_focus_modes.contains(Camera.Parameters.FOCUS_MODE_FIXED) ) {
                 output_modes.add("focus_mode_fixed");
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, " supports focus_mode_fixed");
             }
             if( supported_focus_modes.contains(Camera.Parameters.FOCUS_MODE_EDOF) ) {
                 output_modes.add("focus_mode_edof");
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, " supports focus_mode_edof");
             }
             if( supported_focus_modes.contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE) ) {
                 output_modes.add("focus_mode_continuous_picture");
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, " supports focus_mode_continuous_picture");
             }
             if( supported_focus_modes.contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO) ) {
                 output_modes.add("focus_mode_continuous_video");
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, " supports focus_mode_continuous_video");
             }
         }
@@ -284,7 +284,7 @@ public class CameraController1 extends CameraController {
     }
 
     public CameraFeatures getCameraFeatures() throws CameraControllerException {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "getCameraFeatures()");
         Camera.Parameters parameters;
         try {
@@ -305,7 +305,7 @@ public class CameraController1 extends CameraController {
             catch(NumberFormatException e) {
                 // crash java.lang.NumberFormatException: Invalid int: " 500" reported in v1.4 on device "es209ra", Android 4.1, 3 Jan 2014
                 // this is from java.lang.Integer.invalidInt(Integer.java:138) - unclear if this is a bug in Open Camera, all we can do for now is catch it
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.e(TAG, "NumberFormatException in getZoomRatios()");
                 e.printStackTrace();
                 camera_features.is_zoom_supported = false;
@@ -360,7 +360,7 @@ public class CameraController1 extends CameraController {
         List<Camera.Size> camera_video_sizes = parameters.getSupportedVideoSizes();
         if( camera_video_sizes == null ) {
             // if null, we should use the preview sizes - see http://stackoverflow.com/questions/14263521/android-getsupportedvideosizes-allways-returns-null
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "take video_sizes from preview sizes");
             camera_video_sizes = parameters.getSupportedPreviewSizes();
         }
@@ -378,7 +378,7 @@ public class CameraController1 extends CameraController {
             camera_features.preview_sizes.add(new CameraController.Size(camera_size.width, camera_size.height));
         }
 
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "camera parameters: " + parameters.flatten());
 
         if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1 ) {
@@ -406,7 +406,7 @@ public class CameraController1 extends CameraController {
             camera_features.view_angle_x = default_view_angle_x;
             camera_features.view_angle_y = default_view_angle_y;
         }
-        if( MyDebug.LOG ) {
+        if( CameraXDebug.LOG ) {
             Log.d(TAG, "view_angle_x: " + camera_features.view_angle_x);
             Log.d(TAG, "view_angle_y: " + camera_features.view_angle_y);
         }
@@ -490,7 +490,7 @@ public class CameraController1 extends CameraController {
     }
 
     public SupportedValues setWhiteBalance(String value) {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "setWhiteBalance: " + value);
         Camera.Parameters parameters = this.getParameters();
         List<String> values = parameters.getSupportedWhiteBalance();
@@ -592,7 +592,7 @@ public class CameraController1 extends CameraController {
         }
         List<String> values = null;
         if( iso_values != null && iso_values.length() > 0 ) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "iso_values: " + iso_values);
             String [] isos_array = iso_values.split(",");
             // split shouldn't return null
@@ -665,7 +665,7 @@ public class CameraController1 extends CameraController {
             }
             SupportedValues supported_values = checkModeIsSupported(values, value, ISO_DEFAULT);
             if( supported_values != null ) {
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "set: " + iso_key + " to: " + supported_values.selected_value);
                 parameters.set(iso_key, supported_values.selected_value);
                 setCameraParameters(parameters);
@@ -677,7 +677,7 @@ public class CameraController1 extends CameraController {
 
     @Override
     public String getISOKey() {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "getISOKey");
         return this.iso_key;
     }
@@ -736,7 +736,7 @@ public class CameraController1 extends CameraController {
         this.picture_width = width;
         this.picture_height = height;
         parameters.setPictureSize(width, height);
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "set picture size: " + parameters.getPictureSize().width + ", " + parameters.getPictureSize().height);
         setCameraParameters(parameters);
     }
@@ -751,20 +751,20 @@ public class CameraController1 extends CameraController {
     @Override
     public void setPreviewSize(int width, int height) {
         Camera.Parameters parameters = this.getParameters();
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "current preview size: " + parameters.getPreviewSize().width + ", " + parameters.getPreviewSize().height);
         parameters.setPreviewSize(width, height);
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "new preview size: " + parameters.getPreviewSize().width + ", " + parameters.getPreviewSize().height);
         setCameraParameters(parameters);
     }
 
     @Override
     public void setBurstType(BurstType burst_type) {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "setBurstType: " + burst_type);
         if( camera == null ) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.e(TAG, "no camera");
             return;
         }
@@ -808,16 +808,16 @@ public class CameraController1 extends CameraController {
 
     @Override
     public void setExpoBracketingNImages(int n_images) {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "setExpoBracketingNImages: " + n_images);
         if( n_images <= 1 || (n_images % 2) == 0 ) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.e(TAG, "n_images should be an odd number greater than 1");
             throw new RuntimeException(); // throw as RuntimeException, as this is a programming error
         }
         if( n_images > max_expo_bracketing_n_images ) {
             n_images = max_expo_bracketing_n_images;
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.e(TAG, "limiting n_images to max of " + n_images);
         }
         this.expo_bracketing_n_images = n_images;
@@ -825,10 +825,10 @@ public class CameraController1 extends CameraController {
 
     @Override
     public void setExpoBracketingStops(double stops) {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "setExpoBracketingStops: " + stops);
         if( stops <= 0.0 ) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.e(TAG, "stops should be positive");
             throw new RuntimeException(); // throw as RuntimeException, as this is a programming error
         }
@@ -925,7 +925,7 @@ public class CameraController1 extends CameraController {
     public void setZoom(int value) {
         try {
             Camera.Parameters parameters = this.getParameters();
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "zoom was: " + parameters.getZoom());
             this.current_zoom_value = value;
             parameters.setZoom(value);
@@ -951,7 +951,7 @@ public class CameraController1 extends CameraController {
         }
         catch(Exception e) {
             // received a NullPointerException from StringToReal.parseFloat() beneath getExposureCompensationStep() on Google Play!
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.e(TAG, "exception from getExposureCompensationStep()");
             e.printStackTrace();
             exposure_step = 1.0f/3.0f; // make up a typical example
@@ -965,7 +965,7 @@ public class CameraController1 extends CameraController {
 		int current_exposure = parameters.getExposureCompensation();
 		if( new_exposure != current_exposure ) {*/
         if( new_exposure != current_exposure_compensation ) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "change exposure from " + current_exposure_compensation + " to " + new_exposure);
             Camera.Parameters parameters = this.getParameters();
             this.current_exposure_compensation = new_exposure;
@@ -978,7 +978,7 @@ public class CameraController1 extends CameraController {
 
     @Override
     public void setPreviewFpsRange(int min, int max) {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "setPreviewFpsRange: " + min + " to " + max);
         try {
             Camera.Parameters parameters = this.getParameters();
@@ -995,7 +995,7 @@ public class CameraController1 extends CameraController {
 
     @Override
     public void clearPreviewFpsRange() {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "clearPreviewFpsRange");
         // not supported for old API
     }
@@ -1043,7 +1043,7 @@ public class CameraController1 extends CameraController {
                 parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
                 break;
             default:
-                if (MyDebug.LOG)
+                if (CameraXDebug.LOG)
                     Log.d(TAG, "setFocusValue() received unknown focus value " + focus_value);
                 break;
         }
@@ -1052,7 +1052,7 @@ public class CameraController1 extends CameraController {
 
     private String convertFocusModeToValue(String focus_mode) {
         // focus_mode may be null on some devices; we return ""
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "convertFocusModeToValue: " + focus_mode);
         String focus_value = "";
         if( focus_mode == null ) {
@@ -1161,7 +1161,7 @@ public class CameraController1 extends CameraController {
 
     public void setFlashValue(String flash_value) {
         Camera.Parameters parameters = this.getParameters();
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "setFlashValue: " + flash_value);
 
         this.frontscreen_flash = false;
@@ -1172,7 +1172,7 @@ public class CameraController1 extends CameraController {
         }
 
         if( parameters.getFlashMode() == null ) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "flash mode not supported");
             return;
         }
@@ -1181,7 +1181,7 @@ public class CameraController1 extends CameraController {
         if( flash_mode.length() > 0 && !flash_mode.equals(parameters.getFlashMode()) ) {
             if( parameters.getFlashMode().equals(Camera.Parameters.FLASH_MODE_TORCH) && !flash_mode.equals(Camera.Parameters.FLASH_MODE_OFF) ) {
                 // workaround for bug on Nexus 5 and Nexus 6 where torch doesn't switch off until we set FLASH_MODE_OFF
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "first turn torch off");
                 parameters.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
                 setCameraParameters(parameters);
@@ -1190,7 +1190,7 @@ public class CameraController1 extends CameraController {
                 handler.postDelayed(new Runnable(){
                     @Override
                     public void run(){
-                        if( MyDebug.LOG )
+                        if( CameraXDebug.LOG )
                             Log.d(TAG, "now set actual flash mode after turning torch off");
                         if( camera != null ) { // make sure camera wasn't released in the meantime (has a Google Play crash as a result of this)
                             Camera.Parameters parameters = getParameters();
@@ -1209,7 +1209,7 @@ public class CameraController1 extends CameraController {
 
     private String convertFlashModeToValue(String flash_mode) {
         // flash_mode may be null, meaning flash isn't supported; we return ""
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "convertFlashModeToValue: " + flash_mode);
         String flash_value = "";
         if( flash_mode == null ) {
@@ -1241,7 +1241,7 @@ public class CameraController1 extends CameraController {
     }
 
     public void setRecordingHint(boolean hint) {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "setRecordingHint: " + hint);
         try {
             Camera.Parameters parameters = this.getParameters();
@@ -1307,7 +1307,7 @@ public class CameraController1 extends CameraController {
 
     public void setLocationInfo(Location location) {
         // don't log location, in case of privacy!
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "setLocationInfo");
         Camera.Parameters parameters = this.getParameters();
         parameters.removeGpsData();
@@ -1356,7 +1356,7 @@ public class CameraController1 extends CameraController {
 
                 // also set metering areas
                 if( parameters.getMaxNumMeteringAreas() == 0 ) {
-                    if( MyDebug.LOG )
+                    if( CameraXDebug.LOG )
                         Log.d(TAG, "metering areas not supported");
                 }
                 else {
@@ -1463,7 +1463,7 @@ public class CameraController1 extends CameraController {
         String current_focus_mode = parameters.getFocusMode();
         // getFocusMode() is documented as never returning null, however I've had null pointer exceptions reported in Google Play
         boolean focus_is_video = current_focus_mode != null && current_focus_mode.equals(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
-        if( MyDebug.LOG ) {
+        if( CameraXDebug.LOG ) {
             Log.d(TAG, "current_focus_mode: " + current_focus_mode);
             Log.d(TAG, "focus_is_video: " + focus_is_video);
         }
@@ -1472,13 +1472,13 @@ public class CameraController1 extends CameraController {
 
     @Override
     public void reconnect() throws CameraControllerException {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "reconnect");
         try {
             camera.reconnect();
         }
         catch(IOException e) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.e(TAG, "reconnect threw IOException");
             e.printStackTrace();
             throw new CameraControllerException();
@@ -1487,7 +1487,7 @@ public class CameraController1 extends CameraController {
 
     @Override
     public void setPreviewDisplay(SurfaceHolder holder) throws CameraControllerException {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "setPreviewDisplay");
         try {
             camera.setPreviewDisplay(holder);
@@ -1500,7 +1500,7 @@ public class CameraController1 extends CameraController {
 
     @Override
     public void setPreviewTexture(TextureView texture) throws CameraControllerException {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "setPreviewTexture");
         try {
             camera.setPreviewTexture(texture.getSurfaceTexture());
@@ -1513,13 +1513,13 @@ public class CameraController1 extends CameraController {
 
     @Override
     public void startPreview() throws CameraControllerException {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "startPreview");
         try {
             camera.startPreview();
         }
         catch(RuntimeException e) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.e(TAG, "failed to start preview");
             e.printStackTrace();
             throw new CameraControllerException();
@@ -1536,13 +1536,13 @@ public class CameraController1 extends CameraController {
 
     // returns false if RuntimeException thrown (may include if face-detection already started)
     public boolean startFaceDetection() {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "startFaceDetection");
         try {
             camera.startFaceDetection();
         }
         catch(RuntimeException e) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "face detection failed or already started");
             return false;
         }
@@ -1565,14 +1565,14 @@ public class CameraController1 extends CameraController {
 
     @Override
     public void autoFocus(final CameraController.AutoFocusCallback cb, boolean capture_follows_autofocus_hint) {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "autoFocus");
         Camera.AutoFocusCallback camera_cb = new Camera.AutoFocusCallback() {
             boolean done_autofocus = false;
 
             @Override
             public void onAutoFocus(boolean success, Camera camera) {
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "autoFocus.onAutoFocus");
                 // in theory we should only ever get one call to onAutoFocus(), but some Samsung phones at least can call the callback multiple times
                 // see http://stackoverflow.com/questions/36316195/take-picture-fails-on-samsung-phones
@@ -1583,7 +1583,7 @@ public class CameraController1 extends CameraController {
                     cb.onAutoFocus(success);
                 }
                 else {
-                    if( MyDebug.LOG )
+                    if( CameraXDebug.LOG )
                         Log.e(TAG, "ignore repeated autofocus");
                 }
             }
@@ -1594,7 +1594,7 @@ public class CameraController1 extends CameraController {
         catch(RuntimeException e) {
             // just in case? We got a RuntimeException report here from 1 user on Google Play:
             // 21 Dec 2013, Xperia Go, Android 4.1
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.e(TAG, "runtime exception from autoFocus");
             e.printStackTrace();
             // should call the callback, so the application isn't left waiting (e.g., when we autofocus before trying to take a photo)
@@ -1614,7 +1614,7 @@ public class CameraController1 extends CameraController {
         }
         catch(RuntimeException e) {
             // had a report of crash on some devices, see comment at https://sourceforge.net/p/opencamera/tickets/4/ made on 20140520
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "cancelAutoFocus() failed");
             e.printStackTrace();
         }
@@ -1622,7 +1622,7 @@ public class CameraController1 extends CameraController {
 
     @Override
     public void setContinuousFocusMoveCallback(final ContinuousFocusMoveCallback cb) {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "setContinuousFocusMoveCallback");
         if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN ) {
             // setAutoFocusMoveCallback() requires JELLY_BEAN
@@ -1631,7 +1631,7 @@ public class CameraController1 extends CameraController {
                     camera.setAutoFocusMoveCallback(new AutoFocusMoveCallback() {
                         @Override
                         public void onAutoFocusMoving(boolean start, Camera camera) {
-                            if( MyDebug.LOG )
+                            if( CameraXDebug.LOG )
                                 Log.d(TAG, "onAutoFocusMoving: " + start);
                             cb.onContinuousFocusMove(start);
                         }
@@ -1643,13 +1643,13 @@ public class CameraController1 extends CameraController {
             }
             catch(RuntimeException e) {
                 // received RuntimeException reports from some users on Google Play - seems to be older devices, but still important to catch!
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.e(TAG, "runtime exception from setAutoFocusMoveCallback");
                 e.printStackTrace();
             }
         }
         else {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "setContinuousFocusMoveCallback requires Android JELLY_BEAN or higher");
         }
     }
@@ -1658,13 +1658,13 @@ public class CameraController1 extends CameraController {
         // don't do anything here, but we need to implement the callback to get the shutter sound (at least on Galaxy Nexus and Nexus 7)
         @Override
         public void onShutter() {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "shutterCallback.onShutter()");
         }
     }
 
     private void clearPending() {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "clearPending");
         pending_burst_images.clear();
         burst_exposures = null;
@@ -1672,21 +1672,21 @@ public class CameraController1 extends CameraController {
     }
 
     private void takePictureNow(final CameraController.PictureCallback picture, final ErrorCallback error) {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "takePictureNow");
 
         // only set the shutter callback if sounds enabled
         final Camera.ShutterCallback shutter = sounds_enabled ? new TakePictureShutterCallback() : null;
         final Camera.PictureCallback camera_jpeg = picture == null ? null : new Camera.PictureCallback() {
             public void onPictureTaken(byte[] data, Camera cam) {
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "onPictureTaken");
                 // n.b., this is automatically run in a different thread
 
                 if( want_expo_bracketing && n_burst > 1 ) {
                     pending_burst_images.add(data);
                     if( pending_burst_images.size() >= n_burst ) { // shouldn't ever be greater, but just in case
-                        if( MyDebug.LOG )
+                        if( CameraXDebug.LOG )
                             Log.d(TAG, "all burst images available");
                         if( pending_burst_images.size() > n_burst ) {
                             Log.e(TAG, "pending_burst_images size " + pending_burst_images.size() + " is greater than n_burst " + n_burst);
@@ -1716,7 +1716,7 @@ public class CameraController1 extends CameraController {
                         picture.onCompleted();
                     }
                     else {
-                        if( MyDebug.LOG )
+                        if( CameraXDebug.LOG )
                             Log.d(TAG, "number of burst images is now: " + pending_burst_images.size());
                         // set exposure compensation for next image
                         setExposureCompensation(burst_exposures.get(pending_burst_images.size()));
@@ -1727,7 +1727,7 @@ public class CameraController1 extends CameraController {
                             startPreview();
                         }
                         catch(CameraControllerException e) {
-                            if( MyDebug.LOG )
+                            if( CameraXDebug.LOG )
                                 Log.d(TAG, "CameraControllerException trying to startPreview");
                             e.printStackTrace();
                         }
@@ -1736,7 +1736,7 @@ public class CameraController1 extends CameraController {
                         handler.postDelayed(new Runnable(){
                             @Override
                             public void run(){
-                                if( MyDebug.LOG )
+                                if( CameraXDebug.LOG )
                                     Log.d(TAG, "take picture after delay for next expo");
                                 if( camera != null ) { // make sure camera wasn't released in the meantime
                                     takePictureNow(picture, error);
@@ -1753,7 +1753,7 @@ public class CameraController1 extends CameraController {
         };
 
         if( picture != null ) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "call onStarted() in callback");
             picture.onStarted();
         }
@@ -1762,7 +1762,7 @@ public class CameraController1 extends CameraController {
         }
         catch(RuntimeException e) {
             // just in case? We got a RuntimeException report here from 1 user on Google Play; I also encountered it myself once of Galaxy Nexus when starting up
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.e(TAG, "runtime exception from takePicture");
             e.printStackTrace();
             error.onError();
@@ -1770,12 +1770,12 @@ public class CameraController1 extends CameraController {
     }
 
     public void takePicture(final CameraController.PictureCallback picture, final ErrorCallback error) {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "takePicture");
 
         clearPending();
         if( want_expo_bracketing ) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "set up expo bracketing");
             Camera.Parameters parameters = this.getParameters();
             int n_half_images = expo_bracketing_n_images/2;
@@ -1788,7 +1788,7 @@ public class CameraController1 extends CameraController {
             double stops_per_image = expo_bracketing_stops / (double)n_half_images;
             int steps = (int)((stops_per_image+1.0e-5) / exposure_step); // need to add a small amount, otherwise we can round down
             steps = Math.max(steps, 1);
-            if( MyDebug.LOG ) {
+            if( CameraXDebug.LOG ) {
                 Log.d(TAG, "steps: " + steps);
                 Log.d(TAG, "exposure_current: " + exposure_current);
             }
@@ -1804,7 +1804,7 @@ public class CameraController1 extends CameraController {
                 int exposure = exposure_current - (n_half_images-i)*steps;
                 exposure = Math.max(exposure, min_exposure);
                 requests.add(exposure);
-                if( MyDebug.LOG ) {
+                if( CameraXDebug.LOG ) {
                     Log.d(TAG, "add burst request for " + i + "th dark image:");
                     Log.d(TAG, "exposure: " + exposure);
                 }
@@ -1815,7 +1815,7 @@ public class CameraController1 extends CameraController {
                 int exposure = exposure_current + (i+1)*steps;
                 exposure = Math.min(exposure, max_exposure);
                 requests.add(exposure);
-                if( MyDebug.LOG ) {
+                if( CameraXDebug.LOG ) {
                     Log.d(TAG, "add burst request for " + i + "th light image:");
                     Log.d(TAG, "exposure: " + exposure);
                 }
@@ -1826,7 +1826,7 @@ public class CameraController1 extends CameraController {
         }
 
         if( frontscreen_flash ) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "front screen flash");
             picture.onFrontScreenTurnOn();
             // take picture after a delay, to allow autoexposure and autofocus to update (unlike CameraController2, we can't tell when this happens, so we just wait for a fixed delay)
@@ -1834,7 +1834,7 @@ public class CameraController1 extends CameraController {
             handler.postDelayed(new Runnable(){
                 @Override
                 public void run(){
-                    if( MyDebug.LOG )
+                    if( CameraXDebug.LOG )
                         Log.d(TAG, "take picture after delay for front screen flash");
                     if( camera != null ) { // make sure camera wasn't released in the meantime
                         takePictureNow(picture, error);
@@ -1856,7 +1856,7 @@ public class CameraController1 extends CameraController {
         else {
             result = (camera_info.orientation - degrees + 360) % 360;
         }
-        if( MyDebug.LOG ) {
+        if( CameraXDebug.LOG ) {
             Log.d(TAG, "    info orientation is " + camera_info.orientation);
             Log.d(TAG, "    setDisplayOrientation to " + result);
         }
@@ -1915,7 +1915,7 @@ public class CameraController1 extends CameraController {
         }
         catch(Exception e) {
             // received a StringIndexOutOfBoundsException from beneath getParameters().flatten() on Google Play!
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.e(TAG, "exception from getParameters().flatten()");
             e.printStackTrace();
         }

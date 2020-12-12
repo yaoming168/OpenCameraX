@@ -6,7 +6,7 @@ import android.media.Image;
 import android.os.Build;
 import android.util.Log;
 
-import net.sourceforge.opencamera.MyDebug;
+import net.sourceforge.opencamera.CameraXDebug;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -28,7 +28,7 @@ public class RawImage {
      */
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public void writeImage(OutputStream dngOutput) throws IOException {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "writeImage");
         try {
             dngCreator.writeImage(dngOutput, image);
@@ -52,7 +52,7 @@ public class RawImage {
      */
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public void close() {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "close");
         image.close();
         dngCreator.close();

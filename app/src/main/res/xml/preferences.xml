@@ -260,7 +260,7 @@
                 android:defaultValue="false"
                 />
 
-            <!-- if the default value changes, remember to update code in MyPreferenceFragment.setSummary() -->
+            <!-- if the default value changes, remember to update code in CameraXPreferenceFragment.setSummary() -->
             <EditTextPreference
                 android:key="preference_save_photo_prefix"
                 android:title="@string/preference_save_photo_prefix"
@@ -271,7 +271,7 @@
                 android:defaultValue="IMG_"
                 />
 
-            <!-- if the default value changes, remember to update code in MyPreferenceFragment.setSummary() -->
+            <!-- if the default value changes, remember to update code in CameraXPreferenceFragment.setSummary() -->
             <EditTextPreference
                 android:key="preference_save_video_prefix"
                 android:title="@string/preference_save_video_prefix"

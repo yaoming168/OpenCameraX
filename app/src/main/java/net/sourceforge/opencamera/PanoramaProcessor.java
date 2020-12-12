@@ -49,14 +49,14 @@ public class PanoramaProcessor {
     }
 
     private void freeScripts() {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "freeScripts");
 
         pyramidBlendingScript = null;
         featureDetectorScript = null;
     }
     public void onDestroy() {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "onDestroy");
 
         freeScripts(); // just in case
@@ -76,19 +76,19 @@ public class PanoramaProcessor {
     }
 
     private void initRenderscript() {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "initRenderscript");
         if( rs == null ) {
             // initialise renderscript
             this.rs = RenderScript.create(context);
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "create renderscript object");
         }
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private Allocation reduceBitmap(ScriptC_pyramid_blending script, Allocation allocation) {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "reduceBitmap");
         int width = allocation.getType().getX();
         int height = allocation.getType().getY();
@@ -103,10 +103,10 @@ public class PanoramaProcessor {
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private Allocation expandBitmap(ScriptC_pyramid_blending script, Allocation allocation) {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "expandBitmap");
         long time_s = 0;
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             time_s = System.currentTimeMillis();
 
         int width = allocation.getType().getX();
@@ -114,40 +114,40 @@ public class PanoramaProcessor {
         Allocation result_allocation;
 
         Allocation expanded_allocation = Allocation.createTyped(rs, Type.createXY(rs, Element.RGBA_8888(rs), 2*width, 2*height));
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "### expandBitmap: time after creating expanded_allocation: " + (System.currentTimeMillis() - time_s));
 
         script.set_bitmap(allocation);
         script.forEach_expand(expanded_allocation, expanded_allocation);
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "### expandBitmap: time after expand: " + (System.currentTimeMillis() - time_s));
 
         final boolean use_blur_2d = false; // faster to do blue as two 1D passes
         if( use_blur_2d ) {
             result_allocation = Allocation.createTyped(rs, Type.createXY(rs, Element.RGBA_8888(rs), 2*width, 2*height));
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "### expandBitmap: time after creating result_allocation: " + (System.currentTimeMillis() - time_s));
             script.set_bitmap(expanded_allocation);
             script.forEach_blur(expanded_allocation, result_allocation);
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "### expandBitmap: time after blur: " + (System.currentTimeMillis() - time_s));
             expanded_allocation.destroy();
             //result_allocation = expanded_allocation;
         }
         else {
             Allocation temp_allocation = Allocation.createTyped(rs, Type.createXY(rs, Element.RGBA_8888(rs), 2*width, 2*height));
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "### expandBitmap: time after creating temp_allocation: " + (System.currentTimeMillis() - time_s));
             script.set_bitmap(expanded_allocation);
             script.forEach_blur1dX(expanded_allocation, temp_allocation);
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "### expandBitmap: time after blur1dX: " + (System.currentTimeMillis() - time_s));
 
             // now re-use expanded_allocation for the result_allocation
             result_allocation = expanded_allocation;
             script.set_bitmap(temp_allocation);
             script.forEach_blur1dY(temp_allocation, result_allocation);
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "### expandBitmap: time after blur1dY: " + (System.currentTimeMillis() - time_s));
 
             temp_allocation.destroy();
@@ -161,7 +161,7 @@ public class PanoramaProcessor {
      */
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private Allocation subtractBitmap(ScriptC_pyramid_blending script, Allocation allocation0, Allocation allocation1) {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "subtractBitmap");
         int width = allocation0.getType().getX();
         int height = allocation0.getType().getY();
@@ -182,7 +182,7 @@ public class PanoramaProcessor {
      */
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void addBitmap(ScriptC_pyramid_blending script, Allocation allocation0, Allocation allocation1) {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "addBitmap");
         int width = allocation0.getType().getX();
         int height = allocation0.getType().getY();
@@ -196,7 +196,7 @@ public class PanoramaProcessor {
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private List<Allocation> createGaussianPyramid(ScriptC_pyramid_blending script, Bitmap bitmap, int n_levels) {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "createGaussianPyramid");
         List<Allocation> pyramid = new ArrayList<>();
 
@@ -219,16 +219,16 @@ public class PanoramaProcessor {
      */
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private List<Allocation> createLaplacianPyramid(ScriptC_pyramid_blending script, Bitmap bitmap, int n_levels, String name) {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "createLaplacianPyramid");
         long time_s = 0;
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             time_s = System.currentTimeMillis();
 
         List<Allocation> gaussianPyramid = createGaussianPyramid(script, bitmap, n_levels);
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "### createLaplacianPyramid: time after createGaussianPyramid: " + (System.currentTimeMillis() - time_s));
-        /*if( MyDebug.LOG )
+        /*if( CameraXDebug.LOG )
 		{
 			// debug
 			savePyramid("gaussian", gaussianPyramid);
@@ -236,28 +236,28 @@ public class PanoramaProcessor {
         List<Allocation> pyramid = new ArrayList<>();
 
         for(int i=0;i<gaussianPyramid.size()-1;i++) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "createLaplacianPyramid: i = " + i);
             Allocation this_gauss = gaussianPyramid.get(i);
             Allocation next_gauss = gaussianPyramid.get(i+1);
             Allocation next_gauss_expanded = expandBitmap(script, next_gauss);
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "### createLaplacianPyramid: time after expandBitmap for level " + i + ": " + (System.currentTimeMillis() - time_s));
-            if( MyDebug.LOG ) {
+            if( CameraXDebug.LOG ) {
                 Log.d(TAG, "this_gauss: " + this_gauss.getType().getX() + " , " + this_gauss.getType().getY());
                 Log.d(TAG, "next_gauss: " + next_gauss.getType().getX() + " , " + next_gauss.getType().getY());
                 Log.d(TAG, "next_gauss_expanded: " + next_gauss_expanded.getType().getX() + " , " + next_gauss_expanded.getType().getY());
             }
-            /*if( MyDebug.LOG )
+            /*if( CameraXDebug.LOG )
 			{
 				// debug
 				saveAllocation(name + "_this_gauss_" + i + ".jpg", this_gauss);
 				saveAllocation(name + "_next_gauss_expanded_" + i + ".jpg", next_gauss_expanded);
 			}*/
             Allocation difference = subtractBitmap(script, this_gauss, next_gauss_expanded);
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "### createLaplacianPyramid: time after subtractBitmap for level " + i + ": " + (System.currentTimeMillis() - time_s));
-            /*if( MyDebug.LOG )
+            /*if( CameraXDebug.LOG )
 			{
 				// debug
 				saveAllocation(name + "_difference_" + i + ".jpg", difference);
@@ -268,7 +268,7 @@ public class PanoramaProcessor {
             this_gauss.destroy();
             gaussianPyramid.set(i, null); // to help garbage collection
             next_gauss_expanded.destroy();
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "### createLaplacianPyramid: time after level " + i + ": " + (System.currentTimeMillis() - time_s));
         }
         pyramid.add(gaussianPyramid.get(gaussianPyramid.size()-1));
@@ -278,7 +278,7 @@ public class PanoramaProcessor {
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private Bitmap collapseLaplacianPyramid(ScriptC_pyramid_blending script, List<Allocation> pyramid) {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "collapseLaplacianPyramid");
 
         Allocation allocation = pyramid.get(pyramid.size()-1);
@@ -310,7 +310,7 @@ public class PanoramaProcessor {
      */
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void mergePyramids(ScriptC_pyramid_blending script, List<Allocation> pyramid0, List<Allocation> pyramid1, int [] best_path, int best_path_n_x) {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "mergePyramids");
 
         if( best_path == null ) {
@@ -319,7 +319,7 @@ public class PanoramaProcessor {
             best_path[0] = 1;
             //best_path[0] = 2; // test
         }
-        if( MyDebug.LOG ) {
+        if( CameraXDebug.LOG ) {
             for(int i=0;i<best_path.length;i++)
                 Log.d(TAG, "best_path[" + i + "]: " + best_path[i]);
         }
@@ -380,7 +380,7 @@ public class PanoramaProcessor {
             //float best_path_x_width = width / (best_path_n_x+1.0f); // width of each "bucket" for the best paths
             //blend_width = Math.min(blend_width, (int)(2.0f*best_path_x_width+0.5f));
             float best_path_y_scale = best_path.length/(float)height;
-            /*if( MyDebug.LOG ) {
+            /*if( CameraXDebug.LOG ) {
                 Log.d(TAG, "i = " + i);
                 Log.d(TAG, "    width: " + width);
                 Log.d(TAG, "    blend_width: " + blend_width);
@@ -400,7 +400,7 @@ public class PanoramaProcessor {
                     float alpha = best_path_value / (best_path_n_x-1.0f);
                     float frac = (1.0f - alpha) * 0.25f + alpha * 0.75f;
                     interpolated_best_path[y] = (int)(frac*width + 0.5f);
-                    /*if( MyDebug.LOG ) {
+                    /*if( CameraXDebug.LOG ) {
                         Log.d(TAG, "    interpolated_best_path[" + y + "]: " + interpolated_best_path[y] + " (best_path_value " + best_path_value + ")");
                     }*/
                 }
@@ -432,7 +432,7 @@ public class PanoramaProcessor {
                         int prev_best_path = best_path[best_path_y_index_i];
                         int next_best_path = best_path[best_path_y_index_i+1];
                         best_path_value = (1.0f-alpha) * prev_best_path + alpha * next_best_path;
-                        /*if( MyDebug.LOG ) {
+                        /*if( CameraXDebug.LOG ) {
                             Log.d(TAG, "    alpha: " + alpha);
                             Log.d(TAG, "    prev_best_path: " + prev_best_path);
                             Log.d(TAG, "    next_best_path: " + next_best_path);
@@ -442,7 +442,7 @@ public class PanoramaProcessor {
                     float alpha = best_path_value / (best_path_n_x-1.0f);
                     float frac = (1.0f - alpha) * 0.25f + alpha * 0.75f;
                     interpolated_best_path[y] = (int)(frac*width + 0.5f);
-                    /*if( MyDebug.LOG ) {
+                    /*if( CameraXDebug.LOG ) {
                         Log.d(TAG, "    interpolated_best_path[" + y + "]: " + interpolated_best_path[y] + " (best_path_value " + best_path_value + ")");
                     }*/
                 }
@@ -488,7 +488,7 @@ public class PanoramaProcessor {
             else
                 bitmap.compress(Bitmap.CompressFormat.JPEG, 90, outputStream);
             outputStream.close();
-            MainActivity mActivity = (MainActivity) context;
+            CameraXActivity mActivity = (CameraXActivity) context;
             mActivity.getStorageUtils().broadcastFile(file, true, false, true);
         }
         catch(IOException e) {
@@ -567,23 +567,23 @@ public class PanoramaProcessor {
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private Bitmap blendPyramids(Bitmap lhs, Bitmap rhs) {
         long time_s = 0;
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             time_s = System.currentTimeMillis();
 
         if( pyramidBlendingScript == null ) {
             pyramidBlendingScript = new ScriptC_pyramid_blending(rs);
         }
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "### blendPyramids: time after creating ScriptC_pyramid_blending: " + (System.currentTimeMillis() - time_s));
 
         // debug
-        /*if( MyDebug.LOG )
+        /*if( CameraXDebug.LOG )
         {
             saveBitmap(lhs, "lhs.jpg");
             saveBitmap(rhs, "rhs.jpg");
         }*/
         // debug
-        /*if( MyDebug.LOG )
+        /*if( CameraXDebug.LOG )
         {
             List<Allocation> lhs_pyramid = createGaussianPyramid(script, lhs, blend_n_levels);
             List<Allocation> rhs_pyramid = createGaussianPyramid(script, rhs, blend_n_levels);
@@ -628,7 +628,7 @@ public class PanoramaProcessor {
             Bitmap best_path_lhs = Bitmap.createScaledBitmap(lhs, lhs.getWidth()/scale_factor, lhs.getHeight()/scale_factor, true);
             Bitmap best_path_rhs = Bitmap.createScaledBitmap(rhs, rhs.getWidth()/scale_factor, rhs.getHeight()/scale_factor, true);
             // debug
-            /*if( MyDebug.LOG )
+            /*if( CameraXDebug.LOG )
             {
                 saveBitmap(best_path_lhs, "best_path_lhs.jpg");
                 saveBitmap(best_path_rhs, "best_path_rhs.jpg");
@@ -642,7 +642,7 @@ public class PanoramaProcessor {
             pyramidBlendingScript.bind_errors(errorsAllocation);
 
             Script.LaunchOptions launch_options = new Script.LaunchOptions();
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "### blendPyramids: time after creating allocations for best path: " + (System.currentTimeMillis() - time_s));
 
             pyramidBlendingScript.set_bitmap(rhs_allocation);
@@ -674,7 +674,7 @@ public class PanoramaProcessor {
                     errorsAllocation.copyTo(errors);
 
                     int this_error = errors[0];
-                    if( MyDebug.LOG )
+                    if( CameraXDebug.LOG )
                         Log.d(TAG, "    best_path error[" + x + "][" + y + "]: " + this_error);
                     if( best_path[y] == -1 || this_error < best_error ) {
                         best_path[y] = x;
@@ -684,7 +684,7 @@ public class PanoramaProcessor {
 
                 //best_path[y] = 1; // test
                 //best_path[y] = y % best_path_n_x; // test
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "best_path [" + y + "]: " + best_path[y]);
             }
 
@@ -699,26 +699,26 @@ public class PanoramaProcessor {
                 best_path_rhs.recycle();
             }
 
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "### blendPyramids: time after finding best path: " + (System.currentTimeMillis() - time_s));
         }
 
         List<Allocation> lhs_pyramid = createLaplacianPyramid(pyramidBlendingScript, lhs, blend_n_levels, "lhs");
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "### blendPyramids: time after createLaplacianPyramid 1st call: " + (System.currentTimeMillis() - time_s));
         List<Allocation> rhs_pyramid = createLaplacianPyramid(pyramidBlendingScript, rhs, blend_n_levels, "rhs");
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "### blendPyramids: time after createLaplacianPyramid 2nd call: " + (System.currentTimeMillis() - time_s));
 
         // debug
-        /*if( MyDebug.LOG )
+        /*if( CameraXDebug.LOG )
 		{
 			savePyramid("lhs_laplacian", lhs_pyramid);
 			savePyramid("rhs_laplacian", rhs_pyramid);
 		}*/
 
         // debug
-        /*if( MyDebug.LOG )
+        /*if( CameraXDebug.LOG )
 		{
 			Bitmap lhs_collapsed = collapseLaplacianPyramid(script, lhs_pyramid);
 			saveBitmap(lhs_collapsed, "lhs_collapsed.jpg");
@@ -729,13 +729,13 @@ public class PanoramaProcessor {
 		}*/
 
         mergePyramids(pyramidBlendingScript, lhs_pyramid, rhs_pyramid, best_path, best_path_n_x);
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "### blendPyramids: time after mergePyramids: " + (System.currentTimeMillis() - time_s));
         Bitmap merged_bitmap = collapseLaplacianPyramid(pyramidBlendingScript, lhs_pyramid);
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "### blendPyramids: time after collapseLaplacianPyramid: " + (System.currentTimeMillis() - time_s));
         // debug
-        /*if( MyDebug.LOG )
+        /*if( CameraXDebug.LOG )
         {
             savePyramid("merged_laplacian", lhs_pyramid);
             saveBitmap(merged_bitmap, "merged_bitmap.jpg");
@@ -747,7 +747,7 @@ public class PanoramaProcessor {
         for(Allocation allocation : rhs_pyramid) {
             allocation.destroy();
         }
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "### blendPyramids: time taken: " + (System.currentTimeMillis() - time_s));
         return merged_bitmap;
     }
@@ -844,7 +844,7 @@ public class PanoramaProcessor {
             float gden = wid2*g2sum - gsum*gsum;
             float g_recip = gden==0 ? 0.0f : 1/ gden;
             float fg_corr = wid2*fgsum-fsum*gsum;
-            //if( MyDebug.LOG ) {
+            //if( CameraXDebug.LOG ) {
             //	Log.d(TAG, "match distance: ");
             //	Log.d(TAG, "    fg_corr: " + fg_corr);
             //	Log.d(TAG, "    fden: " + fden);
@@ -897,13 +897,13 @@ public class PanoramaProcessor {
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private AutoAlignmentByFeatureResult autoAlignmentByFeature(int width, int height, List<Bitmap> bitmaps, int debug_index) throws PanoramaProcessorException {
-        if( MyDebug.LOG ) {
+        if( CameraXDebug.LOG ) {
             Log.d(TAG, "autoAlignmentByFeature");
             Log.d(TAG, "width: " + width);
             Log.d(TAG, "height: " + height);
         }
         long time_s = 0;
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             time_s = System.currentTimeMillis();
         if( bitmaps.size() != 2 ) {
             Log.e(TAG, "must have 2 bitmaps");
@@ -911,20 +911,20 @@ public class PanoramaProcessor {
         }
 
         initRenderscript();
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "### autoAlignmentByFeature: time after initRenderscript: " + (System.currentTimeMillis() - time_s));
         Allocation [] allocations = new Allocation[bitmaps.size()];
         for(int i=0;i<bitmaps.size();i++) {
             allocations[i] = Allocation.createFromBitmap(rs, bitmaps.get(i));
         }
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "### autoAlignmentByFeature: time after creating allocations: " + (System.currentTimeMillis() - time_s));
 
         // create RenderScript
 		if( featureDetectorScript == null ) {
             featureDetectorScript = new ScriptC_feature_detector(rs);
         }
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "### autoAlignmentByFeature: time after create featureDetectorScript: " + (System.currentTimeMillis() - time_s));
 
         //final int feature_descriptor_radius = 2; // radius of square used to compare features
@@ -933,10 +933,10 @@ public class PanoramaProcessor {
         Point [][] points_arrays = new Point[2][];
 
         for(int i=0;i<bitmaps.size();i++) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "detect features for image: " + i);
 
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "convert to greyscale");
             Allocation gs_allocation = Allocation.createTyped(rs, Type.createXY(rs, Element.U8(rs), width, height));
             //createMTBScript.set_out_bitmap(gs_allocation);
@@ -944,7 +944,7 @@ public class PanoramaProcessor {
             featureDetectorScript.forEach_create_greyscale(allocations[i], gs_allocation);
             //saveAllocation("gs_bitmap" + debug_index + "_" + i + ".png", gs_allocation);
 
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "compute derivatives");
             Allocation ix_allocation = Allocation.createTyped(rs, Type.createXY(rs, Element.U8(rs), width, height));
             Allocation iy_allocation = Allocation.createTyped(rs, Type.createXY(rs, Element.U8(rs), width, height));
@@ -953,7 +953,7 @@ public class PanoramaProcessor {
             featureDetectorScript.set_bitmap_Iy(iy_allocation);
             featureDetectorScript.forEach_compute_derivatives(gs_allocation);
 
-			/*if( MyDebug.LOG ) {
+			/*if( CameraXDebug.LOG ) {
 				// debugging
                 byte [] bytes_x = new byte[width*height];
                 byte [] bytes_y = new byte[width*height];
@@ -995,7 +995,7 @@ public class PanoramaProcessor {
                 bitmap_y.recycle();
 			}*/
 
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "call corner detector script for image: " + i);
             Allocation strength_allocation = Allocation.createTyped(rs, Type.createXY(rs, Element.F32(rs), width, height));
             featureDetectorScript.set_bitmap(gs_allocation);
@@ -1003,7 +1003,7 @@ public class PanoramaProcessor {
             featureDetectorScript.set_bitmap_Iy(iy_allocation);
             featureDetectorScript.forEach_corner_detector(gs_allocation, strength_allocation);
 
-			/*if( MyDebug.LOG ) {
+			/*if( CameraXDebug.LOG ) {
 				// debugging
 				float [] bytes = new float[width*height];
 				strength_allocation.copyTo(bytes);
@@ -1017,7 +1017,7 @@ public class PanoramaProcessor {
 					if( bytes[j] > max_value )
 						max_value = bytes[j];
 				}
-				if( MyDebug.LOG )
+				if( CameraXDebug.LOG )
 					Log.d(TAG, "strength max_value: " + max_value);
 				for(int j=0;j<width*height;j++) {
 					float value = bytes[j]/max_value;
@@ -1050,7 +1050,7 @@ public class PanoramaProcessor {
             //noinspection UnusedAssignment
             iy_allocation = null;
 
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "find local maxima for image: " + i);
             // reuse gs_allocation (since it's on the same U8 type that we want)
             Allocation local_max_features_allocation = gs_allocation;
@@ -1091,7 +1091,7 @@ public class PanoramaProcessor {
 
             List<Point> all_points = new ArrayList<>();
             for(int cy=0;cy<n_y_chunks;cy++) {
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, ">>> find corners, chunk " + cy + " / " + n_y_chunks);
                 float threshold = 5000000.0f;
                 // setting a min_threshold fixes testPanorama11, also helps testPanorama1
@@ -1103,13 +1103,13 @@ public class PanoramaProcessor {
                 float high_threshold = -1.0f;
                 int start_y = (cy*height)/n_y_chunks;
                 int stop_y = ((cy+1)*height)/n_y_chunks;
-                if( MyDebug.LOG ) {
+                if( CameraXDebug.LOG ) {
                     Log.d(TAG, "    start_y: " + start_y);
                     Log.d(TAG, "    stop_y: " + stop_y);
                 }
                 final int max_iter = 10;
                 for(int count=0;;count++) {
-                    if( MyDebug.LOG )
+                    if( CameraXDebug.LOG )
                         Log.d(TAG, "### attempt " + count + " try threshold: " + threshold + " [ " + low_threshold + " : " + high_threshold + " ]");
                     featureDetectorScript.set_corner_threshold(threshold);
                     Script.LaunchOptions launch_options = new Script.LaunchOptions();
@@ -1131,7 +1131,7 @@ public class PanoramaProcessor {
                             }
                         }
                     }
-                    if( MyDebug.LOG )
+                    if( CameraXDebug.LOG )
                         Log.d(TAG, "    " + points.size() + " points");
                     if( points.size() >= min_corners && points.size() <= max_corners ) {
                         all_points.addAll(points);
@@ -1139,13 +1139,13 @@ public class PanoramaProcessor {
                     }
                     else if( points.size() < min_corners ) {
                         if( threshold <= min_threshold ) {
-                            if( MyDebug.LOG )
+                            if( CameraXDebug.LOG )
                                 Log.d(TAG, "    hit minimum threshold: " + threshold);
                             all_points.addAll(points);
                             break;
                         }
                         else if( count+1 == max_iter ) {
-                            if( MyDebug.LOG )
+                            if( CameraXDebug.LOG )
                                 Log.d(TAG, "    too few points but hit max iterations: " + points.size());
                             all_points.addAll(points);
                             //if( true )
@@ -1155,7 +1155,7 @@ public class PanoramaProcessor {
                         else {
                             high_threshold = threshold;
                             threshold = 0.5f * ( low_threshold + threshold );
-                            if( MyDebug.LOG )
+                            if( CameraXDebug.LOG )
                                 Log.d(TAG, "    reduced threshold to: " + threshold);
 							/*if( low_threshold == 0.0f ) {
 								throw new RuntimeException();
@@ -1166,7 +1166,7 @@ public class PanoramaProcessor {
                         }
                     }
                     else if( count+1 == max_iter ) {
-                        if( MyDebug.LOG )
+                        if( CameraXDebug.LOG )
                             Log.d(TAG, "    too many points but hit max iterations: " + points.size());
                         // arbitrarily take a subset
                         points.subList(max_corners,points.size()).clear();
@@ -1182,14 +1182,14 @@ public class PanoramaProcessor {
                         }
                         else
                             threshold = 0.5f * ( threshold + high_threshold );
-                        if( MyDebug.LOG )
+                        if( CameraXDebug.LOG )
                             Log.d(TAG, "    increased threshold to: " + threshold);
                     }
                 }
             }
             points_arrays[i] = all_points.toArray(new Point[0]);
 
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "### image: " + i + " has " + points_arrays[i].length + " points");
 
             strength_allocation.destroy();
@@ -1200,13 +1200,13 @@ public class PanoramaProcessor {
             //noinspection UnusedAssignment
             local_max_features_allocation = null;
         }
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "### autoAlignmentByFeature: time after feature detection: " + (System.currentTimeMillis() - time_s));
 
         // if we have too few good corners, risk of getting a poor match
         final int min_required_corners = 10;
         if( points_arrays[0].length < min_required_corners || points_arrays[1].length < min_required_corners ) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "too few points!");
 			/*if( true )
 				throw new RuntimeException();*/
@@ -1227,7 +1227,7 @@ public class PanoramaProcessor {
         final int max_match_dist_x = width;
         final int max_match_dist_y = height/16;
         final int max_match_dist2 = max_match_dist_x*max_match_dist_x + max_match_dist_y*max_match_dist_y;
-        if( MyDebug.LOG ) {
+        if( CameraXDebug.LOG ) {
             Log.d(TAG, "max_match_dist_x: " + max_match_dist_x);
             Log.d(TAG, "max_match_dist_y: " + max_match_dist_y);
             Log.d(TAG, "max_match_dist2: " + max_match_dist2);
@@ -1250,9 +1250,9 @@ public class PanoramaProcessor {
                 }
             }
         }
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "### possible matches: " + matches.size());
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "### autoAlignmentByFeature: time after finding possible matches: " + (System.currentTimeMillis() - time_s));
 
         // compute distances between matches
@@ -1286,25 +1286,25 @@ public class PanoramaProcessor {
                 // testing shows 2 threads gives slightly better than using more threads, or not using smp
                 //int n_threads = Math.min(matches.size(), Runtime.getRuntime().availableProcessors());
                 int n_threads = Math.min(matches.size(), 2);
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "n_threads: " + n_threads);
                 ComputeDistancesBetweenMatchesThread [] threads = new ComputeDistancesBetweenMatchesThread[n_threads];
                 int st_indx = 0;
                 for(int i=0;i<n_threads;i++) {
                     int nd_indx = (((i+1)*matches.size())/n_threads);
-                    if( MyDebug.LOG )
+                    if( CameraXDebug.LOG )
                         Log.d(TAG, "thread " + i + " from " + st_indx + " to " + nd_indx);
                     threads[i] = new ComputeDistancesBetweenMatchesThread(matches, st_indx, nd_indx, feature_descriptor_radius, bitmaps, pixels0, pixels1);
                     st_indx = nd_indx;
                 }
                 // start threads
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "start threads");
                 for(int i=0;i<n_threads;i++) {
                     threads[i].start();
                 }
                 // wait for threads to complete
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "wait for threads to complete");
                 try {
                     for(int i=0;i<n_threads;i++) {
@@ -1316,7 +1316,7 @@ public class PanoramaProcessor {
                     e.printStackTrace();
                     Thread.currentThread().interrupt();
                 }
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "threads completed");
             }
             else {
@@ -1328,14 +1328,14 @@ public class PanoramaProcessor {
                 computeDistancesBetweenMatches(matches, st_indx, nd_indx, feature_descriptor_radius, bitmaps, pixels0, pixels1);
             }
         }
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "### autoAlignmentByFeature: time after computing match distances: " + (System.currentTimeMillis() - time_s));
 
         // sort
         Collections.sort(matches);
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "### autoAlignmentByFeature: time after sorting matches: " + (System.currentTimeMillis() - time_s));
-        if( MyDebug.LOG ) {
+        if( CameraXDebug.LOG ) {
             FeatureMatch best_match = matches.get(0);
             FeatureMatch worst_match = matches.get(matches.size()-1);
             Log.d(TAG, "best match between " + best_match.index0 + " and " + best_match.index1 + " distance: " + best_match.distance);
@@ -1354,7 +1354,7 @@ public class PanoramaProcessor {
             if( has_matched0[match.index0] || has_matched1[match.index1] ) {
                 continue;
             }
-            if( MyDebug.LOG ) {
+            if( CameraXDebug.LOG ) {
                 Log.d(TAG, "    match between " + match.index0 + " and " + match.index1 + " distance: " + match.distance);
             }
 
@@ -1366,13 +1366,13 @@ public class PanoramaProcessor {
                 if( match.index0 == match2.index0 ) {
                     found = true;
                     float ratio = match.distance / match2.distance;
-                    if( MyDebug.LOG ) {
+                    if( CameraXDebug.LOG ) {
                         Log.d(TAG, "        next best match for index0 " + match.index0 + " is with " + match2.index1 + " distance: " + match2.distance + " , ratio: " + ratio);
                     }
                     // Need a threshold of 0.8 or less to help testPanorama15 images _5 to _6, otherwise we get too many incorrect
                     // matches in the grass region
                     if( ratio+1.0e-5 > 0.8f ) {
-                        if( MyDebug.LOG ) {
+                        if( CameraXDebug.LOG ) {
                             Log.d(TAG, "        reject due to Lowe's test, ratio: " + ratio);
                         }
                         reject = true;
@@ -1393,9 +1393,9 @@ public class PanoramaProcessor {
 				break;
 			}*/
         }
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "### autoAlignmentByFeature: time after initial matching: " + (System.currentTimeMillis() - time_s));
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "### found: " + actual_matches.size() + " matches");
         Log.d(TAG, "### autoAlignmentByFeature: time after finding possible matches: " + (System.currentTimeMillis() - time_s));
 
@@ -1414,7 +1414,7 @@ public class PanoramaProcessor {
         n_matches = Math.max(n_minimum_matches_c, n_matches);
         if( n_matches < actual_matches.size() )
             actual_matches.subList(n_matches,actual_matches.size()).clear();
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "### resized to: " + actual_matches.size() + " actual matches");
         // need to reset has_matched arrays
         has_matched0 = new boolean[points_arrays[0].length];
@@ -1422,14 +1422,14 @@ public class PanoramaProcessor {
         for(FeatureMatch match : actual_matches) {
             has_matched0[match.index0] = true;
             has_matched1[match.index1] = true;
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "    actual match between " + match.index0 + " and " + match.index1 + " distance: " + match.distance);
         }
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "### autoAlignmentByFeature: time after choosing best matches: " + (System.currentTimeMillis() - time_s));
 
         if( actual_matches.size() == 0 ) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "no matches!");
 			/*if( true )
 				throw new RuntimeException();*/
@@ -1460,7 +1460,7 @@ public class PanoramaProcessor {
         // we risk choose matches that are too close, and getting an incorrect rotation
         //final float min_rotation_dist = Math.max(5.0f, Math.max(width, height)/32.0f);
         final float min_rotation_dist = Math.max(5.0f, Math.max(width, height)/4.0f);
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "min_rotation_dist: " + min_rotation_dist);
         //final float min_rotation_dist2 = 1.0e-5f;
         final float min_rotation_dist2 = min_rotation_dist*min_rotation_dist;
@@ -1478,7 +1478,7 @@ public class PanoramaProcessor {
             final float max_inlier_dist = Math.max(5.01f, Math.max(width, height)/100.0f);
             //final float max_inlier_dist = Math.max(2.51f, Math.max(width, height)/200.0f);
             //final float max_inlier_dist = Math.max(1.26f, Math.max(width, height)/400.0f);
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "max_inlier_dist: " + max_inlier_dist);
             final float max_inlier_dist2 = max_inlier_dist*max_inlier_dist;
             for(int i=0;i<actual_matches.size();i++) {
@@ -1506,7 +1506,7 @@ public class PanoramaProcessor {
                     }
                     if( inliers.size() > best_inliers.size() ) {
                         // found an improved model!
-                        if( MyDebug.LOG )
+                        if( CameraXDebug.LOG )
                             Log.d(TAG, "match " + i + " gives better translation model: " + inliers.size() + " inliers vs " + best_inliers.size());
                         ransac_matches.clear();
                         ransac_matches.add(match);
@@ -1515,7 +1515,7 @@ public class PanoramaProcessor {
                         use_rotation = false;
                         use_y_scale = false;
                         if( best_inliers.size() == actual_matches.size() ) {
-                            if( MyDebug.LOG )
+                            if( CameraXDebug.LOG )
                                 Log.d(TAG, "all matches are inliers");
                             // no point trying any further
                             break;
@@ -1578,7 +1578,7 @@ public class PanoramaProcessor {
                             // reject too large angles
                             continue;
                         }
-						/*if( MyDebug.LOG ) {
+						/*if( CameraXDebug.LOG ) {
 							Log.d(TAG, "ransac: " + i + " , " + j + ": ");
 							Log.d(TAG, "    match 0: " + points_arrays[0][match.index0].x + " , " + points_arrays[0][match.index0].y);
 							Log.d(TAG, "    match 1: " + points_arrays[1][match.index1].x + " , " + points_arrays[1][match.index1].y);
@@ -1624,7 +1624,7 @@ public class PanoramaProcessor {
 
                             float dx = transformed_x0 - x1;
                             float dy = transformed_y0 - y1;
-							/*if( MyDebug.LOG ) {
+							/*if( CameraXDebug.LOG ) {
 								if( other_match == match )
 									Log.d(TAG, "    ransac on match: " + i + " , " + j + " : " + dx + " , " + dy);
 								else if( other_match == match2 )
@@ -1638,7 +1638,7 @@ public class PanoramaProcessor {
 
                         if( inliers.size() > best_inliers.size() && inliers.size() >= 5 ) {
                             // found an improved model!
-                            if( MyDebug.LOG ) {
+                            if( CameraXDebug.LOG ) {
                                 Log.d(TAG, "match " + i + " gives better rotation model: " + inliers.size() + " inliers vs " + best_inliers.size());
                                 Log.d(TAG, "    c0_x: " + c0_x + " , c0_y: " + c0_y);
                                 Log.d(TAG, "    c1_x: " + c1_x + " , c1_y: " + c1_y);
@@ -1656,7 +1656,7 @@ public class PanoramaProcessor {
                             use_rotation = true;
                             use_y_scale = found_y_scale;
                             if( best_inliers.size() == actual_matches.size() ) {
-                                if( MyDebug.LOG )
+                                if( CameraXDebug.LOG )
                                     Log.d(TAG, "all matches are inliers");
                                 // no point trying any further
                                 break;
@@ -1665,7 +1665,7 @@ public class PanoramaProcessor {
                     }
 
                     if( best_inliers.size() == actual_matches.size() ) {
-                        if( MyDebug.LOG )
+                        if( CameraXDebug.LOG )
                             Log.d(TAG, "all matches are inliers");
                         // no point trying any further
                         break;
@@ -1673,9 +1673,9 @@ public class PanoramaProcessor {
                 }
             }
             actual_matches = best_inliers;
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "### autoAlignmentByFeature: time after RANSAC: " + (System.currentTimeMillis() - time_s));
-            if( MyDebug.LOG ) {
+            if( CameraXDebug.LOG ) {
                 for(FeatureMatch match : actual_matches) {
                     Log.d(TAG, "    after ransac: actual match between " + match.index0 + " and " + match.index1 + " distance: " + match.distance);
                 }
@@ -1696,7 +1696,7 @@ public class PanoramaProcessor {
             centres[i].x /= actual_matches.size();
             centres[i].y /= actual_matches.size();
         }
-        if( MyDebug.LOG ) {
+        if( CameraXDebug.LOG ) {
             Log.d(TAG, "centres[0]: " + centres[0].x + " , " + centres[0].y);
             Log.d(TAG, "centres[1]: " + centres[1].x + " , " + centres[1].y);
         }
@@ -1721,7 +1721,7 @@ public class PanoramaProcessor {
 						float this_y_scale = d1_y / d0_y;
 						y_scale_sum += this_y_scale;
 						n_y_scale++;
-						if( MyDebug.LOG )
+						if( CameraXDebug.LOG )
 							Log.d(TAG, "    match has scale: " + this_y_scale);
 					}
 				}
@@ -1751,7 +1751,7 @@ public class PanoramaProcessor {
                     angle += 2.0f*Math.PI;
                 else if( angle > Math.PI )
                     angle -= 2.0f*Math.PI;
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "    match has angle: " + angle);
                 angle_sum += angle;
                 n_angles++;
@@ -1779,7 +1779,7 @@ public class PanoramaProcessor {
                         float this_y_scale = dy1 / transformed_dy0;
                         y_scale_sum += this_y_scale;
                         n_y_scale++;
-                        if( MyDebug.LOG )
+                        if( CameraXDebug.LOG )
                             Log.d(TAG, "    match has scale: " + this_y_scale);
                     }
                 }
@@ -1798,7 +1798,7 @@ public class PanoramaProcessor {
             float rotated_centre_x = (float)(centres[0].x * Math.cos(rotation) - centres[0].y * Math.sin(rotation));
             float rotated_centre_y = (float)(centres[0].x * Math.sin(rotation) + centres[0].y * Math.cos(rotation));
             rotated_centre_y *= y_scale;
-            if( MyDebug.LOG ) {
+            if( CameraXDebug.LOG ) {
                 Log.d(TAG, "offset_x before rotation: " + offset_x);
                 Log.d(TAG, "offset_y before rotation: " + offset_y);
                 Log.d(TAG, "rotated_centre: " + rotated_centre_x + " , " + rotated_centre_y);
@@ -1807,9 +1807,9 @@ public class PanoramaProcessor {
             offset_y += centres[0].y - rotated_centre_y;
 
         }
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "### autoAlignmentByFeature: time after computing transformation: " + (System.currentTimeMillis() - time_s));
-        if( MyDebug.LOG ) {
+        if( CameraXDebug.LOG ) {
             Log.d(TAG, "offset_x: " + offset_x);
             Log.d(TAG, "offset_y: " + offset_y);
             Log.d(TAG, "rotation: " + rotation);
@@ -1831,7 +1831,7 @@ public class PanoramaProcessor {
 			throw new RuntimeException();
 		}*/
 
-        if( false && MyDebug.LOG ) {
+        if( false && CameraXDebug.LOG ) {
             // debug:
             Bitmap bitmap = Bitmap.createBitmap(2*width, height, Bitmap.Config.ARGB_8888);
             Paint p = new Paint();
@@ -1848,12 +1848,12 @@ public class PanoramaProcessor {
                     int off_x = (i==0) ? 0 : width;
                     boolean was_matched;
                     if( i == 0 ) {
-						/*if( MyDebug.LOG )
+						/*if( CameraXDebug.LOG )
 							Log.d(TAG, "### has_matched0[" + j + "]: " + has_matched0[j]);*/
                         was_matched = has_matched0[j];
                     }
                     else {
-						/*if( MyDebug.LOG )
+						/*if( CameraXDebug.LOG )
 							Log.d(TAG, "### has_matched1[" + j + "]: " + has_matched1[j]);*/
                         was_matched = has_matched1[j];
                     }
@@ -1956,7 +1956,7 @@ public class PanoramaProcessor {
                 OutputStream outputStream = new FileOutputStream(file);
                 bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
                 outputStream.close();
-                MainActivity mActivity = (MainActivity) context;
+                CameraXActivity mActivity = (CameraXActivity) context;
                 mActivity.getStorageUtils().broadcastFile(file, true, false, true);
             }
             catch(IOException e) {
@@ -1973,7 +1973,7 @@ public class PanoramaProcessor {
             }
         }
 
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "### autoAlignmentByFeature: total time: " + (System.currentTimeMillis() - time_s));
         return new AutoAlignmentByFeatureResult(offset_x, offset_y, rotation, y_scale);
     }
@@ -2091,7 +2091,7 @@ public class PanoramaProcessor {
                                      final int align_x, final int align_y, final int dst_offset_x, final int shift_stop_x, final int centre_shift_x,
                                      final double camera_angle, long time_s) {
         //float alpha = (float)((camera_angle * i)/panorama_pics_per_screen);
-        if( MyDebug.LOG ) {
+        if( CameraXDebug.LOG ) {
             //Log.d(TAG, "    alpha: " + alpha + " ( " + Math.toDegrees(alpha) + " degrees )");
             Log.d(TAG, "    align_x: " + align_x);
             Log.d(TAG, "    align_y: " + align_y);
@@ -2099,14 +2099,14 @@ public class PanoramaProcessor {
             Log.d(TAG, "    shift_stop_x: " + shift_stop_x);
         }
 
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "### time before projection for " + i + "th bitmap: " + (System.currentTimeMillis() - time_s));
         Bitmap projected_bitmap = createProjectedBitmap(src_rect_workspace, dst_rect_workspace, bitmap, p, bitmap_width, bitmap_height, camera_angle, centre_shift_x);
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "### time after projection for " + i + "th bitmap: " + (System.currentTimeMillis() - time_s));
 
         if( i > 0 && blend_hwidth > 0 ) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "### time before blending for " + i + "th bitmap: " + (System.currentTimeMillis() - time_s));
             // first blend right hand side of previous image with left hand side of new image
             final int blend_dimension = getBlendDimension();
@@ -2114,7 +2114,7 @@ public class PanoramaProcessor {
             // ensure we blend images that are a multiple of blend_dimension
             int blend_width = nextMultiple(2*blend_hwidth, blend_dimension);
             int blend_height = nextMultiple(bitmap_height, blend_dimension);
-            if( MyDebug.LOG ) {
+            if( CameraXDebug.LOG ) {
                 Log.d(TAG, "blend_dimension: " + blend_dimension);
                 Log.d(TAG, "blend_hwidth: " + blend_hwidth);
                 Log.d(TAG, "bitmap_height: " + bitmap_height);
@@ -2149,7 +2149,7 @@ public class PanoramaProcessor {
                 dst_rect_workspace.set(0, -crop_y0, blend_width, blend_height-crop_y0);
                 rhs_canvas.drawBitmap(projected_bitmap, src_rect_workspace, dst_rect_workspace, p);
             }
-            if( MyDebug.LOG ) {
+            if( CameraXDebug.LOG ) {
                 Log.d(TAG, "lhs dimensions: " + lhs.getWidth() + " x " + lhs.getHeight());
                 Log.d(TAG, "rhs dimensions: " + rhs.getWidth() + " x " + rhs.getHeight());
             }
@@ -2186,7 +2186,7 @@ public class PanoramaProcessor {
             lhs.recycle();
             rhs.recycle();
             blended_bitmap.recycle();
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "### time after blending for " + i + "th bitmap: " + (System.currentTimeMillis() - time_s));
         }
 
@@ -2199,7 +2199,7 @@ public class PanoramaProcessor {
             stop_x -= align_x; // to undo the shift of src_rect_workspace by align_x below
         }
         stop_x -= shift_stop_x;
-        if( MyDebug.LOG ) {
+        if( CameraXDebug.LOG ) {
             Log.d(TAG, "    offset_x: " + offset_x);
             Log.d(TAG, "    dst_offset_x: " + dst_offset_x);
             Log.d(TAG, "    start_x: " + start_x);
@@ -2207,17 +2207,17 @@ public class PanoramaProcessor {
         }
 
         // draw rest of this image
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "### time before drawing non-blended region for " + i + "th bitmap: " + (System.currentTimeMillis() - time_s));
         src_rect_workspace.set(offset_x + start_x, 0, offset_x + stop_x, bitmap_height);
         src_rect_workspace.offset(align_x, align_y);
         dst_rect_workspace.set(offset_x + dst_offset_x + start_x - crop_x0, -crop_y0, offset_x + dst_offset_x + stop_x - crop_x0, bitmap_height-crop_y0);
-        if( MyDebug.LOG ) {
+        if( CameraXDebug.LOG ) {
             Log.d(TAG, "    src_rect_workspace: " + src_rect_workspace);
             Log.d(TAG, "    dst_rect_workspace: " + dst_rect_workspace);
         }
         canvas.drawBitmap(projected_bitmap, src_rect_workspace, dst_rect_workspace, p);
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "### time after drawing non-blended region for " + i + "th bitmap: " + (System.currentTimeMillis() - time_s));
 
         /*
@@ -2228,7 +2228,7 @@ public class PanoramaProcessor {
         if( i == bitmaps.size()-1 )
             stop_x = slice_width+offset_x;
         stop_x -= align_x;
-        if( MyDebug.LOG ) {
+        if( CameraXDebug.LOG ) {
             Log.d(TAG, "    start_x: " + start_x);
             Log.d(TAG, "    stop_x: " + stop_x);
         }
@@ -2247,7 +2247,7 @@ public class PanoramaProcessor {
                 // if x=blend_hwidth-1: frac=1
                 float frac = ((float)x+blend_hwidth)/(2*blend_hwidth-1.0f);
                 blend_alpha = (int)(255.0f*frac);
-                //if( MyDebug.LOG )
+                //if( CameraXDebug.LOG )
                 //Log.d(TAG, "    left hand blend_alpha: " + blend_alpha);
             }
             else if( i < bitmaps.size()-1 && x > stop_x-2*blend_hwidth-1 ) {
@@ -2257,7 +2257,7 @@ public class PanoramaProcessor {
                 // if x=stop_x-1: frac=0
                 float frac = ((float)stop_x-1-x)/(2*blend_hwidth-1.0f);
                 blend_alpha = (int)(255.0f*frac);
-                //if( MyDebug.LOG )
+                //if( CameraXDebug.LOG )
                 //Log.d(TAG, "    right hand blend_alpha: " + blend_alpha);
             }
             p.setAlpha(blend_alpha);
@@ -2276,12 +2276,12 @@ public class PanoramaProcessor {
 
         /*float x0 = -slice_width/2;
         float new_height0 = bitmap_height * (float)(h / (h * Math.cos(alpha) - x0 * Math.sin(alpha)));
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "    new_height0: " + new_height0);
 
         float x1 = slice_width/2;
         float new_height1 = bitmap_height * (float)(h / (h * Math.cos(alpha) - x1 * Math.sin(alpha)));
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "    new_height1: " + new_height1);
 
         float src_x0 = 0, src_y0 = 0.0f;
@@ -2296,7 +2296,7 @@ public class PanoramaProcessor {
 
         float [] src_points = new float[]{src_x0, src_y0, src_x1, src_y1, src_x2, src_y2, src_x3, src_y3};
         float [] dst_points = new float[]{dst_x0, dst_y0, dst_x1, dst_y1, dst_x2, dst_y2, dst_x3, dst_y3};
-        if( MyDebug.LOG ) {
+        if( CameraXDebug.LOG ) {
             Log.d(TAG, "    src top-left: " + src_x0 + " , " + src_y0);
             Log.d(TAG, "    src bottom-left: " + src_x1 + " , " + src_y1);
             Log.d(TAG, "    src top-right: " + src_x2 + " , " + src_y2);
@@ -2312,7 +2312,7 @@ public class PanoramaProcessor {
             Log.e(TAG, "failed to create matrix");
             throw new RuntimeException();
         }
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "matrix: " + matrix);
 
         matrix.postTranslate(i*slice_width, 0.0f);
@@ -2337,14 +2337,14 @@ public class PanoramaProcessor {
         float min_relative_brightness = current_relative_brightness;
         float max_relative_brightness = current_relative_brightness;
 
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "### time before computing brightnesses: " + (System.currentTimeMillis() - time_s));
 
         for(int i=0;i<bitmaps.size()-1;i++) {
             // compute brightness difference between i-th and (i+1)-th images
             Bitmap bitmap_l = bitmaps.get(i);
             Bitmap bitmap_r = bitmaps.get(i+1);
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "### time before cropping bitmaps: " + (System.currentTimeMillis() - time_s));
 
             // scale down for performance
@@ -2355,10 +2355,10 @@ public class PanoramaProcessor {
             //bitmap_r = Bitmap.createBitmap(bitmap_r, offset_x-exposure_hwidth, 0, 2*exposure_hwidth, bitmap_height);
             bitmap_l = Bitmap.createBitmap(bitmap_l, offset_x+slice_width-exposure_hwidth, 0, 2*exposure_hwidth, bitmap_height, scale_matrix, true);
             bitmap_r = Bitmap.createBitmap(bitmap_r, offset_x-exposure_hwidth, 0, 2*exposure_hwidth, bitmap_height, scale_matrix, true);
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "### time after cropping bitmaps: " + (System.currentTimeMillis() - time_s));
             // debug
-            /*if( MyDebug.LOG )
+            /*if( CameraXDebug.LOG )
             {
                 saveBitmap(bitmap_l, "exposure_bitmap_l.jpg");
                 saveBitmap(bitmap_r, "exposure_bitmap_r.jpg");
@@ -2371,7 +2371,7 @@ public class PanoramaProcessor {
 
             float brightness_scale = ((float)Math.max(histogramInfo_r.median_brightness, 1)) / (float)Math.max(histogramInfo_l.median_brightness, 1);
             current_relative_brightness *= brightness_scale;
-            if( MyDebug.LOG ) {
+            if( CameraXDebug.LOG ) {
                 Log.d(TAG, "compare brightnesses from images " + i + " to " + (i+1) + ":");
                 Log.d(TAG, "    left median: " + histogramInfo_l.median_brightness);
                 Log.d(TAG, "    right median: " + histogramInfo_r.median_brightness);
@@ -2390,7 +2390,7 @@ public class PanoramaProcessor {
         }
 
         float ratio_brightnesses = (max_relative_brightness/min_relative_brightness);
-        if( MyDebug.LOG ) {
+        if( CameraXDebug.LOG ) {
             Log.d(TAG, "min_relative_brightness: " + min_relative_brightness);
             Log.d(TAG, "max_relative_brightness: " + max_relative_brightness);
             Log.d(TAG, "ratio of max to min relative brightness: " + ratio_brightnesses);
@@ -2404,11 +2404,11 @@ public class PanoramaProcessor {
             count++;
         }
         avg_relative_brightness /= count;
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "avg_relative_brightness: " + avg_relative_brightness);
         */
 
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "### time after computing brightnesses: " + (System.currentTimeMillis() - time_s));
 
         List<HDRProcessor.HistogramInfo> histogramInfos = new ArrayList<>();
@@ -2422,26 +2422,26 @@ public class PanoramaProcessor {
             mean_median_brightness += histogramInfo.median_brightness;
             float equalised_brightness = histogramInfo.median_brightness/relative_brightness.get(i);
             mean_equalised_brightness += equalised_brightness;
-            if( MyDebug.LOG ) {
+            if( CameraXDebug.LOG ) {
                 Log.d(TAG, "image " + i + " has median brightness " + histogramInfo.median_brightness);
                 Log.d(TAG, "    and equalised_brightness " + equalised_brightness);
             }
         }
         mean_median_brightness /= bitmaps.size();
         mean_equalised_brightness /= bitmaps.size();
-        if( MyDebug.LOG ) {
+        if( CameraXDebug.LOG ) {
             Log.d(TAG, "mean_median_brightness: " + mean_median_brightness);
             Log.d(TAG, "mean_equalised_brightness: " + mean_equalised_brightness);
         }
 
         float avg_relative_brightness = mean_median_brightness / Math.max(mean_equalised_brightness, 1.0f);
 
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "### time after computing global histograms: " + (System.currentTimeMillis() - time_s));
 
         float min_preferred_scale = 1000.0f, max_preferred_scale = 0.0f;
         for(int i=0;i<bitmaps.size();i++) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "    adjust exposure for image: " + i);
 
             Bitmap bitmap = bitmaps.get(i);
@@ -2449,7 +2449,7 @@ public class PanoramaProcessor {
 
             int brightness_target = (int)(histogramInfo.median_brightness*avg_relative_brightness/relative_brightness.get(i) + 0.1f);
             brightness_target = Math.min(255, brightness_target);
-            if( MyDebug.LOG ) {
+            if( CameraXDebug.LOG ) {
                 Log.d(TAG, "    image " + i + " has initial brightness_target: " + brightness_target);
                 Log.d(TAG, "    median_brightness: " + histogramInfo.median_brightness);
                 Log.d(TAG, "    relative_brightness: " + relative_brightness.get(i));
@@ -2463,7 +2463,7 @@ public class PanoramaProcessor {
             int this_brightness_target = brightness_target;
             this_brightness_target = Math.max(this_brightness_target, min_brightness);
             this_brightness_target = Math.min(this_brightness_target, max_brightness);
-            if( MyDebug.LOG ) {
+            if( CameraXDebug.LOG ) {
                 Log.d(TAG, "    brightness_target: " + brightness_target);
                 Log.d(TAG, "    preferred brightness scale: " + brightness_target / (float) histogramInfo.median_brightness);
                 Log.d(TAG, "    this_brightness_target: " + this_brightness_target);
@@ -2472,7 +2472,7 @@ public class PanoramaProcessor {
 
             hdrProcessor.brightenImage(bitmap, histogramInfo.median_brightness, histogramInfo.max_brightness, this_brightness_target);
         }
-        if( MyDebug.LOG ) {
+        if( CameraXDebug.LOG ) {
             Log.d(TAG, "min_preferred_scale: " + min_preferred_scale);
             Log.d(TAG, "max_preferred_scale: " + max_preferred_scale);
             Log.d(TAG, "### time after adjusting brightnesses: " + (System.currentTimeMillis() - time_s));
@@ -2497,21 +2497,21 @@ public class PanoramaProcessor {
             histogramInfos.add(histogramInfo);
             mean_median_brightness += histogramInfo.median_brightness;
             median_brightnesses.add(histogramInfo.median_brightness);
-            if( MyDebug.LOG ) {
+            if( CameraXDebug.LOG ) {
                 Log.d(TAG, "image " + i + " has median brightness " + histogramInfo.median_brightness);
             }
         }
         mean_median_brightness /= bitmaps.size();
         final int brightness_target = (int)(mean_median_brightness + 0.1f);
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "mean_median_brightness: " + mean_median_brightness);
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "### time after computing brightnesses: " + (System.currentTimeMillis() - time_s));
         float min_preferred_scale = 1000.0f, max_preferred_scale = 0.0f;
         for(int i=0;i<bitmaps.size();i++) {
             Bitmap bitmap = bitmaps.get(i);
             HDRProcessor.HistogramInfo histogramInfo = histogramInfos.get(i);
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "    adjust exposure for image: " + i);
 
             /*
@@ -2527,7 +2527,7 @@ public class PanoramaProcessor {
                 count++;
             }
             local_mean_brightness /= count;
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "    local_mean_brightness: " + local_mean_brightness);
             final int brightness_target = (int)(local_mean_brightness + 0.1f);
             */
@@ -2540,7 +2540,7 @@ public class PanoramaProcessor {
             int this_brightness_target = brightness_target;
             this_brightness_target = Math.max(this_brightness_target, min_brightness);
             this_brightness_target = Math.min(this_brightness_target, max_brightness);
-            if( MyDebug.LOG ) {
+            if( CameraXDebug.LOG ) {
                 Log.d(TAG, "    brightness_target: " + brightness_target);
                 Log.d(TAG, "    preferred brightness scale: " + brightness_target / (float) histogramInfo.median_brightness);
                 Log.d(TAG, "    this_brightness_target: " + this_brightness_target);
@@ -2549,7 +2549,7 @@ public class PanoramaProcessor {
 
             hdrProcessor.brightenImage(bitmap, histogramInfo.median_brightness, histogramInfo.max_brightness, this_brightness_target);
         }
-        if( MyDebug.LOG ) {
+        if( CameraXDebug.LOG ) {
             Log.d(TAG, "min_preferred_scale: " + min_preferred_scale);
             Log.d(TAG, "max_preferred_scale: " + max_preferred_scale);
             Log.d(TAG, "### time after adjusting brightnesses: " + (System.currentTimeMillis() - time_s));
@@ -2570,7 +2570,7 @@ public class PanoramaProcessor {
         //final boolean use_auto_align = false;
 
         for(int i=0;i<bitmaps.size();i++) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "process bitmap: " + i);
 
             double angle_z = 0.0;
@@ -2581,7 +2581,7 @@ public class PanoramaProcessor {
                 //alignment_bitmaps.add( Bitmap.createBitmap(bitmaps.get(i-1), offset_x+slice_width-align_hwidth, 0, 2*align_hwidth, bitmap_height) );
                 //alignment_bitmaps.add( Bitmap.createBitmap(bitmaps.get(i), offset_x-align_hwidth, 0, 2*align_hwidth, bitmap_height) );
                 // tall:
-                if( MyDebug.LOG ) {
+                if( CameraXDebug.LOG ) {
                     Log.d(TAG, "    align_x: " + align_x);
                     Log.d(TAG, "    offset_x: " + offset_x);
                     Log.d(TAG, "    slice_width: " + slice_width);
@@ -2597,7 +2597,7 @@ public class PanoramaProcessor {
                     // although in theory the alignment algorithm should work on any size, it is best to standardise, as most testing
                     // was done where input images had height 2080 or 2048, and the alignment images were downscaled by a factor of 4
                     align_downsample = bitmap_height/520.0f;
-                    if( MyDebug.LOG ) {
+                    if( CameraXDebug.LOG ) {
                         Log.d(TAG, "downscale by: " + align_downsample);
                         Log.d(TAG, "### time before downscaling creating alignment bitmaps for " + i + "th bitmap: " + (System.currentTimeMillis() - time_s));
                     }
@@ -2606,7 +2606,7 @@ public class PanoramaProcessor {
                         double ratio = power/align_downsample;
                         if( ratio >= 0.95f && ratio <= 1.05f ) {
                             align_downsample = power;
-                            if( MyDebug.LOG )
+                            if( CameraXDebug.LOG )
                                 Log.d(TAG, "snapped downscale to: " + align_downsample);
                             break;
                         }
@@ -2614,7 +2614,7 @@ public class PanoramaProcessor {
                 }
 
                 int align_bitmap_height = (3*bitmap_height)/4;
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "### time before creating alignment bitmaps for " + i + "th bitmap: " + (System.currentTimeMillis() - time_s));
                 // n.b., we add in reverse order, so we find the transformation to map the next image (i) onto the previous image (i-1)
                 //alignment_bitmaps.add( Bitmap.createBitmap(bitmaps.get(i), align_x+offset_x-align_hwidth, (bitmap_height-align_bitmap_height)/2, 2*align_hwidth, align_bitmap_height) );
@@ -2623,7 +2623,7 @@ public class PanoramaProcessor {
                 align_scale_matrix.postScale(1.0f/align_downsample, 1.0f/align_downsample);
                 alignment_bitmaps.add( Bitmap.createBitmap(bitmaps.get(i), align_x+offset_x-align_hwidth, (bitmap_height-align_bitmap_height)/2, 2*align_hwidth, align_bitmap_height, align_scale_matrix, true) );
                 alignment_bitmaps.add( Bitmap.createBitmap(bitmaps.get(i-1), align_x+offset_x+slice_width-align_hwidth, (bitmap_height-align_bitmap_height)/2, 2*align_hwidth, align_bitmap_height, align_scale_matrix, true) );
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "### time after creating alignment bitmaps for " + i + "th bitmap: " + (System.currentTimeMillis() - time_s));
 
                 /*if( use_align_by_feature ) {
@@ -2634,12 +2634,12 @@ public class PanoramaProcessor {
                         alignment_bitmaps.get(j).recycle();
                         alignment_bitmaps.set(j, new_bitmap);
                     }
-                    if( MyDebug.LOG )
+                    if( CameraXDebug.LOG )
                         Log.d(TAG, "### time after downscaling creating alignment bitmaps for " + i + "th bitmap: " + (System.currentTimeMillis() - time_s));
                 }*/
 
                 // save bitmaps used for alignments
-                /*if( MyDebug.LOG ) {
+                /*if( CameraXDebug.LOG ) {
                     for(int j=0;j<alignment_bitmaps.size();j++) {
                         Bitmap alignment_bitmap = alignment_bitmaps.get(j);
                         saveBitmap(alignment_bitmap, "alignment_bitmap_" + i + "_" + j +".png");
@@ -2648,7 +2648,7 @@ public class PanoramaProcessor {
 
                 int this_align_x, this_align_y;
                 float y_scale = 1.0f;
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "### time before auto-alignment for " + i + "th bitmap: " + (System.currentTimeMillis() - time_s));
                 if( use_align_by_feature ) {
                     PanoramaProcessor.AutoAlignmentByFeatureResult res = autoAlignmentByFeature(alignment_bitmaps.get(0).getWidth(), alignment_bitmaps.get(0).getHeight(), alignment_bitmaps, i);
@@ -2666,7 +2666,7 @@ public class PanoramaProcessor {
                     this_align_x = offsets_x[1];
                     this_align_y = offsets_y[1];
                 }
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "### time after auto-alignment for " + i + "th bitmap: " + (System.currentTimeMillis() - time_s));
                 this_align_x *= align_downsample;
                 this_align_y *= align_downsample;
@@ -2674,7 +2674,7 @@ public class PanoramaProcessor {
                     alignment_bitmap.recycle();
                 }
                 alignment_bitmaps.clear();
-                if( MyDebug.LOG ) {
+                if( CameraXDebug.LOG ) {
                     Log.d(TAG, "    this_align_x: " + this_align_x);
                     Log.d(TAG, "    this_align_y: " + this_align_y);
                 }
@@ -2705,7 +2705,7 @@ public class PanoramaProcessor {
                     align_x = - (int)trans_x;
                 }
 
-                if( MyDebug.LOG ) {
+                if( CameraXDebug.LOG ) {
                     Log.d(TAG, "    align_x is now: " + align_x);
                     Log.d(TAG, "    align_y is now: " + align_y);
                 }
@@ -2722,10 +2722,10 @@ public class PanoramaProcessor {
                 align_x = 0;
                 align_y = 0;
             }
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "    dst_offset_x is now: " + dst_offset_x);
 
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "### time after processing " + i + "th bitmap: " + (System.currentTimeMillis() - time_s));
         }
     }
@@ -2744,7 +2744,7 @@ public class PanoramaProcessor {
             cumulative_transforms.get(i).getValues(values);
             // get rotation anticlockwise in degrees - https://stackoverflow.com/questions/12256854/get-the-rotate-value-from-matrix-in-android
             float rotation = (float)Math.toDegrees(Math.atan2(values[Matrix.MSKEW_X], values[Matrix.MSCALE_X]));
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "bitmap " + i + " has rotation " + rotation + " degrees");
             min_rotation = Math.min(min_rotation, rotation);
             max_rotation = Math.max(max_rotation, rotation);
@@ -2752,7 +2752,7 @@ public class PanoramaProcessor {
         }
         //float mid_rotation = 0.5f*(min_rotation + max_rotation);
         //float mid_rotation = sum_rotation/bitmaps.size();
-        if( MyDebug.LOG ) {
+        if( CameraXDebug.LOG ) {
             Log.d(TAG, "min_rotation: " + min_rotation + " degrees");
             Log.d(TAG, "max_rotation: " + max_rotation + " degrees");
             //Log.d(TAG, "mid_rotation: " + mid_rotation + " degrees");
@@ -2773,7 +2773,7 @@ public class PanoramaProcessor {
         float dx = x1 - x0;
         float dy = y1 - y0;
         float mid_rotation = -(float)Math.toDegrees(Math.atan2(dy, dx));
-        if( MyDebug.LOG ) {
+        if( CameraXDebug.LOG ) {
             Log.d(TAG, "x0: " + x0);
             Log.d(TAG, "y0: " + y0);
             Log.d(TAG, "x1: " + x1);
@@ -2785,7 +2785,7 @@ public class PanoramaProcessor {
         // but don't rotate more than the input transforms - helps testPanorama22
         mid_rotation = Math.max(mid_rotation, min_rotation);
         mid_rotation = Math.min(mid_rotation, max_rotation);
-        if( MyDebug.LOG ) {
+        if( CameraXDebug.LOG ) {
             Log.d(TAG, "limited mid_rotation to: " + mid_rotation + " degrees");
         }
 
@@ -2799,7 +2799,7 @@ public class PanoramaProcessor {
             {
                 cumulative_transforms.get(i).getValues(values);
                 float rotation = (float)Math.toDegrees(Math.atan2(values[Matrix.MSKEW_X], values[Matrix.MSCALE_X]));
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "bitmap " + i + " now has rotation " + rotation + " degrees");
             }
         }
@@ -2819,7 +2819,7 @@ public class PanoramaProcessor {
         Canvas canvas = new Canvas(panorama);
 
         for(int i=0;i<bitmaps.size();i++) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "render bitmap: " + i);
             Bitmap bitmap = bitmaps.get(i);
             int align_x = align_x_values.get(i);
@@ -2874,12 +2874,12 @@ public class PanoramaProcessor {
                     }
 
                     cumulative_transforms.get(i).postTranslate(bake_trans_x, 0.0f);
-                    //if( MyDebug.LOG )
+                    //if( CameraXDebug.LOG )
                     //Log.d(TAG, "centre_shift_x: " + centre_shift_x);
-                    //if( MyDebug.LOG )
+                    //if( CameraXDebug.LOG )
                     //Log.d(TAG, "    align_x: " + align_x);
                     centre_shift_x += bake_trans_x;
-                    //if( MyDebug.LOG )
+                    //if( CameraXDebug.LOG )
                     //Log.d(TAG, "new centre_shift_x: " + centre_shift_x);
                     align_x += bake_trans_x;
                 }
@@ -2895,7 +2895,7 @@ public class PanoramaProcessor {
                     rotated_canvas.restore();
 
                     bitmap = rotated_bitmap;
-                    /*if( MyDebug.LOG ) {
+                    /*if( CameraXDebug.LOG ) {
                         saveBitmap(bitmap, "transformed_bitmap_" + i + ".jpg");
                     }*/
                     free_bitmap = true;
@@ -2913,25 +2913,25 @@ public class PanoramaProcessor {
                 bitmap.recycle();
             }
 
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "### time after rendering " + i + "th bitmap: " + (System.currentTimeMillis() - time_s));
         }
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public Bitmap panorama(List<Bitmap> bitmaps, float panorama_pics_per_screen, float camera_angle_y, final boolean crop) throws PanoramaProcessorException {
-        if( MyDebug.LOG ) {
+        if( CameraXDebug.LOG ) {
             Log.d(TAG, "panorama");
             Log.d(TAG, "camera_angle_y: " + camera_angle_y);
         }
 
         long time_s = 0;
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             time_s = System.currentTimeMillis();
 
         int bitmap_width = bitmaps.get(0).getWidth();
         int bitmap_height = bitmaps.get(0).getHeight();
-        if( MyDebug.LOG ) {
+        if( CameraXDebug.LOG ) {
             Log.d(TAG, "bitmap_width: " + bitmap_width);
             Log.d(TAG, "bitmap_height: " + bitmap_height);
         }
@@ -2952,11 +2952,11 @@ public class PanoramaProcessor {
         }*/
 
         final int slice_width = (int) (bitmap_width / panorama_pics_per_screen);
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "slice_width: " + slice_width);
 
         final double camera_angle = Math.toRadians(camera_angle_y);
-        if( MyDebug.LOG ) {
+        if( CameraXDebug.LOG ) {
             Log.d(TAG, "camera_angle_y: " + camera_angle_y);
             Log.d(TAG, "camera_angle: " + camera_angle);
         }
@@ -2968,7 +2968,7 @@ public class PanoramaProcessor {
         /*int max_offset_error_x = (int)(h * Math.tan(Math.toRadians(gyro_tol_degrees)) + 0.5f);
         max_offset_error_x *= 2; // allow a fudge factor
         int max_offset_error_y = max_offset_error_x;
-        if( MyDebug.LOG ) {
+        if( CameraXDebug.LOG ) {
             Log.d(TAG, "h: " + h);
             Log.d(TAG, "max_offset_error_x: " + max_offset_error_x);
             Log.d(TAG, "max_offset_error_y: " + max_offset_error_y);
@@ -2987,7 +2987,7 @@ public class PanoramaProcessor {
         //final int blend_hwidth = nextPowerOf2(bitmap_width/5);
         final int align_hwidth = bitmap_width/10;
         //final int align_hwidth = bitmap_width/5;
-        if( MyDebug.LOG ) {
+        if( CameraXDebug.LOG ) {
             Log.d(TAG, "    blend_hwidth: " + blend_hwidth);
             Log.d(TAG, "    align_hwidth: " + align_hwidth);
         }
@@ -3003,12 +3003,12 @@ public class PanoramaProcessor {
         // note that we crop the panorama_width later on, but for now we still need an estimate, before finalising
         // the transforms
         int panorama_width = (bitmaps.size()*slice_width+2*offset_x);
-        if( MyDebug.LOG ) {
+        if( CameraXDebug.LOG ) {
             Log.d(TAG, "original panorama_width: " + panorama_width);
         }
 
         adjustPanoramaTransforms(bitmaps, cumulative_transforms, panorama_width, slice_width, bitmap_width, bitmap_height);
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "### time after adjusting transforms: " + (System.currentTimeMillis() - time_s));
 
         //adjustExposures(bitmaps, time_s);
@@ -3045,7 +3045,7 @@ public class PanoramaProcessor {
                 crop_y1 = Math.min(crop_y1, (int)points[5]);
                 crop_y1 = Math.min(crop_y1, (int)points[7]);
 
-                if( MyDebug.LOG ) {
+                if( CameraXDebug.LOG ) {
                     Log.d(TAG, "i: " + i);
                     Log.d(TAG, "    points[0]: " + points[0]);
                     Log.d(TAG, "    points[1]: " + points[1]);
@@ -3068,7 +3068,7 @@ public class PanoramaProcessor {
 
             panorama_width -= (bitmap_width - 1) - crop_x1;
             panorama_width -= crop_x0;
-            if( MyDebug.LOG ) {
+            if( CameraXDebug.LOG ) {
                 Log.d(TAG, "crop_x0: " + crop_x0);
                 Log.d(TAG, "crop_x1: " + crop_x1);
                 Log.d(TAG, "panorama_width: " + panorama_width);
@@ -3081,7 +3081,7 @@ public class PanoramaProcessor {
             }*/
 
             panorama_height = crop_y1 - crop_y0 + 1;
-            if( MyDebug.LOG ) {
+            if( CameraXDebug.LOG ) {
                 Log.d(TAG, "crop_y0: " + crop_y0);
                 Log.d(TAG, "crop_y1: " + crop_y1);
                 Log.d(TAG, "panorama_height: " + panorama_height);
@@ -3090,7 +3090,7 @@ public class PanoramaProcessor {
             // take cylindrical projection into account
             float theta = (float)((bitmap_width/2)*camera_angle)/(float)bitmap_width;
             float yscale = (float)Math.cos(theta);
-            if( MyDebug.LOG ) {
+            if( CameraXDebug.LOG ) {
                 Log.d(TAG, "theta: " + theta);
                 Log.d(TAG, "yscale: " + yscale);
             }
@@ -3099,7 +3099,7 @@ public class PanoramaProcessor {
             crop_y1 = (int)(bitmap_height/2.0f + yscale*(crop_y1 - bitmap_height/2.0f) + 0.5f);
 
             panorama_height = crop_y1 - crop_y0 + 1;
-            if( MyDebug.LOG ) {
+            if( CameraXDebug.LOG ) {
                 Log.d(TAG, "crop_y0: " + crop_y0);
                 Log.d(TAG, "crop_y1: " + crop_y1);
                 Log.d(TAG, "panorama_height: " + panorama_height);
@@ -3114,11 +3114,11 @@ public class PanoramaProcessor {
 
         Bitmap panorama = Bitmap.createBitmap(panorama_width, panorama_height, Bitmap.Config.ARGB_8888);
 
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "### time before rendering bitmaps: " + (System.currentTimeMillis() - time_s));
         renderPanorama(bitmaps, bitmap_width, bitmap_height, cumulative_transforms, align_x_values, dst_offset_x_values,
                 blend_hwidth, slice_width, offset_x, panorama, crop_x0, crop_y0, camera_angle, time_s);
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "### time after rendering bitmaps: " + (System.currentTimeMillis() - time_s));
 
         for(Bitmap bitmap : bitmaps) {
@@ -3127,30 +3127,30 @@ public class PanoramaProcessor {
         bitmaps.clear();
 
         if( ratio_brightnesses >= 3.0f ) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "apply contrast enhancement, ratio_brightnesses: " + ratio_brightnesses);
 
             /*if( true )
                 throw new RuntimeException("ratio_brightnesses: " + ratio_brightnesses);*/
 
             Allocation allocation = Allocation.createFromBitmap(rs, panorama);
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "### time after creating allocation_out: " + (System.currentTimeMillis() - time_s));
             hdrProcessor.adjustHistogram(allocation, allocation, panorama.getWidth(), panorama.getHeight(), 0.25f, 1, true, time_s);
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "### time after adjustHistogram: " + (System.currentTimeMillis() - time_s));
             allocation.copyTo(panorama);
             allocation.destroy();
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "### time after copying to bitmap: " + (System.currentTimeMillis() - time_s));
         }
 
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "panorama complete!");
 
         freeScripts();
 
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "### time taken: " + (System.currentTimeMillis() - time_s));
 
         return panorama;

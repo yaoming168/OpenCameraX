@@ -19,6 +19,13 @@ import net.sourceforge.opencamera.cameracontroller.RawImage;
  *  Note there is no need for your subclass of BasicApplicationInterface to call "super" methods -
  *  these are just default implementations that should be overridden as required.
  */
+
+/*
+* 提供“默认”实现的ApplicationInterface的部分实现。
+因此子类化它比直接实现ApplicationInterface更容易—你只需要在开始时提供未实现的方法，然后可以重写
+BasicApplicationInterface的方法。
+注意，你的BasicApplicationInterface子类没有必要调用“超级”方法——这些只是默认的实现，应该根据需要被覆盖。
+* */
 public abstract class BasicApplicationInterface implements ApplicationInterface {
     @Override
     public Location getLocation() {

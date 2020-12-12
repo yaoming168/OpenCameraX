@@ -30,7 +30,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import net.sourceforge.opencamera.MyDebug;
+import net.sourceforge.opencamera.CameraXDebug;
 import net.sourceforge.opencamera.PreferenceKeys;
 import net.sourceforge.opencamera.R;
 
@@ -78,7 +78,7 @@ public class DeviceScanner extends ListActivity {
         mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getApplicationContext());
         String preference_remote_device_name = PreferenceKeys.RemoteName;
         String remote_name = mSharedPreferences.getString(preference_remote_device_name, "none");
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "preference_remote_device_name: " + remote_name);
 
         TextView currentRemote = findViewById(R.id.currentRemote);
@@ -88,7 +88,7 @@ public class DeviceScanner extends ListActivity {
 
     private void startScanning() {
 
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "Start scanning");
 
         if( !bluetoothAdapter.isEnabled() ) {
@@ -119,7 +119,7 @@ public class DeviceScanner extends ListActivity {
     }
 
     private void askForLocationPermission() {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "askForLocationPermission");
         // n.b., we only need ACCESS_COARSE_LOCATION, but it's simpler to request both to be consistent with Open Camera's
         // location permission requests in PermissionHandler. If we only request ACCESS_COARSE_LOCATION here, and later the
@@ -139,7 +139,7 @@ public class DeviceScanner extends ListActivity {
         }
         else {
             // Can go ahead and request the permission
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "requesting location permissions...");
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION},
@@ -148,10 +148,10 @@ public class DeviceScanner extends ListActivity {
     }
 
     private void showRequestLocationPermissionRationale() {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "showRequestLocationPermissionRationale");
         if( Build.VERSION.SDK_INT < Build.VERSION_CODES.M ) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.e(TAG, "shouldn't be requesting permissions for pre-Android M!");
             return;
         }
@@ -167,7 +167,7 @@ public class DeviceScanner extends ListActivity {
                 .setPositiveButton(android.R.string.ok, null)
                 .setOnDismissListener(new DialogInterface.OnDismissListener() {
                     public void onDismiss(DialogInterface dialog) {
-                        if( MyDebug.LOG )
+                        if( CameraXDebug.LOG )
                             Log.d(TAG, "requesting permission...");
                         ActivityCompat.requestPermissions(DeviceScanner.this, permissions_f, REQUEST_LOCATION_PERMISSIONS);
                     }
@@ -177,18 +177,18 @@ public class DeviceScanner extends ListActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "onRequestPermissionsResult: requestCode " + requestCode);
         //noinspection SwitchStatementWithTooFewBranches
         switch (requestCode) {
             case REQUEST_LOCATION_PERMISSIONS: {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    if( MyDebug.LOG )
+                    if( CameraXDebug.LOG )
                         Log.d(TAG, "location permission granted");
                     scanLeDevice(true);
                 }
                 else {
-                    if( MyDebug.LOG )
+                    if( CameraXDebug.LOG )
                         Log.d(TAG, "location permission denied");
                 }
             }
@@ -197,7 +197,7 @@ public class DeviceScanner extends ListActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "onActivityResult");
         // user decided to cancel the enabling of Bluetooth, so exit
         if( requestCode == REQUEST_ENABLE_BT && resultCode == Activity.RESULT_CANCELED ) {
@@ -209,7 +209,7 @@ public class DeviceScanner extends ListActivity {
 
     @Override
     protected void onPause() {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "onPause");
         super.onPause();
         if( is_scanning ) {
@@ -220,7 +220,7 @@ public class DeviceScanner extends ListActivity {
 
     @Override
     protected void onStop() {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "onStop");
         super.onStop();
 
@@ -233,7 +233,7 @@ public class DeviceScanner extends ListActivity {
 
     @Override
     protected void onDestroy() {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "onDestroy");
 
         // we do this in onPause, but done here again just to be certain!
@@ -250,7 +250,7 @@ public class DeviceScanner extends ListActivity {
         final BluetoothDevice device = leDeviceListAdapter.getDevice(position);
         if( device == null )
             return;
-        if( MyDebug.LOG ) {
+        if( CameraXDebug.LOG ) {
             Log.d(TAG, "onListItemClick");
             Log.d(TAG, device.getAddress());
         }
@@ -263,14 +263,14 @@ public class DeviceScanner extends ListActivity {
     }
 
     private void scanLeDevice(final boolean enable) {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "scanLeDevice: " + enable);
         if( enable ) {
             // stop scanning after certain time
             bluetoothHandler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    if( MyDebug.LOG )
+                    if( CameraXDebug.LOG )
                         Log.d(TAG, "stop scanning after delay");
                     is_scanning = false;
                     bluetoothAdapter.stopLeScan(mLeScanCallback);

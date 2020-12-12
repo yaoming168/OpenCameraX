@@ -1,6 +1,6 @@
 package net.sourceforge.opencamera.preview.camerasurface;
 
-import net.sourceforge.opencamera.MyDebug;
+import net.sourceforge.opencamera.CameraXDebug;
 import net.sourceforge.opencamera.cameracontroller.CameraController;
 import net.sourceforge.opencamera.cameracontroller.CameraControllerException;
 import net.sourceforge.opencamera.preview.Preview;
@@ -18,8 +18,8 @@ import android.view.View;
 
 /** Provides support for the surface used for the preview, using a SurfaceView.
  */
-public class MySurfaceView extends SurfaceView implements CameraSurface {
-    private static final String TAG = "MySurfaceView";
+public class CameraXSurfaceView extends SurfaceView implements CameraSurface {
+    private static final String TAG = "CameraXSurfaceView";
 
     private final Preview preview;
     private final int [] measure_spec = new int[2];
@@ -27,11 +27,11 @@ public class MySurfaceView extends SurfaceView implements CameraSurface {
     private final Runnable tick;
 
     public
-    MySurfaceView(Context context, final Preview preview) {
+    CameraXSurfaceView(Context context, final Preview preview) {
         super(context);
         this.preview = preview;
-        if( MyDebug.LOG ) {
-            Log.d(TAG, "new MySurfaceView");
+        if( CameraXDebug.LOG ) {
+            Log.d(TAG, "new CameraXSurfaceView");
         }
 
         // Install a SurfaceHolder.Callback so we get notified when the
@@ -42,7 +42,7 @@ public class MySurfaceView extends SurfaceView implements CameraSurface {
 
         tick = new Runnable() {
             public void run() {
-				/*if( MyDebug.LOG )
+				/*if( CameraXDebug.LOG )
 					Log.d(TAG, "invalidate()");*/
                 preview.test_ticker_called = true;
                 invalidate();
@@ -58,13 +58,13 @@ public class MySurfaceView extends SurfaceView implements CameraSurface {
 
     @Override
     public void setPreviewDisplay(CameraController camera_controller) {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "setPreviewDisplay");
         try {
             camera_controller.setPreviewDisplay(this.getHolder());
         }
         catch(CameraControllerException e) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.e(TAG, "Failed to set preview display: " + e.getMessage());
             e.printStackTrace();
         }
@@ -88,7 +88,7 @@ public class MySurfaceView extends SurfaceView implements CameraSurface {
 
     @Override
     protected void onMeasure(int widthSpec, int heightSpec) {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "onMeasure: " + widthSpec + " x " + heightSpec);
         preview.getMeasureSpec(measure_spec, widthSpec, heightSpec);
         super.onMeasure(measure_spec[0], measure_spec[1]);
@@ -96,21 +96,21 @@ public class MySurfaceView extends SurfaceView implements CameraSurface {
 
     @Override
     public void setTransform(Matrix matrix) {
-        if( MyDebug.LOG )
-            Log.d(TAG, "setting transforms not supported for MySurfaceView");
+        if( CameraXDebug.LOG )
+            Log.d(TAG, "setting transforms not supported for CameraXSurfaceView");
         throw new RuntimeException();
     }
 
     @Override
     public void onPause() {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "onPause()");
         handler.removeCallbacks(tick);
     }
 
     @Override
     public void onResume() {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "onResume()");
         tick.run();
     }

@@ -13,14 +13,14 @@ public class OpenCameraApplication extends Application {
 
     @Override
     public void onCreate() {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "onCreate");
         super.onCreate();
         checkAppReplacingState();
     }
 
     private void checkAppReplacingState() {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "checkAppReplacingState");
         if( getResources() == null ) {
             Log.e(TAG, "app is replacing, kill");

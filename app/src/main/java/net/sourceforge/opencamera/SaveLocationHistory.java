@@ -10,7 +10,7 @@ import android.util.Log;
  */
 public class SaveLocationHistory {
     private static final String TAG = "SaveLocationHistory";
-    private final MainActivity main_activity;
+    private final CameraXActivity main_activity;
     private final String pref_base;
     private final ArrayList<String> save_location_history = new ArrayList<>();
 
@@ -19,8 +19,8 @@ public class SaveLocationHistory {
      * @param pref_base String to use for shared preferences.
      * @param folder_name The current save folder.
      */
-    SaveLocationHistory(MainActivity main_activity, String pref_base, String folder_name) {
-        if( MyDebug.LOG )
+    SaveLocationHistory(CameraXActivity main_activity, String pref_base, String folder_name) {
+        if( CameraXDebug.LOG )
             Log.d(TAG, "pref_base: " + pref_base);
         this.main_activity = main_activity;
         this.pref_base = pref_base;
@@ -29,12 +29,12 @@ public class SaveLocationHistory {
         // read save locations
         save_location_history.clear();
         int save_location_history_size = sharedPreferences.getInt(pref_base + "_size", 0);
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "save_location_history_size: " + save_location_history_size);
         for(int i=0;i<save_location_history_size;i++) {
             String string = sharedPreferences.getString(pref_base + "_" + i, null);
             if( string != null ) {
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "save_location_history " + i + ": " + string);
                 save_location_history.add(string);
             }
@@ -60,7 +60,7 @@ public class SaveLocationHistory {
      * @param folder_name The folder name to add or update in the history.
      */
     private void updateFolderHistory(String folder_name) {
-        if( MyDebug.LOG ) {
+        if( CameraXDebug.LOG ) {
             Log.d(TAG, "updateFolderHistory: " + folder_name);
             Log.d(TAG, "save_location_history size: " + save_location_history.size());
             for(int i=0;i<save_location_history.size();i++) {
@@ -74,7 +74,7 @@ public class SaveLocationHistory {
             save_location_history.remove(0);
         }
         writeSaveLocations();
-        if( MyDebug.LOG ) {
+        if( CameraXDebug.LOG ) {
             Log.d(TAG, "updateFolderHistory exit:");
             Log.d(TAG, "save_location_history size: " + save_location_history.size());
             for(int i=0;i<save_location_history.size();i++) {
@@ -87,7 +87,7 @@ public class SaveLocationHistory {
      * @param folder_name The current folder name.
      */
     void clearFolderHistory(String folder_name) {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "clearFolderHistory: " + folder_name);
         save_location_history.clear();
         updateFolderHistory(folder_name, true); // to re-add the current choice, and save
@@ -96,12 +96,12 @@ public class SaveLocationHistory {
     /** Writes the history to the SharedPreferences.
      */
     private void writeSaveLocations() {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "writeSaveLocations");
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putInt(pref_base + "_size", save_location_history.size());
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "save_location_history_size = " + save_location_history.size());
         for(int i=0;i<save_location_history.size();i++) {
             String string = save_location_history.get(i);

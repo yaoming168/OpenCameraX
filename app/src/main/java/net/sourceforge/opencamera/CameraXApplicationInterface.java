@@ -56,8 +56,8 @@ import android.widget.ImageButton;
 
 /** Our implementation of ApplicationInterface, see there for details.
  */
-public class MyApplicationInterface extends BasicApplicationInterface {
-    private static final String TAG = "MyApplicationInterface";
+public class CameraXApplicationInterface extends BasicApplicationInterface {
+    private static final String TAG = "CameraXApplicationInterface";
 
     // note, okay to change the order of enums in future versions, as getPhotoMode() does not rely on the order for the saved photo mode
     public enum PhotoMode {
@@ -71,7 +71,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         Panorama
     }
 
-    private final MainActivity main_activity;
+    private final CameraXActivity main_activity;
     private final LocationSupplier locationSupplier;
     private final GyroSensor gyroSensor;
     private final StorageUtils storageUtils;
@@ -124,7 +124,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                 // previous to Android 7, we could just use a "file://" uri, but this is no longer supported on Android 7, and
                 // results in a android.os.FileUriExposedException when trying to share!
                 // see https://stackoverflow.com/questions/38200282/android-os-fileuriexposedexception-file-storage-emulated-0-test-txt-exposed
-                // so instead we leave null for now, and set it from MyApplicationInterface.scannedFile().
+                // so instead we leave null for now, and set it from CameraXApplicationInterface.scannedFile().
                 this.uri = null;
             }
             else {
@@ -152,21 +152,21 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     public volatile int test_n_videos_scanned;
     public volatile int test_max_mp;
 
-    MyApplicationInterface(MainActivity main_activity, Bundle savedInstanceState) {
+    CameraXApplicationInterface(CameraXActivity main_activity, Bundle savedInstanceState) {
         long debug_time = 0;
-        if( MyDebug.LOG ) {
-            Log.d(TAG, "MyApplicationInterface");
+        if( CameraXDebug.LOG ) {
+            Log.d(TAG, "CameraXApplicationInterface");
             debug_time = System.currentTimeMillis();
         }
         this.main_activity = main_activity;
         this.sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
         this.locationSupplier = new LocationSupplier(main_activity);
-        if( MyDebug.LOG )
-            Log.d(TAG, "MyApplicationInterface: time after creating location supplier: " + (System.currentTimeMillis() - debug_time));
+        if( CameraXDebug.LOG )
+            Log.d(TAG, "CameraXApplicationInterface: time after creating location supplier: " + (System.currentTimeMillis() - debug_time));
         this.gyroSensor = new GyroSensor(main_activity);
         this.storageUtils = new StorageUtils(main_activity, this);
-        if( MyDebug.LOG )
-            Log.d(TAG, "MyApplicationInterface: time after creating storage utils: " + (System.currentTimeMillis() - debug_time));
+        if( CameraXDebug.LOG )
+            Log.d(TAG, "CameraXApplicationInterface: time after creating storage utils: " + (System.currentTimeMillis() - debug_time));
         this.drawPreview = new DrawPreview(main_activity, this);
 
         this.imageSaver = new ImageSaver(main_activity);
@@ -175,22 +175,22 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         this.reset(false);
         if( savedInstanceState != null ) {
             // load the things we saved in onSaveInstanceState().
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "read from savedInstanceState");
             has_set_cameraId = true;
             cameraId = savedInstanceState.getInt("cameraId", cameraId_default);
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "found cameraId: " + cameraId);
             nr_mode = savedInstanceState.getString("nr_mode", nr_mode_default);
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "found nr_mode: " + nr_mode);
             aperture = savedInstanceState.getFloat("aperture", aperture_default);
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "found aperture: " + aperture);
         }
 
-        if( MyDebug.LOG )
-            Log.d(TAG, "MyApplicationInterface: total time to create MyApplicationInterface: " + (System.currentTimeMillis() - debug_time));
+        if( CameraXDebug.LOG )
+            Log.d(TAG, "CameraXApplicationInterface: total time to create CameraXApplicationInterface: " + (System.currentTimeMillis() - debug_time));
     }
 
     /** Here we save states which aren't saved in preferences (we don't want them to be saved if the
@@ -198,21 +198,21 @@ public class MyApplicationInterface extends BasicApplicationInterface {
      *  the application (e.g., configuration change, or it's destroyed while in background).
      */
     void onSaveInstanceState(Bundle state) {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "onSaveInstanceState");
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "save cameraId: " + cameraId);
         state.putInt("cameraId", cameraId);
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "save nr_mode: " + nr_mode);
         state.putString("nr_mode", nr_mode);
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "save aperture: " + aperture);
         state.putFloat("aperture", aperture);
     }
 
     void onDestroy() {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "onDestroy");
         if( drawPreview != null ) {
             drawPreview.onDestroy();
@@ -278,21 +278,21 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     @Override
     public VideoMethod createOutputVideoMethod() {
         if( isVideoCaptureIntent() ) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "from video capture intent");
             Bundle myExtras = main_activity.getIntent().getExtras();
             if (myExtras != null) {
                 Uri intent_uri = myExtras.getParcelable(MediaStore.EXTRA_OUTPUT);
                 if( intent_uri != null ) {
-                    if( MyDebug.LOG )
+                    if( CameraXDebug.LOG )
                         Log.d(TAG, "save to: " + intent_uri);
                     return VideoMethod.URI;
                 }
             }
             // if no EXTRA_OUTPUT, we should save to standard location, and will pass back the Uri of that location
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "intent uri not specified");
-            if( MainActivity.useScopedStorage() ) {
+            if( CameraXActivity.useScopedStorage() ) {
                 // can't use file method with scoped storage
                 return VideoMethod.MEDIASTORE;
             }
@@ -304,7 +304,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         else if( storageUtils.isUsingSAF() ) {
             return VideoMethod.SAF;
         }
-        else if( MainActivity.useScopedStorage() ) {
+        else if( CameraXActivity.useScopedStorage() ) {
             return VideoMethod.MEDIASTORE;
         }
         else {
@@ -331,23 +331,23 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                 MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
         ContentValues contentValues = new ContentValues();
         String filename = storageUtils.createMediaFilename(StorageUtils.MEDIA_TYPE_VIDEO, "", 0, "." + extension, new Date());
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "filename: " + filename);
         contentValues.put(MediaStore.Video.Media.DISPLAY_NAME, filename);
         String mime_type = storageUtils.getVideoMimeType(extension);
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "mime_type: " + mime_type);
         contentValues.put(MediaStore.Video.Media.MIME_TYPE, mime_type);
         if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ) {
             String relative_path = storageUtils.getSaveRelativeFolder();
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "relative_path: " + relative_path);
             contentValues.put(MediaStore.Video.Media.RELATIVE_PATH, relative_path);
             contentValues.put(MediaStore.Video.Media.IS_PENDING, 1);
         }
 
         last_video_file_uri = main_activity.getContentResolver().insert(folder, contentValues);
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "uri: " + last_video_file_uri);
         if( last_video_file_uri == null ) {
             throw new IOException();
@@ -359,13 +359,13 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     @Override
     public Uri createOutputVideoUri() {
         if( isVideoCaptureIntent() ) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "from video capture intent");
             Bundle myExtras = main_activity.getIntent().getExtras();
             if (myExtras != null) {
                 Uri intent_uri = myExtras.getParcelable(MediaStore.EXTRA_OUTPUT);
                 if( intent_uri != null ) {
-                    if( MyDebug.LOG )
+                    if( CameraXDebug.LOG )
                         Log.d(TAG, "save to: " + intent_uri);
                     return intent_uri;
                 }
@@ -400,7 +400,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
             focus_assist = Integer.parseInt(focus_assist_value);
         }
         catch(NumberFormatException e) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.e(TAG, "failed to parse focus_assist_value: " + focus_assist_value);
             e.printStackTrace();
             focus_assist = 0;
@@ -460,16 +460,16 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     @Override
     public int getExposureCompensationPref() {
         String value = sharedPreferences.getString(PreferenceKeys.ExposurePreferenceKey, "0");
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "saved exposure value: " + value);
         int exposure = 0;
         try {
             exposure = Integer.parseInt(value);
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "exposure: " + exposure);
         }
         catch(NumberFormatException exception) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "exposure invalid format, can't parse to int");
         }
         return exposure;
@@ -527,34 +527,34 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         }
 
         String resolution_value = sharedPreferences.getString(PreferenceKeys.getResolutionPreferenceKey(cameraId), "");
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "resolution_value: " + resolution_value);
         Pair<Integer, Integer> result = null;
         if( resolution_value.length() > 0 ) {
             // parse the saved size, and make sure it is still valid
             int index = resolution_value.indexOf(' ');
             if( index == -1 ) {
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "resolution_value invalid format, can't find space");
             }
             else {
                 String resolution_w_s = resolution_value.substring(0, index);
                 String resolution_h_s = resolution_value.substring(index+1);
-                if( MyDebug.LOG ) {
+                if( CameraXDebug.LOG ) {
                     Log.d(TAG, "resolution_w_s: " + resolution_w_s);
                     Log.d(TAG, "resolution_h_s: " + resolution_h_s);
                 }
                 try {
                     int resolution_w = Integer.parseInt(resolution_w_s);
-                    if( MyDebug.LOG )
+                    if( CameraXDebug.LOG )
                         Log.d(TAG, "resolution_w: " + resolution_w);
                     int resolution_h = Integer.parseInt(resolution_h_s);
-                    if( MyDebug.LOG )
+                    if( CameraXDebug.LOG )
                         Log.d(TAG, "resolution_h: " + resolution_h);
                     result = new Pair<>(resolution_w, resolution_h);
                 }
                 catch(NumberFormatException exception) {
-                    if( MyDebug.LOG )
+                    if( CameraXDebug.LOG )
                         Log.d(TAG, "resolution_value invalid format, can't parse w or h to int");
                 }
             }
@@ -580,7 +580,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
      *  saving the final image (as specified by the user).
      */
     private int getSaveImageQualityPref() {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "getSaveImageQualityPref");
         String image_quality_s = sharedPreferences.getString(PreferenceKeys.QualityPreferenceKey, "90");
         int image_quality;
@@ -588,14 +588,14 @@ public class MyApplicationInterface extends BasicApplicationInterface {
             image_quality = Integer.parseInt(image_quality_s);
         }
         catch(NumberFormatException exception) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.e(TAG, "image_quality_s invalid format: " + image_quality_s);
             image_quality = 90;
         }
         if( isRawOnly() ) {
             // if raw only mode, we can set a lower quality for the JPEG, as it isn't going to be saved - only used for
             // the thumbnail and pause preview option
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "set lower quality for raw_only mode");
             image_quality = Math.min(image_quality, 70);
         }
@@ -604,7 +604,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 
     @Override
     public int getImageQualityPref() {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "getImageQualityPref");
         // see documentation for getSaveImageQualityPref(): in DRO mode we want to take the photo
         // at 100% quality for post-processing, the final image will then be saved at the user requested
@@ -640,22 +640,22 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     @Override
     public String getVideoQualityPref() {
         if( isVideoCaptureIntent() ) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "from video capture intent");
             if( main_activity.getIntent().hasExtra(MediaStore.EXTRA_VIDEO_QUALITY) ) {
                 int intent_quality = main_activity.getIntent().getIntExtra(MediaStore.EXTRA_VIDEO_QUALITY, 0);
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "intent_quality: " + intent_quality);
                 if( intent_quality == 0 || intent_quality == 1 ) {
                     List<String> video_quality = main_activity.getPreview().getVideoQualityHander().getSupportedVideoQuality();
                     if( intent_quality == 0 ) {
-                        if( MyDebug.LOG )
+                        if( CameraXDebug.LOG )
                             Log.d(TAG, "return lowest quality");
                         // return lowest quality, video_quality is sorted high to low
                         return video_quality.get(video_quality.size()-1);
                     }
                     else {
-                        if( MyDebug.LOG )
+                        if( CameraXDebug.LOG )
                             Log.d(TAG, "return highest quality");
                         // return highest quality, video_quality is sorted high to low
                         return video_quality.get(0);
@@ -693,11 +693,11 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     public String getVideoFPSPref() {
         // if check for EXTRA_VIDEO_QUALITY, if set, best to fall back to default FPS - see corresponding code in getVideoQualityPref
         if( isVideoCaptureIntent() ) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "from video capture intent");
             if( main_activity.getIntent().hasExtra(MediaStore.EXTRA_VIDEO_QUALITY) ) {
                 int intent_quality = main_activity.getIntent().getIntExtra(MediaStore.EXTRA_VIDEO_QUALITY, 0);
-                if (MyDebug.LOG)
+                if (CameraXDebug.LOG)
                     Log.d(TAG, "intent_quality: " + intent_quality);
                 if (intent_quality == 0 || intent_quality == 1) {
                     return "default";
@@ -707,10 +707,10 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 
         float capture_rate_factor = getVideoCaptureRateFactor();
         if( capture_rate_factor < 1.0f-1.0e-5f ) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "set fps for slow motion, capture rate: " + capture_rate_factor);
             int preferred_fps = (int)(30.0/capture_rate_factor+0.5);
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "preferred_fps: " + preferred_fps);
             if( main_activity.getPreview().getVideoQualityHander().videoSupportsFrameRateHighSpeed(preferred_fps) ||
                     main_activity.getPreview().getVideoQualityHander().videoSupportsFrameRate(preferred_fps) )
@@ -719,7 +719,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
             // motion is supported, but we need to set 120fps instead of 60fps
             while( preferred_fps < 240 ) {
                 preferred_fps *= 2;
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "preferred_fps not supported, try: " + preferred_fps);
                 if( main_activity.getPreview().getVideoQualityHander().videoSupportsFrameRateHighSpeed(preferred_fps) ||
                         main_activity.getPreview().getVideoQualityHander().videoSupportsFrameRate(preferred_fps) )
@@ -735,14 +735,14 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     @Override
     public float getVideoCaptureRateFactor() {
         float capture_rate_factor = sharedPreferences.getFloat(PreferenceKeys.getVideoCaptureRatePreferenceKey(main_activity.getPreview().getCameraId()), 1.0f);
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "capture_rate_factor: " + capture_rate_factor);
         if( Math.abs(capture_rate_factor - 1.0f) > 1.0e-5 ) {
             // check stored capture rate is valid
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "check stored capture rate is valid");
             List<Float> supported_capture_rates = getSupportedVideoCaptureRates();
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "supported_capture_rates: " + supported_capture_rates);
             boolean found = false;
             for(float this_capture_rate : supported_capture_rates) {
@@ -878,11 +878,11 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         float gamma = 0.0f;
         try {
             gamma = Float.parseFloat(gamma_value);
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "gamma: " + gamma);
         }
         catch(NumberFormatException e) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.e(TAG, "failed to parse gamma value: " + gamma_value);
             e.printStackTrace();
         }
@@ -892,11 +892,11 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     @Override
     public long getVideoMaxDurationPref() {
         if( isVideoCaptureIntent() ) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "from video capture intent");
             if( main_activity.getIntent().hasExtra(MediaStore.EXTRA_DURATION_LIMIT) ) {
                 int intent_duration_limit = main_activity.getIntent().getIntExtra(MediaStore.EXTRA_DURATION_LIMIT, 0);
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "intent_duration_limit: " + intent_duration_limit);
                 return intent_duration_limit * 1000;
             }
@@ -908,7 +908,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
             video_max_duration = (long)Integer.parseInt(video_max_duration_value) * 1000;
         }
         catch(NumberFormatException e) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.e(TAG, "failed to parse preference_video_max_duration value: " + video_max_duration_value);
             e.printStackTrace();
             video_max_duration = 0;
@@ -924,7 +924,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
             remaining_restart_video = Integer.parseInt(restart_value);
         }
         catch(NumberFormatException e) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.e(TAG, "failed to parse preference_video_restart value: " + restart_value);
             e.printStackTrace();
             remaining_restart_video = 0;
@@ -933,15 +933,15 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     }
 
     long getVideoMaxFileSizeUserPref() {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "getVideoMaxFileSizeUserPref");
 
         if( isVideoCaptureIntent() ) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "from video capture intent");
             if( main_activity.getIntent().hasExtra(MediaStore.EXTRA_SIZE_LIMIT) ) {
                 long intent_size_limit = main_activity.getIntent().getLongExtra(MediaStore.EXTRA_SIZE_LIMIT, 0);
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "intent_size_limit: " + intent_size_limit);
                 return intent_size_limit;
             }
@@ -953,20 +953,20 @@ public class MyApplicationInterface extends BasicApplicationInterface {
             video_max_filesize = Long.parseLong(video_max_filesize_value);
         }
         catch(NumberFormatException e) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.e(TAG, "failed to parse preference_video_max_filesize value: " + video_max_filesize_value);
             e.printStackTrace();
             video_max_filesize = 0;
         }
         //video_max_filesize = 1024*1024; // test
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "video_max_filesize: " + video_max_filesize);
         return video_max_filesize;
     }
 
     private boolean getVideoRestartMaxFileSizeUserPref() {
         if( isVideoCaptureIntent() ) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "from video capture intent");
             if( main_activity.getIntent().hasExtra(MediaStore.EXTRA_SIZE_LIMIT) ) {
                 // if called from a video capture intent that set a max file size, this will be expecting a single file with that maximum size
@@ -979,7 +979,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 
     @Override
     public VideoMaxFileSize getVideoMaxFileSizePref() throws NoFreeStorageException {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "getVideoMaxFileSizePref");
         VideoMaxFileSize video_max_filesize = new VideoMaxFileSize();
         video_max_filesize.max_filesize = getVideoMaxFileSizeUserPref();
@@ -997,7 +997,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         }
         else {
             String folder_name = storageUtils.getSaveLocation();
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "saving to: " + folder_name);
             boolean is_internal = false;
             if( !StorageUtils.saveFolderIsFull(folder_name) ) {
@@ -1006,17 +1006,17 @@ public class MyApplicationInterface extends BasicApplicationInterface {
             else {
                 // If save folder path is a full path, see if it matches the "external" storage (which actually means "primary", which typically isn't an SD card these days).
                 File storage = Environment.getExternalStorageDirectory();
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "compare to: " + storage.getAbsolutePath());
                 if( folder_name.startsWith( storage.getAbsolutePath() ) )
                     is_internal = true;
             }
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "using internal storage?" + is_internal);
             set_max_filesize = is_internal;
         }
         if( set_max_filesize ) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "try setting max filesize");
             long free_memory = storageUtils.freeMemory();
             if( free_memory >= 0 ) {
@@ -1032,7 +1032,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                 if( test_set_available_memory ) {
                     available_memory = test_available_memory;
                 }
-                if( MyDebug.LOG ) {
+                if( CameraXDebug.LOG ) {
                     Log.d(TAG, "free_memory: " + free_memory);
                     Log.d(TAG, "available_memory: " + available_memory);
                 }
@@ -1040,18 +1040,18 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                     if( video_max_filesize.max_filesize == 0 || video_max_filesize.max_filesize > available_memory ) {
                         video_max_filesize.max_filesize = available_memory;
                         // still leave auto_restart set to true - because even if we set a max filesize for running out of storage, the video may still hit a maximum limit beforehand, if there's a device max limit set (typically ~2GB)
-                        if( MyDebug.LOG )
+                        if( CameraXDebug.LOG )
                             Log.d(TAG, "set video_max_filesize to avoid running out of space: " + video_max_filesize);
                     }
                 }
                 else {
-                    if( MyDebug.LOG )
+                    if( CameraXDebug.LOG )
                         Log.e(TAG, "not enough free storage to record video");
                     throw new NoFreeStorageException();
                 }
             }
             else {
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "can't determine remaining free space");
             }
         }
@@ -1141,7 +1141,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 
     @Override
     public long getTimerPref() {
-        if( getPhotoMode() == MyApplicationInterface.PhotoMode.Panorama )
+        if( getPhotoMode() == CameraXApplicationInterface.PhotoMode.Panorama )
             return 0; // don't support timer with panorama
         String timer_value = sharedPreferences.getString(PreferenceKeys.TimerPreferenceKey, "0");
         long timer_delay;
@@ -1149,7 +1149,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
             timer_delay = (long)Integer.parseInt(timer_value) * 1000;
         }
         catch(NumberFormatException e) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.e(TAG, "failed to parse preference_timer value: " + timer_value);
             e.printStackTrace();
             timer_delay = 0;
@@ -1159,7 +1159,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 
     @Override
     public String getRepeatPref() {
-        if( getPhotoMode() == MyApplicationInterface.PhotoMode.Panorama )
+        if( getPhotoMode() == CameraXApplicationInterface.PhotoMode.Panorama )
             return "1"; // don't support repeat with panorama
         return sharedPreferences.getString(PreferenceKeys.RepeatModePreferenceKey, "1");
     }
@@ -1170,12 +1170,12 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         long timer_delay;
         try {
             float timer_delay_s = Float.parseFloat(timer_value);
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "timer_delay_s: " + timer_delay_s);
             timer_delay = (long)(timer_delay_s * 1000);
         }
         catch(NumberFormatException e) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.e(TAG, "failed to parse repeat interval value: " + timer_value);
             e.printStackTrace();
             timer_delay = 0;
@@ -1227,7 +1227,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
             ghost_image_alpha = Integer.parseInt(ghost_image_alpha_value);
         }
         catch(NumberFormatException e) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.e(TAG, "failed to parse ghost_image_alpha_value: " + ghost_image_alpha_value);
             e.printStackTrace();
             ghost_image_alpha = 50;
@@ -1267,15 +1267,15 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     private int getTextStampFontSizePref() {
         int font_size = 12;
         String value = sharedPreferences.getString(PreferenceKeys.StampFontSizePreferenceKey, "12");
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "saved font size: " + value);
         try {
             font_size = Integer.parseInt(value);
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "font_size: " + font_size);
         }
         catch(NumberFormatException exception) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "font size invalid format, can't parse to int");
         }
         return font_size;
@@ -1287,7 +1287,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 
     @Override
     public int getZoomPref() {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "getZoomPref: " + zoom_factor);
         return zoom_factor;
     }
@@ -1299,7 +1299,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 
     @Override
     public boolean canTakeNewPhoto() {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "canTakeNewPhoto");
 
         int n_raw, n_jpegs;
@@ -1347,7 +1347,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 
         int photo_cost = imageSaver.computePhotoCost(n_raw, n_jpegs);
         if( imageSaver.queueWouldBlock(photo_cost) ) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "canTakeNewPhoto: no, as queue would block");
             return false;
         }
@@ -1358,7 +1358,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         if( photo_mode == PhotoMode.FastBurst || photo_mode == PhotoMode.Panorama ) {
             // only allow one fast burst at a time, so require queue to be empty
             if( n_images_to_save > 0 ) {
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "canTakeNewPhoto: no, as too many for fast burst");
                 return false;
             }
@@ -1366,7 +1366,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         if( photo_mode == PhotoMode.NoiseReduction ) {
             // allow a max of 2 photos in memory when at max of 8 images
             if( n_images_to_save >= 2*photo_cost ) {
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "canTakeNewPhoto: no, as too many for nr");
                 return false;
             }
@@ -1374,7 +1374,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         if( n_jpegs > 1 ) {
             // if in any other kind of burst mode (e.g., expo burst, HDR), allow a max of 3 photos in memory
             if( n_images_to_save >= 3*photo_cost ) {
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "canTakeNewPhoto: no, as too many for burst");
                 return false;
             }
@@ -1382,7 +1382,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         if( n_raw > 0 ) {
             // if RAW mode, allow a max of 3 photos
             if( n_images_to_save >= 3*photo_cost ) {
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "canTakeNewPhoto: no, as too many for raw");
                 return false;
             }
@@ -1394,7 +1394,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                 // so need to at least allow a new photo, if the number of photos is less than 1 NR photo
             }
             else {
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "canTakeNewPhoto: no, as too many for regular");
                 return false;
             }
@@ -1405,7 +1405,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 
     @Override
     public boolean imageQueueWouldBlock(int n_raw, int n_jpegs) {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "imageQueueWouldBlock");
         return imageSaver.queueWouldBlock(n_raw, n_jpegs);
     }
@@ -1448,7 +1448,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                 n_images = Integer.parseInt(n_images_value);
             }
             catch(NumberFormatException e) {
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.e(TAG, "failed to parse FastBurstNImagesPreferenceKey value: " + n_images_value);
                 e.printStackTrace();
                 n_images = 5;
@@ -1469,14 +1469,14 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     }
 
     public String getNRMode() {
-		/*if( MyDebug.LOG )
+		/*if( CameraXDebug.LOG )
 			Log.d(TAG, "nr_mode: " + nr_mode);*/
         return nr_mode;
     }
 
     @Override
     public NRModePref getNRModePref() {
-		/*if( MyDebug.LOG )
+		/*if( CameraXDebug.LOG )
 			Log.d(TAG, "nr_mode: " + nr_mode);*/
         //noinspection SwitchStatementWithTooFewBranches
         switch( nr_mode ) {
@@ -1497,7 +1497,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 
     @Override
     public int getExpoBracketingNImagesPref() {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "getExpoBracketingNImagesPref");
         int n_images;
         PhotoMode photo_mode = getPhotoMode();
@@ -1511,19 +1511,19 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                 n_images = Integer.parseInt(n_images_s);
             }
             catch(NumberFormatException exception) {
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.e(TAG, "n_images_s invalid format: " + n_images_s);
                 n_images = 3;
             }
         }
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "n_images = " + n_images);
         return n_images;
     }
 
     @Override
     public double getExpoBracketingStopsPref() {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "getExpoBracketingStopsPref");
         double n_stops;
         PhotoMode photo_mode = getPhotoMode();
@@ -1537,19 +1537,19 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                 n_stops = Double.parseDouble(n_stops_s);
             }
             catch(NumberFormatException exception) {
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.e(TAG, "n_stops_s invalid format: " + n_stops_s);
                 n_stops = 2.0;
             }
         }
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "n_stops = " + n_stops);
         return n_stops;
     }
 
     @Override
     public int getFocusBracketingNImagesPref() {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "getFocusBracketingNImagesPref");
         int n_images;
         String n_images_s = sharedPreferences.getString(PreferenceKeys.FocusBracketingNImagesPreferenceKey, "3");
@@ -1557,11 +1557,11 @@ public class MyApplicationInterface extends BasicApplicationInterface {
             n_images = Integer.parseInt(n_images_s);
         }
         catch(NumberFormatException exception) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.e(TAG, "n_images_s invalid format: " + n_images_s);
             n_images = 3;
         }
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "n_images = " + n_images);
         return n_images;
     }
@@ -1578,7 +1578,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
      */
     public PhotoMode getPhotoMode() {
         String photo_mode_pref = sharedPreferences.getString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_std");
-		/*if( MyDebug.LOG )
+		/*if( CameraXDebug.LOG )
 			Log.d(TAG, "photo_mode_pref: " + photo_mode_pref);*/
         boolean dro = photo_mode_pref.equals("preference_photo_mode_dro");
         if( dro && main_activity.supportsDRO() )
@@ -1730,7 +1730,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 
     @Override
     public boolean isTestAlwaysFocus() {
-        if( MyDebug.LOG ) {
+        if( CameraXDebug.LOG ) {
             Log.d(TAG, "isTestAlwaysFocus: " + main_activity.is_test);
         }
         return main_activity.is_test;
@@ -1748,13 +1748,13 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 
     @Override
     public void onContinuousFocusMove(boolean start) {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "onContinuousFocusMove: " + start);
         drawPreview.onContinuousFocusMove(start);
     }
 
     void startPanorama() {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "startPanorama");
         gyroSensor.startRecording();
         n_panorama_pics = 0;
@@ -1771,7 +1771,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     /** Ends panorama and submits the panoramic images to be processed.
      */
     void finishPanorama() {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "finishPanorama");
 
         imageSaver.getImageBatchRequest().panorama_dir_left_to_right = this.panorama_dir_left_to_right;
@@ -1787,10 +1787,10 @@ public class MyApplicationInterface extends BasicApplicationInterface {
      * @param is_cancelled Whether the panorama has been cancelled.
      */
     void stopPanorama(boolean is_cancelled) {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "stopPanorama");
         if( !gyroSensor.isRecording() ) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "...nothing to stop");
             return;
         }
@@ -1806,15 +1806,15 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     }
 
     private void setNextPanoramaPoint(boolean repeat) {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "setNextPanoramaPoint");
         float camera_angle_y = main_activity.getPreview().getViewAngleY(false);
         if( !repeat )
             n_panorama_pics++;
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "n_panorama_pics is now: " + n_panorama_pics);
         if( n_panorama_pics == max_panorama_pics_c ) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "reached max panorama limit");
             finishPanorama();
             return;
@@ -1838,7 +1838,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     }
 
     private void setNextPanoramaPoint(float x, float y, float z) {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "setNextPanoramaPoint : " + x + " , " + y + " , " + z);
 
         final float target_angle = 1.0f * 0.01745329252f;
@@ -1849,7 +1849,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         gyroSensor.setTarget(x, y, z, target_angle, upright_angle_tol, too_far_angle, new GyroSensor.TargetCallback() {
             @Override
             public void onAchieved(int indx) {
-                if( MyDebug.LOG ) {
+                if( CameraXDebug.LOG ) {
                     Log.d(TAG, "TargetCallback.onAchieved: " + indx);
                     Log.d(TAG, "    n_panorama_pics: " + n_panorama_pics);
                 }
@@ -1863,7 +1863,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                 gyroSensor.disableTargetCallback();
                 if( n_panorama_pics == 1 ) {
                     panorama_dir_left_to_right = indx == 0;
-                    if( MyDebug.LOG )
+                    if( CameraXDebug.LOG )
                         Log.d(TAG, "set panorama_dir_left_to_right to " + panorama_dir_left_to_right);
                 }
                 main_activity.takePicturePressed(false, false);
@@ -1871,12 +1871,12 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 
             @Override
             public void onTooFar() {
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "TargetCallback.onTooFar");
 
                 if( !main_activity.is_test ) {
                     main_activity.getPreview().showToast(null, R.string.panorama_cancelled);
-                    MyApplicationInterface.this.stopPanorama(true);
+                    CameraXApplicationInterface.this.stopPanorama(true);
                 }
             }
 
@@ -1885,7 +1885,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     }
 
     private void clearPanoramaPoint() {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "clearPanoramaPoint");
         gyroSensor.clearTarget();
         drawPreview.clearGyroDirectionMarker();
@@ -1919,7 +1919,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 
     @Override
     public void startedVideo() {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "startedVideo()");
         if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.N ) {
             if( !( main_activity.getMainUI().inImmersiveMode() && main_activity.usingKitKatImmersiveModeEverything() ) ) {
@@ -1935,7 +1935,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
             }
         }
         if( main_activity.getMainUI().isExposureUIOpen() ) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "need to update exposure UI for start video recording");
             // need to update the exposure UI when starting/stopping video recording, to remove/add
             // ability to switch between auto and manual
@@ -1960,29 +1960,29 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                 private long min_video_time_from = 0;
 
                 private String getSubtitleFilename(String video_filename) {
-                    if( MyDebug.LOG )
+                    if( CameraXDebug.LOG )
                         Log.d(TAG, "getSubtitleFilename");
                     int indx = video_filename.indexOf('.');
                     if( indx != -1 ) {
                         video_filename = video_filename.substring(0, indx);
                     }
                     video_filename = video_filename + ".srt";
-                    if( MyDebug.LOG )
+                    if( CameraXDebug.LOG )
                         Log.d(TAG, "return filename: " + video_filename);
                     return video_filename;
                 }
 
                 public void run() {
-                    if( MyDebug.LOG )
+                    if( CameraXDebug.LOG )
                         Log.d(TAG, "SubtitleVideoTimerTask run");
                     long video_time = main_activity.getPreview().getVideoTime();
                     if( !main_activity.getPreview().isVideoRecording() ) {
-                        if( MyDebug.LOG )
+                        if( CameraXDebug.LOG )
                             Log.d(TAG, "no longer video recording");
                         return;
                     }
                     if( main_activity.getPreview().isVideoRecordingPaused() ) {
-                        if( MyDebug.LOG )
+                        if( CameraXDebug.LOG )
                             Log.d(TAG, "video recording is paused");
                         return;
                     }
@@ -1992,7 +1992,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                     // We subtract an offset, because if the current time is say 00:00:03.425 and the video has been recording for
                     // 1s, we instead need to record the video time when it became 00:00:03.000. This does mean that the GPS
                     // location is going to be off by up to 1s, but that should be less noticeable than the clock being off.
-                    if( MyDebug.LOG ) {
+                    if( CameraXDebug.LOG ) {
                         Log.d(TAG, "count: " + count);
                         Log.d(TAG, "offset_ms: " + offset_ms);
                         Log.d(TAG, "video_time: " + video_time);
@@ -2002,7 +2002,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                     Location location = store_location ? getLocation() : null;
                     double geo_direction = store_geo_direction && main_activity.getPreview().hasGeoDirection() ? main_activity.getPreview().getGeoDirection() : 0.0;
                     String gps_stamp = main_activity.getTextFormatter().getGPSString(preference_stamp_gpsformat, preference_units_distance, store_location && location!=null, location, store_geo_direction && main_activity.getPreview().hasGeoDirection(), geo_direction);
-                    if( MyDebug.LOG ) {
+                    if( CameraXDebug.LOG ) {
                         Log.d(TAG, "date_stamp: " + date_stamp);
                         Log.d(TAG, "time_stamp: " + time_stamp);
                         // don't log gps_stamp, in case of privacy!
@@ -2029,11 +2029,11 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                             if( main_activity.isAppPaused() ) {
                                 // seems safer to not try to initiate potential network connections (via geocoder) if Open Camera
                                 // is paused - this shouldn't happen, since we stop video when paused, but just to be safe
-                                if( MyDebug.LOG )
+                                if( CameraXDebug.LOG )
                                     Log.d(TAG, "don't call geocoder for video subtitles  as app is paused?!");
                             }
                             else if( Geocoder.isPresent() ) {
-                                if( MyDebug.LOG )
+                                if( CameraXDebug.LOG )
                                     Log.d(TAG, "geocoder is present");
                                 Geocoder geocoder = new Geocoder(main_activity, Locale.getDefault());
                                 try {
@@ -2041,7 +2041,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                                     if( addresses != null && addresses.size() > 0 ) {
                                         address = addresses.get(0);
                                         // don't log address, in case of privacy!
-                                        if( MyDebug.LOG ) {
+                                        if( CameraXDebug.LOG ) {
                                             Log.d(TAG, "max line index: " + address.getMaxAddressLineIndex());
                                         }
                                     }
@@ -2052,7 +2052,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                                 }
                             }
                             else {
-                                if( MyDebug.LOG )
+                                if( CameraXDebug.LOG )
                                     Log.d(TAG, "geocoder not present");
                             }
                         }
@@ -2066,12 +2066,12 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                         }
 
                         if( address == null || preference_stamp_geo_address.equals("preference_stamp_geo_address_both") ) {
-                            if( MyDebug.LOG )
+                            if( CameraXDebug.LOG )
                                 Log.d(TAG, "display gps coords");
                             subtitles.append(gps_stamp).append("\n");
                         }
                         else if( store_geo_direction ) {
-                            if( MyDebug.LOG )
+                            if( CameraXDebug.LOG )
                                 Log.d(TAG, "not displaying gps coords, but need to display geo direction");
                             gps_stamp = main_activity.getTextFormatter().getGPSString(preference_stamp_gpsformat, preference_units_distance, false, null, store_geo_direction && main_activity.getPreview().hasGeoDirection(), geo_direction);
                             if( gps_stamp.length() > 0 ) {
@@ -2103,7 +2103,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                                     writer = new FileWriter(subtitle_filename);
                                 }
                                 else if( video_method == VideoMethod.SAF || video_method == VideoMethod.MEDIASTORE ) {
-                                    if( MyDebug.LOG )
+                                    if( CameraXDebug.LOG )
                                         Log.d(TAG, "last_video_file_uri: " + last_video_file_uri);
                                     String subtitle_filename = storageUtils.getFileName(last_video_file_uri);
                                     subtitle_filename = getSubtitleFilename(subtitle_filename);
@@ -2123,7 +2123,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                                         contentValues.put(MediaStore.Images.Media.MIME_TYPE, "video/x-srt");
                                         if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ) {
                                             String relative_path = storageUtils.getSaveRelativeFolder();
-                                            if( MyDebug.LOG )
+                                            if( CameraXDebug.LOG )
                                                 Log.d(TAG, "relative_path: " + relative_path);
                                             contentValues.put(MediaStore.Video.Media.RELATIVE_PATH, relative_path);
                                             contentValues.put(MediaStore.Video.Media.IS_PENDING, 1);
@@ -2133,7 +2133,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                                             throw new IOException();
                                         }
                                     }
-                                    if( MyDebug.LOG )
+                                    if( CameraXDebug.LOG )
                                         Log.d(TAG, "uri: " + uri);
                                     pfd_saf = getContext().getContentResolver().openFileDescriptor(uri, "w");
                                     writer = new FileWriter(pfd_saf.getFileDescriptor());
@@ -2155,20 +2155,20 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                         count++;
                     }
                     catch(IOException e) {
-                        if( MyDebug.LOG )
+                        if( CameraXDebug.LOG )
                             Log.e(TAG, "SubtitleVideoTimerTask failed to create or write");
                         e.printStackTrace();
                     }
-                    if( MyDebug.LOG )
+                    if( CameraXDebug.LOG )
                         Log.d(TAG, "SubtitleVideoTimerTask exit");
                 }
 
                 public boolean cancel() {
-                    if( MyDebug.LOG )
+                    if( CameraXDebug.LOG )
                         Log.d(TAG, "SubtitleVideoTimerTask cancel");
                     synchronized( this ) {
                         if( writer != null ) {
-                            if( MyDebug.LOG )
+                            if( CameraXDebug.LOG )
                                 Log.d(TAG, "close writer");
                             try {
                                 writer.close();
@@ -2204,7 +2204,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 
     @Override
     public void stoppingVideo() {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "stoppingVideo()");
         main_activity.unlockScreen();
         ImageButton view = main_activity.findViewById(R.id.take_photo);
@@ -2215,7 +2215,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 
     @Override
     public void stoppedVideo(final VideoMethod video_method, final Uri uri, final String filename) {
-        if( MyDebug.LOG ) {
+        if( CameraXDebug.LOG ) {
             Log.d(TAG, "stoppedVideo");
             Log.d(TAG, "video_method " + video_method);
             Log.d(TAG, "uri " + uri);
@@ -2228,7 +2228,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         main_activity.getMainUI().setPauseVideoContentDescription(); // just to be safe
         main_activity.getMainUI().destroyPopup(); // as the available popup options change while recording video
         if( main_activity.getMainUI().isExposureUIOpen() ) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "need to update exposure UI for stop video recording");
             // need to update the exposure UI when starting/stopping video recording, to remove/add
             // ability to switch between auto and manual
@@ -2241,7 +2241,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 
         completeVideo(video_method, uri);
         boolean done = broadcastVideo(video_method, uri, filename);
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "done? " + done);
 
         if( isVideoCaptureIntent() ) {
@@ -2249,7 +2249,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                 // do nothing here - we end the activity from storageUtils.broadcastFile after the file has been scanned, as it seems caller apps seem to prefer the content:// Uri rather than one based on a File
             }
             else {
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "from video capture intent");
                 Intent output = null;
                 if( done ) {
@@ -2259,7 +2259,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                     if( video_method == VideoMethod.SAF || video_method == VideoMethod.MEDIASTORE ) {
                         output = new Intent();
                         output.setData(uri);
-                        if( MyDebug.LOG )
+                        if( CameraXDebug.LOG )
                             Log.d(TAG, "pass back output uri [saf]: " + output.getData());
                     }
                 }
@@ -2309,13 +2309,13 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                 ImageButton galleryButton = main_activity.findViewById(R.id.gallery);
                 int width = thumbnail.getWidth();
                 int height = thumbnail.getHeight();
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "    video thumbnail size " + width + " x " + height);
                 if( width > galleryButton.getWidth() ) {
                     float scale = (float) galleryButton.getWidth() / width;
                     int new_width = Math.round(scale * width);
                     int new_height = Math.round(scale * height);
-                    if( MyDebug.LOG )
+                    if( CameraXDebug.LOG )
                         Log.d(TAG, "    scale video thumbnail to " + new_width + " x " + new_height);
                     Bitmap scaled_thumbnail = Bitmap.createScaledBitmap(thumbnail, new_width, new_height, true);
                     // careful, as scaled_thumbnail is sometimes not a copy!
@@ -2331,14 +2331,14 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                     }
                 });
             }
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "    time to create thumbnail: " + (System.currentTimeMillis() - debug_time));
         }
     }
 
     @Override
     public void restartedVideo(final VideoMethod video_method, final Uri uri, final String filename) {
-        if( MyDebug.LOG ) {
+        if( CameraXDebug.LOG ) {
             Log.d(TAG, "restartedVideo");
             Log.d(TAG, "video_method " + video_method);
             Log.d(TAG, "uri " + uri);
@@ -2352,7 +2352,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
      *  file.
      */
     private void completeVideo(final VideoMethod video_method, final Uri uri) {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "completeVideo");
         if( video_method == VideoMethod.MEDIASTORE ) {
             if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ) {
@@ -2364,7 +2364,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     }
 
     private boolean broadcastVideo(final VideoMethod video_method, final Uri uri, final String filename) {
-        if( MyDebug.LOG ) {
+        if( CameraXDebug.LOG ) {
             Log.d(TAG, "broadcastVideo");
             Log.d(TAG, "video_method " + video_method);
             Log.d(TAG, "uri " + uri);
@@ -2402,7 +2402,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         }
         if( done ) {
             test_n_videos_scanned++;
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "test_n_videos_scanned is now: " + test_n_videos_scanned);
         }
 
@@ -2416,7 +2416,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
      *  caller, and finishes the activity.
      */
     void finishVideoIntent(Uri uri) {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "finishVideoIntent:" + uri);
         Intent output = new Intent();
         output.setData(uri);
@@ -2426,7 +2426,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 
     @Override
     public void deleteUnusedVideo(final VideoMethod video_method, final Uri uri, final String filename) {
-        if( MyDebug.LOG ) {
+        if( CameraXDebug.LOG ) {
             Log.d(TAG, "deleteUnusedVideo");
             Log.d(TAG, "video_method " + video_method);
             Log.d(TAG, "uri " + uri);
@@ -2448,13 +2448,13 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     public void onVideoInfo(int what, int extra) {
         // we don't show a toast for MEDIA_RECORDER_INFO_MAX_DURATION_REACHED - conflicts with "n repeats to go" toast from Preview
         if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && what == MediaRecorder.MEDIA_RECORDER_INFO_NEXT_OUTPUT_FILE_STARTED ) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "next output file started");
             int message_id = R.string.video_max_filesize;
             main_activity.getPreview().showToast(null, message_id);
         }
         else if( what == MediaRecorder.MEDIA_RECORDER_INFO_MAX_FILESIZE_REACHED ) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "max filesize reached");
             int message_id = R.string.video_max_filesize;
             main_activity.getPreview().showToast(null, message_id);
@@ -2484,12 +2484,12 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 
     @Override
     public void onVideoError(int what, int extra) {
-        if( MyDebug.LOG ) {
+        if( CameraXDebug.LOG ) {
             Log.d(TAG, "onVideoError: " + what + " extra: " + extra);
         }
         int message_id = R.string.video_error_unknown;
         if( what == MediaRecorder.MEDIA_ERROR_SERVER_DIED  ) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "error: server died");
             message_id = R.string.video_error_server_died;
         }
@@ -2504,7 +2504,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 
     @Override
     public void onVideoRecordStartError(VideoProfile profile) {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "onVideoRecordStartError");
         String error_message;
         String features = main_activity.getPreview().getErrorFeatures(profile);
@@ -2519,7 +2519,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 
     @Override
     public void onVideoRecordStopError(VideoProfile profile) {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "onVideoRecordStopError");
         //main_activity.getPreview().showToast(null, R.string.failed_to_record_video);
         String features = main_activity.getPreview().getErrorFeatures(profile);
@@ -2537,14 +2537,14 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 
     @Override
     public void onFailedCreateVideoFileError() {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "onFailedCreateVideoFileError");
         main_activity.getPreview().showToast(null, R.string.failed_to_save_video);
     }
 
     @Override
     public void hasPausedPreview(boolean paused) {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "hasPausedPreview: " + paused);
         View shareButton = main_activity.findViewById(R.id.share);
         View trashButton = main_activity.findViewById(R.id.trash);
@@ -2561,7 +2561,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 
     @Override
     public void cameraInOperation(boolean in_operation, boolean is_video) {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "cameraInOperation: " + in_operation);
         if( !in_operation && used_front_screen_flash ) {
             main_activity.setBrightnessForCamera(false); // ensure screen brightness matches user preference, after using front screen flash
@@ -2573,7 +2573,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 
     @Override
     public void turnFrontScreenFlashOn() {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "turnFrontScreenFlashOn");
         used_front_screen_flash = true;
         main_activity.setBrightnessForCamera(true); // ensure we have max screen brightness, even if user preference not set for max brightness
@@ -2582,7 +2582,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 
     @Override
     public void onCaptureStarted() {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "onCaptureStarted");
         n_capture_images = 0;
         n_capture_images_raw = 0;
@@ -2591,12 +2591,12 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 
     @Override
     public void onPictureCompleted() {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "onPictureCompleted");
 
         PhotoMode photo_mode = getPhotoMode();
         if( main_activity.getPreview().isVideo() ) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "snapshot mode");
             // must be in photo snapshot while recording video mode, only support standard photo mode
             photo_mode = PhotoMode.Standard;
@@ -2606,23 +2606,23 @@ public class MyApplicationInterface extends BasicApplicationInterface {
             boolean do_in_background = saveInBackground(image_capture_intent);
             imageSaver.finishImageBatch(do_in_background);
         }
-        else if( photo_mode == MyApplicationInterface.PhotoMode.Panorama && gyroSensor.isRecording() ) {
+        else if( photo_mode == CameraXApplicationInterface.PhotoMode.Panorama && gyroSensor.isRecording() ) {
             if( panorama_pic_accepted ) {
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "set next panorama point");
                 this.setNextPanoramaPoint(false);
             }
             else {
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "panorama pic wasn't accepted");
                 this.setNextPanoramaPoint(true);
             }
         }
         else if( photo_mode == PhotoMode.FocusBracketing ) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "focus bracketing completed");
             if( getShutterSoundPref() ) {
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "play completion sound");
                 MediaPlayer player = MediaPlayer.create(getContext(), Settings.System.DEFAULT_NOTIFICATION_URI);
                 if( player != null ) {
@@ -2638,7 +2638,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 
     @Override
     public void cameraClosed() {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "cameraClosed");
         this.stopPanorama(true);
         main_activity.getMainUI().closeExposureUI();
@@ -2647,7 +2647,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     }
 
     void updateThumbnail(Bitmap thumbnail, boolean is_video) {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "updateThumbnail");
         main_activity.updateGalleryIcon(thumbnail);
         drawPreview.updateThumbnail(thumbnail, is_video, true);
@@ -2658,18 +2658,18 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 
     @Override
     public void timerBeep(long remaining_time) {
-        if( MyDebug.LOG ) {
+        if( CameraXDebug.LOG ) {
             Log.d(TAG, "timerBeep()");
             Log.d(TAG, "remaining_time: " + remaining_time);
         }
         if( sharedPreferences.getBoolean(PreferenceKeys.TimerBeepPreferenceKey, true) ) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "play beep!");
             boolean is_last = remaining_time <= 1000;
             main_activity.getSoundPoolManager().playSound(is_last ? R.raw.mybeep_hi : R.raw.mybeep);
         }
         if( sharedPreferences.getBoolean(PreferenceKeys.TimerSpeakPreferenceKey, false) ) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "speak countdown!");
             int remaining_time_s = (int)(remaining_time/1000);
             if( remaining_time_s <= 60 )
@@ -2686,13 +2686,13 @@ public class MyApplicationInterface extends BasicApplicationInterface {
      * @param front_facing Whether to switch to a front or back facing camera.
      */
     void switchToCamera(boolean front_facing) {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "switchToCamera: " + front_facing);
         int n_cameras = main_activity.getPreview().getCameraControllerManager().getNumberOfCameras();
         CameraController.Facing want_facing = front_facing ? CameraController.Facing.FACING_FRONT : CameraController.Facing.FACING_BACK;
         for(int i=0;i<n_cameras;i++) {
             if( main_activity.getPreview().getCameraControllerManager().getFacing(i) == want_facing ) {
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "found desired camera: " + i);
                 this.setCameraIdPref(i);
                 break;
@@ -2819,7 +2819,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
             return;
         }
         String resolution_value = width + " " + height;
-        if( MyDebug.LOG ) {
+        if( CameraXDebug.LOG ) {
             Log.d(TAG, "save new resolution_value: " + resolution_value);
         }
         SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -2836,37 +2836,37 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 
     @Override
     public void setZoomPref(int zoom) {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "setZoomPref: " + zoom);
         this.zoom_factor = zoom;
     }
 
     @Override
     public void requestCameraPermission() {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "requestCameraPermission");
         main_activity.getPermissionHandler().requestCameraPermission();
     }
 
     @Override
     public boolean needsStoragePermission() {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "needsStoragePermission");
-        if( MainActivity.useScopedStorage() )
+        if( CameraXActivity.useScopedStorage() )
             return false; // no longer need storage permission with scoped storage - and shouldn't request it either
         return true;
     }
 
     @Override
     public void requestStoragePermission() {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "requestStoragePermission");
         main_activity.getPermissionHandler().requestStoragePermission();
     }
 
     @Override
     public void requestRecordAudioPermission() {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "requestRecordAudioPermission");
         main_activity.getPermissionHandler().requestRecordAudioPermission();
     }
@@ -2901,7 +2901,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
      *  when switching between photo/video modes, or switching cameras).
      */
     void reset(boolean switched_camera) {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "reset");
         if( switched_camera ) {
             // aperture is reset when switching camera, but not when application is paused or switching between photo/video etc
@@ -2964,14 +2964,14 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         final int padding = (int) (2 * scale + 0.5f); // convert dps to pixels
         if( paint.getTextAlign() == Paint.Align.RIGHT || paint.getTextAlign() == Paint.Align.CENTER ) {
             float width = paint.measureText(text); // n.b., need to use measureText rather than getTextBounds here
-			/*if( MyDebug.LOG )
+			/*if( CameraXDebug.LOG )
 				Log.d(TAG, "width: " + width);*/
             if( paint.getTextAlign() == Paint.Align.CENTER )
                 width /= 2.0f;
             text_bounds.left -= width;
             text_bounds.right -= width;
         }
-		/*if( MyDebug.LOG )
+		/*if( CameraXDebug.LOG )
 			Log.d(TAG, "text_bounds left-right: " + text_bounds.left + " , " + text_bounds.right);*/
         text_bounds.left += location_x - padding;
         text_bounds.right += location_x + padding;
@@ -3029,7 +3029,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         boolean image_capture_intent = false;
         String action = main_activity.getIntent().getAction();
         if( MediaStore.ACTION_IMAGE_CAPTURE.equals(action) || MediaStore.ACTION_IMAGE_CAPTURE_SECURE.equals(action) ) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "from image capture intent");
             image_capture_intent = true;
         }
@@ -3040,7 +3040,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         boolean video_capture_intent = false;
         String action = main_activity.getIntent().getAction();
         if( MediaStore.ACTION_VIDEO_CAPTURE.equals(action) ) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "from video capture intent");
             video_capture_intent = true;
         }
@@ -3067,7 +3067,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
      * @return Whether saving was successful.
      */
     private boolean saveImage(boolean save_expo, List<byte []> images, Date current_date) {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "saveImage");
 
         System.gc();
@@ -3075,12 +3075,12 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         boolean image_capture_intent = isImageCaptureIntent();
         Uri image_capture_intent_uri = null;
         if( image_capture_intent ) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "from image capture intent");
             Bundle myExtras = main_activity.getIntent().getExtras();
             if( myExtras != null ) {
                 image_capture_intent_uri = myExtras.getParcelable(MediaStore.EXTRA_OUTPUT);
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "save to: " + image_capture_intent_uri);
             }
         }
@@ -3091,14 +3091,14 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                 main_activity.getPreview().hasLevelAngle() &&
                 main_activity.getPreview().hasPitchAngle() &&
                 main_activity.getPreview().hasGeoDirection();
-        if( MyDebug.LOG ) {
+        if( CameraXDebug.LOG ) {
             Log.d(TAG, "store_ypr: " + store_ypr);
             Log.d(TAG, "has level angle: " + main_activity.getPreview().hasLevelAngle());
             Log.d(TAG, "has pitch angle: " + main_activity.getPreview().hasPitchAngle());
             Log.d(TAG, "has geo direction: " + main_activity.getPreview().hasGeoDirection());
         }
         int image_quality = getSaveImageQualityPref();
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "image_quality: " + image_quality);
         boolean do_auto_stabilise = getAutoStabilisePref() && main_activity.getPreview().hasLevelAngleStable();
         double level_angle = (main_activity.getPreview().hasLevelAngle()) ? main_activity.getPreview().getLevelAngle() : 0.0;
@@ -3135,12 +3135,12 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         if( main_activity.getPreview().getCameraController() != null ) {
             if( main_activity.getPreview().getCameraController().captureResultHasIso() ) {
                 iso = main_activity.getPreview().getCameraController().captureResultIso();
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "iso: " + iso);
             }
             if( main_activity.getPreview().getCameraController().captureResultHasExposureTime() ) {
                 exposure_time = main_activity.getPreview().getCameraController().captureResultExposureTime();
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "exposure_time: " + exposure_time);
             }
 
@@ -3164,20 +3164,20 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                 sample_factor *= 4;
             }
         }
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "sample_factor: " + sample_factor);
 
         boolean success;
         PhotoMode photo_mode = getPhotoMode();
         if( main_activity.getPreview().isVideo() ) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "snapshot mode");
             // must be in photo snapshot while recording video mode, only support standard photo mode
             photo_mode = PhotoMode.Standard;
         }
 
         if( !main_activity.is_test && photo_mode == PhotoMode.Panorama && gyroSensor.isRecording() && gyroSensor.hasTarget() && !gyroSensor.isTargetAchieved() ) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "ignore panorama image as target no longer achieved!");
             // n.b., gyroSensor.hasTarget() will be false if this is the first picture in the panorama series
             panorama_pic_accepted = false;
@@ -3280,7 +3280,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                     sample_factor);
         }
 
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "saveImage complete, success: " + success);
 
         return success;
@@ -3288,11 +3288,11 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 
     @Override
     public boolean onPictureTaken(byte [] data, Date current_date) {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "onPictureTaken");
 
         n_capture_images++;
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "n_capture_images is now " + n_capture_images);
 
         List<byte []> images = new ArrayList<>();
@@ -3300,7 +3300,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 
         boolean success = saveImage(false, images, current_date);
 
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "onPictureTaken complete, success: " + success);
 
         return success;
@@ -3308,28 +3308,28 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 
     @Override
     public boolean onBurstPictureTaken(List<byte []> images, Date current_date) {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "onBurstPictureTaken: received " + images.size() + " images");
 
         boolean success;
         PhotoMode photo_mode = getPhotoMode();
         if( main_activity.getPreview().isVideo() ) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "snapshot mode");
             // must be in photo snapshot while recording video mode, only support standard photo mode
             photo_mode = PhotoMode.Standard;
         }
         if( photo_mode == PhotoMode.HDR ) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "HDR mode");
             boolean save_expo = sharedPreferences.getBoolean(PreferenceKeys.HDRSaveExpoPreferenceKey, false);
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "save_expo: " + save_expo);
 
             success = saveImage(save_expo, images, current_date);
         }
         else {
-            if( MyDebug.LOG ) {
+            if( CameraXDebug.LOG ) {
                 Log.d(TAG, "exposure/focus bracketing mode mode");
                 if( photo_mode != PhotoMode.ExpoBracketing && photo_mode != PhotoMode.FocusBracketing )
                     Log.e(TAG, "onBurstPictureTaken called with unexpected photo mode?!: " + photo_mode);
@@ -3342,19 +3342,19 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 
     @Override
     public boolean onRawPictureTaken(RawImage raw_image, Date current_date) {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "onRawPictureTaken");
         System.gc();
 
         n_capture_images_raw++;
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "n_capture_images_raw is now " + n_capture_images_raw);
 
         boolean do_in_background = saveInBackground(false);
 
         PhotoMode photo_mode = getPhotoMode();
         if( main_activity.getPreview().isVideo() ) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "snapshot mode");
             // must be in photo snapshot while recording video mode, only support standard photo mode
             // (RAW not supported anyway for video snapshot mode, but have this code just to be safe)
@@ -3367,14 +3367,14 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         int suffix_offset = force_suffix ? (n_capture_images_raw-1) : 0;
         boolean success = imageSaver.saveImageRaw(do_in_background, force_suffix, suffix_offset, raw_image, current_date);
 
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "onRawPictureTaken complete");
         return success;
     }
 
     @Override
     public boolean onRawBurstPictureTaken(List<RawImage> raw_images, Date current_date) {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "onRawBurstPictureTaken");
         System.gc();
 
@@ -3386,13 +3386,13 @@ public class MyApplicationInterface extends BasicApplicationInterface {
             success = imageSaver.saveImageRaw(do_in_background, true, i, raw_images.get(i), current_date);
         }
 
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "onRawBurstPictureTaken complete");
         return success;
     }
 
     void addLastImage(File file, boolean share) {
-        if( MyDebug.LOG ) {
+        if( CameraXDebug.LOG ) {
             Log.d(TAG, "addLastImage: " + file);
             Log.d(TAG, "share?: " + share);
         }
@@ -3402,7 +3402,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     }
 
     void addLastImageSAF(Uri uri, boolean share) {
-        if( MyDebug.LOG ) {
+        if( CameraXDebug.LOG ) {
             Log.d(TAG, "addLastImageSAF: " + uri);
             Log.d(TAG, "share?: " + share);
         }
@@ -3412,7 +3412,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     }
 
     void addLastImageMediaStore(Uri uri, boolean share) {
-        if( MyDebug.LOG ) {
+        if( CameraXDebug.LOG ) {
             Log.d(TAG, "addLastImageMediaStore: " + uri);
             Log.d(TAG, "share?: " + share);
         }
@@ -3422,7 +3422,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     }
 
     void clearLastImages() {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "clearLastImages");
         last_images_type = LastImagesType.FILE;
         last_images.clear();
@@ -3430,7 +3430,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     }
 
     void shareLastImage() {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "shareLastImage");
         Preview preview  = main_activity.getPreview();
         if( preview.isPreviewPaused() ) {
@@ -3444,7 +3444,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
             boolean done = true;
             if( share_image != null ) {
                 Uri last_image_uri = share_image.uri;
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "Share: " + last_image_uri);
                 if( last_image_uri == null ) {
                     // could happen with Android 7+ with non-SAF if the image hasn't been scanned yet,
@@ -3468,20 +3468,20 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     private void trashImage(LastImagesType image_type, Uri image_uri, String image_name, boolean from_user) {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "trashImage");
         Preview preview  = main_activity.getPreview();
         if( image_type == LastImagesType.SAF && image_uri != null ) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "Delete SAF: " + image_uri);
             File file = storageUtils.getFileFromDocumentUriSAF(image_uri, false); // need to get file before deleting it, as fileFromDocumentUriSAF may depend on the file still existing
             try {
                 if( !DocumentsContract.deleteDocument(main_activity.getContentResolver(), image_uri) ) {
-                    if( MyDebug.LOG )
+                    if( CameraXDebug.LOG )
                         Log.e(TAG, "failed to delete " + image_uri);
                 }
                 else {
-                    if( MyDebug.LOG )
+                    if( CameraXDebug.LOG )
                         Log.d(TAG, "successfully deleted " + image_uri);
                     if( from_user )
                         preview.showToast(null, R.string.photo_deleted);
@@ -3494,26 +3494,26 @@ public class MyApplicationInterface extends BasicApplicationInterface {
             catch(FileNotFoundException e) {
                 // note, Android Studio reports a warning that FileNotFoundException isn't thrown, but it can be
                 // thrown by DocumentsContract.deleteDocument - and we get an error if we try to remove the catch!
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.e(TAG, "exception when deleting " + image_uri);
                 e.printStackTrace();
             }
         }
         else if( image_type == LastImagesType.MEDIASTORE && image_uri != null ) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "Delete MediaStore: " + image_uri);
             main_activity.getContentResolver().delete(image_uri, null, null);
         }
         else if( image_name != null ) {
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "Delete: " + image_name);
             File file = new File(image_name);
             if( !file.delete() ) {
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.e(TAG, "failed to delete " + image_name);
             }
             else {
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "successfully deleted " + image_name);
                 if( from_user )
                     preview.showToast(photo_delete_toast, R.string.photo_deleted);
@@ -3523,7 +3523,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     }
 
     void trashLastImage() {
-        if( MyDebug.LOG )
+        if( CameraXDebug.LOG )
             Log.d(TAG, "trashLastImage");
         Preview preview  = main_activity.getPreview();
         if( preview.isPreviewPaused() ) {
@@ -3551,7 +3551,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
      * @param uri  The file's corresponding uri.
      */
     void scannedFile(File file, Uri uri) {
-        if( MyDebug.LOG ) {
+        if( CameraXDebug.LOG ) {
             Log.d(TAG, "scannedFile");
             Log.d(TAG, "file: " + file);
             Log.d(TAG, "uri: " + uri);
@@ -3559,10 +3559,10 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         // see note under LastImage constructor for why we need to update the Uris
         for(int i=0;i<last_images.size();i++) {
             LastImage last_image = last_images.get(i);
-            if( MyDebug.LOG )
+            if( CameraXDebug.LOG )
                 Log.d(TAG, "compare to last_image: " + last_image.name);
             if( last_image.uri == null && last_image.name != null && last_image.name.equals(file.getAbsolutePath()) ) {
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "updated last_image : " + i);
                 last_image.uri = uri;
             }

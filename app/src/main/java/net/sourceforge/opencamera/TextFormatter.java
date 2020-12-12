@@ -86,7 +86,7 @@ public class TextFormatter {
         String gps_stamp = "";
         if( !preference_stamp_gpsformat.equals("preference_stamp_gpsformat_none") ) {
             if( store_location ) {
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "location: " + location);
                 if( preference_stamp_gpsformat.equals("preference_stamp_gpsformat_dms") )
                     gps_stamp += LocationSupplier.locationToDMS(location.getLatitude()) + ", " + LocationSupplier.locationToDMS(location.getLongitude());
@@ -101,7 +101,7 @@ public class TextFormatter {
                 if( geo_angle < 0.0f ) {
                     geo_angle += 360.0f;
                 }
-                if( MyDebug.LOG )
+                if( CameraXDebug.LOG )
                     Log.d(TAG, "geo_angle: " + geo_angle);
                 if( gps_stamp.length() > 0 )
                     gps_stamp += ", ";
