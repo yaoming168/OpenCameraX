@@ -27,6 +27,11 @@ import androidx.annotation.NonNull;
  *  otherwise the calling application still controls the behaviour of the
  *  camera.
  */
+/**
+ *  CameraController是一个抽象类，它包装了访问/控制Android摄像头，这样应用程序的其余部分就不必了直接处理Android相机API。
+ *  它也让我们支持通过同一个API有多个相机API(这是用来支持两者的最初的摄像头API，以及Android 5的Camera2 API)。
+ *  这个类是关于api的相当底层的包装器——有一些额外的逻辑/工作区，这些东西是api特定的，但是否则调用应用程序仍然控制类的行为相机。
+ */
 public abstract class CameraController {
     private static final String TAG = "CameraController";
     private final int cameraId;

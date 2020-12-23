@@ -44,6 +44,9 @@ import android.util.Log;
 /** Provides access to the filesystem. Supports both standard and Storage
  *  Access Framework.
  */
+/*提供对文件系统的访问。支持标准和存储
+ *访问框架。
+ * */
 public class StorageUtils {
     private static final String TAG = "StorageUtils";
 

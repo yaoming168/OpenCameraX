@@ -74,6 +74,7 @@ import java.util.Scanner;
 还需要注意的是，通过一个bundle传递可能是必要的，以避免访问预览，它可以是null
 *
 * */
+
 public class CameraXPreferenceFragment extends PreferenceFragment implements OnSharedPreferenceChangeListener {
     private static final String TAG = "CameraXPreferenceFragment";
 
