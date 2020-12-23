@@ -66,6 +66,15 @@ import java.util.Scanner;
  *  preview, which can be null - see note about video resolutions below.
  *  Also see https://stackoverflow.com/questions/14093438/after-the-rotate-oncreate-fragment-is-called-before-oncreate-fragmentactivi .
  */
+
+/*
+用来显示设置的Fragment UI。
+注意，最初这是一个PreferenceActivity而不是一个PreferenceFragment，它要求所有的通信都通过bundle进行(因为这替换了MainActivity，
+这意味着我们无法访问该类中的数据。
+这不再适用，因为现在使用了一个PreferenceFragment，但我仍然保持通过bundle传递信息(至少大部分)。
+还要注意的是，通过一个bundle传递可能是必要的，以避免访问预览，它可以是空的-请参阅下面关于视频分辨率的注意。
+参见https://stackoverflow.com/questions/14093438/after-the-rotate-oncreate-fragment-is-called-before-oncreate-fragmentactivi。
+ */
 public class CameraXPreferenceFragment extends PreferenceFragment implements OnSharedPreferenceChangeListener {
     private static final String TAG = "CameraXPreferenceFragment";
 
