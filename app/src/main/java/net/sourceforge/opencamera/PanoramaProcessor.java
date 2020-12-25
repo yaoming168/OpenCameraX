@@ -121,7 +121,7 @@ public class PanoramaProcessor {
         script.forEach_expand(expanded_allocation, expanded_allocation);
         if( CameraXDebug.LOG )
             Log.d(TAG, "### expandBitmap: time after expand: " + (System.currentTimeMillis() - time_s));
-
+//        全景模式中绘制的两个蓝色的圆圈
         final boolean use_blur_2d = false; // faster to do blue as two 1D passes
         if( use_blur_2d ) {
             result_allocation = Allocation.createTyped(rs, Type.createXY(rs, Element.RGBA_8888(rs), 2*width, 2*height));
@@ -133,8 +133,7 @@ public class PanoramaProcessor {
                 Log.d(TAG, "### expandBitmap: time after blur: " + (System.currentTimeMillis() - time_s));
             expanded_allocation.destroy();
             //result_allocation = expanded_allocation;
-        }
-        else {
+        }else{
             Allocation temp_allocation = Allocation.createTyped(rs, Type.createXY(rs, Element.RGBA_8888(rs), 2*width, 2*height));
             if( CameraXDebug.LOG )
                 Log.d(TAG, "### expandBitmap: time after creating temp_allocation: " + (System.currentTimeMillis() - time_s));
@@ -159,6 +158,9 @@ public class PanoramaProcessor {
     /** Creates an allocation where each pixel equals the pixel from allocation0 minus the corresponding
      *  pixel from allocation1.
      */
+    /*
+    * 创建一个分配，其中每个像素等于allocation0中的像素减去allocation1中的相应像素。
+    * */
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private Allocation subtractBitmap(ScriptC_pyramid_blending script, Allocation allocation0, Allocation allocation1) {
         if( CameraXDebug.LOG )
@@ -180,6 +182,10 @@ public class PanoramaProcessor {
      *  corresponding pixel from allocation1.
      *  allocation0 should be of type RGBA_8888, allocation1 should be of type F32_3.
      */
+    /*
+    * 更新allocation0，使每个像素等于来自allocation0的像素加上来自allocation1的相应像素。
+allocation0应该是RGBA_8888类型，allocation1应该是F32_3类型。
+    * */
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void addBitmap(ScriptC_pyramid_blending script, Allocation allocation0, Allocation allocation1) {
         if( CameraXDebug.LOG )
@@ -217,6 +223,16 @@ public class PanoramaProcessor {
      *  The allocations are of type floating point (F32_3), except the last which is of type
      *  RGBA_8888.
      */
+
+/*     创建一个位图的拉普拉斯金字塔，从下到上排序。
+     第i个
+     项等于[G(i) - G'(i+1)]，其中G(i)是高斯金字塔的第i级，
+     和G'是通过扩展高斯金字塔的一个层次而产生的;
+     除了最后一项
+     等于高斯金字塔的最后一层(即顶部)。
+     分配的类型是浮点数(F32_3)，除了最后一个是类型
+     RGBA_8888。*/
+
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private List<Allocation> createLaplacianPyramid(ScriptC_pyramid_blending script, Bitmap bitmap, int n_levels, String name) {
         if( CameraXDebug.LOG )
@@ -2928,7 +2944,7 @@ public class PanoramaProcessor {
         long time_s = 0;
         if( CameraXDebug.LOG )
             time_s = System.currentTimeMillis();
-
+//获取
         int bitmap_width = bitmaps.get(0).getWidth();
         int bitmap_height = bitmaps.get(0).getHeight();
         if( CameraXDebug.LOG ) {
