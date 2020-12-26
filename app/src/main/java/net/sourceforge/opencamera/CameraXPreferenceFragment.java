@@ -4,6 +4,7 @@ import net.sourceforge.opencamera.cameracontroller.CameraController;
 import net.sourceforge.opencamera.preview.Preview;
 import net.sourceforge.opencamera.ui.ArraySeekBarPreference;
 import net.sourceforge.opencamera.ui.FolderChooserDialog;
+import net.sourceforge.opencamera.utils.CameraXDebug;
 
 import android.app.Activity;
 import android.app.ActivityManager;

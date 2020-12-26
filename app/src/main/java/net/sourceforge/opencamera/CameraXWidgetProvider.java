@@ -8,6 +8,8 @@ import android.content.Intent;
 import android.util.Log;
 import android.widget.RemoteViews;
 
+import net.sourceforge.opencamera.utils.CameraXDebug;
+
 /** Handles the Open Camera lock screen widget. Lock screen widgets are no
  *  longer supported in Android 5 onwards (instead Open Camera can be launched
  *  from the lock screen using the standard camera icon), but this is kept here

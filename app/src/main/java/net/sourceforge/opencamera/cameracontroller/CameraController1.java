@@ -1,6 +1,6 @@
 package net.sourceforge.opencamera.cameracontroller;
 
-import net.sourceforge.opencamera.CameraXDebug;
+import net.sourceforge.opencamera.utils.CameraXDebug;
 
 import java.io.IOException;
 import java.util.ArrayList;

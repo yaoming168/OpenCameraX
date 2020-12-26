@@ -1,6 +1,6 @@
 package net.sourceforge.opencamera.remotecontrol;
 
-import net.sourceforge.opencamera.CameraXDebug;
+import net.sourceforge.opencamera.utils.CameraXDebug;
 
 import android.app.Service;
 import android.bluetooth.BluetoothAdapter;

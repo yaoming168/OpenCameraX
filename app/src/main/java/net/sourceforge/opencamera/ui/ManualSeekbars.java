@@ -3,7 +3,7 @@ package net.sourceforge.opencamera.ui;
 import android.util.Log;
 import android.widget.SeekBar;
 
-import net.sourceforge.opencamera.CameraXDebug;
+import net.sourceforge.opencamera.utils.CameraXDebug;
 
 import java.util.ArrayList;
 import java.util.List;

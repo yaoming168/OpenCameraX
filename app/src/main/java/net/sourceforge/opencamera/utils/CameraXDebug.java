@@ -1,4 +1,4 @@
-package net.sourceforge.opencamera;
+package net.sourceforge.opencamera.utils;
 
 /** Global constant to control logging, should always be set to false in
  *  released versions.

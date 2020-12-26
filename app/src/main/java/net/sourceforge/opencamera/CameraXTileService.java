@@ -6,6 +6,8 @@ import android.service.quicksettings.TileService;
 import androidx.annotation.RequiresApi;
 import android.util.Log;
 
+import net.sourceforge.opencamera.utils.CameraXDebug;
+
 /** Provides service for quick settings tile.
  */
 @RequiresApi(api = Build.VERSION_CODES.N)

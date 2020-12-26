@@ -8,6 +8,8 @@ import android.os.Build;
 import android.util.Log;
 import android.util.SparseIntArray;
 
+import net.sourceforge.opencamera.utils.CameraXDebug;
+
 /** Manages loading and playing sounds, via SoundPool.
  */
 class SoundPoolManager {

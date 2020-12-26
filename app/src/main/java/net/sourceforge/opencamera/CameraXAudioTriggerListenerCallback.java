@@ -4,6 +4,8 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import net.sourceforge.opencamera.utils.CameraXDebug;
+
 /** Handles the audio "noise" trigger option.
  */
 public class CameraXAudioTriggerListenerCallback implements AudioListener.AudioListenerCallback {

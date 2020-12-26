@@ -2,7 +2,7 @@ package net.sourceforge.opencamera.preview;
 
 import net.sourceforge.opencamera.cameracontroller.RawImage;
 //import net.sourceforge.opencamera.MainActivity;
-import net.sourceforge.opencamera.CameraXDebug;
+import net.sourceforge.opencamera.utils.CameraXDebug;
 import net.sourceforge.opencamera.R;
 import net.sourceforge.opencamera.ScriptC_histogram_compute;
 import net.sourceforge.opencamera.TakePhoto;

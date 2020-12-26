@@ -4,7 +4,7 @@ import android.media.CamcorderProfile;
 import android.util.Log;
 
 import net.sourceforge.opencamera.cameracontroller.CameraController;
-import net.sourceforge.opencamera.CameraXDebug;
+import net.sourceforge.opencamera.utils.CameraXDebug;
 
 import java.io.Serializable;
 import java.util.ArrayList;

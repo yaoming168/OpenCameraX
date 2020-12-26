@@ -1,6 +1,6 @@
 package net.sourceforge.opencamera.ui;
 
-import net.sourceforge.opencamera.CameraXDebug;
+import net.sourceforge.opencamera.utils.CameraXDebug;
 import net.sourceforge.opencamera.R;
 import net.sourceforge.opencamera.StorageUtils;
 

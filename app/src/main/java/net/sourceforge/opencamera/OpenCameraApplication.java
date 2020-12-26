@@ -4,6 +4,8 @@ import android.app.Application;
 import android.os.Process;
 import android.util.Log;
 
+import net.sourceforge.opencamera.utils.CameraXDebug;
+
 /** We override the Application class to implement the workaround at
  *  https://issuetracker.google.com/issues/36972466#comment14 for Google bug crash. It seems ugly,
  *  but Google consider this a low priority despite calling these "bad behaviours" in applications!

@@ -14,6 +14,8 @@ import android.preference.PreferenceManager;
 import androidx.core.content.ContextCompat;
 import android.util.Log;
 
+import net.sourceforge.opencamera.utils.CameraXDebug;
+
 /** Handles listening for GPS location (both coarse and fine).
  */
 public class LocationSupplier {

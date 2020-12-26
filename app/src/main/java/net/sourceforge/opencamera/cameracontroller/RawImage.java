@@ -6,7 +6,7 @@ import android.media.Image;
 import android.os.Build;
 import android.util.Log;
 
-import net.sourceforge.opencamera.CameraXDebug;
+import net.sourceforge.opencamera.utils.CameraXDebug;
 
 import java.io.IOException;
 import java.io.OutputStream;

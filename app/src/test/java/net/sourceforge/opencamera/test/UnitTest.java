@@ -6,7 +6,7 @@ import net.sourceforge.opencamera.CameraXActivity;
 import net.sourceforge.opencamera.CameraXApplicationInterface;
 import net.sourceforge.opencamera.cameracontroller.CameraController;
 import net.sourceforge.opencamera.cameracontroller.CameraController2;
-import net.sourceforge.opencamera.HDRProcessor;
+import net.sourceforge.opencamera.feature.mode.HDR.HDRProcessor;
 import net.sourceforge.opencamera.ImageSaver;
 import net.sourceforge.opencamera.LocationSupplier;
 import net.sourceforge.opencamera.preview.Preview;

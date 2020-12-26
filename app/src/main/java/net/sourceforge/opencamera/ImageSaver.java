@@ -2,6 +2,11 @@ package net.sourceforge.opencamera;
 
 import net.sourceforge.opencamera.cameracontroller.CameraController;
 import net.sourceforge.opencamera.cameracontroller.RawImage;
+import net.sourceforge.opencamera.feature.mode.HDR.HDRProcessor;
+import net.sourceforge.opencamera.feature.mode.HDR.HDRProcessorException;
+import net.sourceforge.opencamera.feature.mode.panorama.PanoramaProcessor;
+import net.sourceforge.opencamera.feature.mode.panorama.PanoramaProcessorException;
+import net.sourceforge.opencamera.utils.CameraXDebug;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;

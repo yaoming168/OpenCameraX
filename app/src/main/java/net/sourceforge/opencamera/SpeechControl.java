@@ -11,6 +11,8 @@ import android.speech.SpeechRecognizer;
 import android.util.Log;
 import android.view.View;
 
+import net.sourceforge.opencamera.utils.CameraXDebug;
+
 import java.util.ArrayList;
 import java.util.Locale;
 

@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
+import net.sourceforge.opencamera.utils.CameraXDebug;
+
 /** Entry Activity for the "take photo" widget (see CameraXWidgetProviderTakePhoto).
  *  This redirects to MainActivity, but uses an intent extra/bundle to pass the
  *  "take photo" request.

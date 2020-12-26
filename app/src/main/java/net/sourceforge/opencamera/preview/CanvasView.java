@@ -1,6 +1,6 @@
 package net.sourceforge.opencamera.preview;
 
-import net.sourceforge.opencamera.CameraXDebug;
+import net.sourceforge.opencamera.utils.CameraXDebug;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.os.Handler;

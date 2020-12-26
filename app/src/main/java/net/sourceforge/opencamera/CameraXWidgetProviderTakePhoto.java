@@ -8,6 +8,8 @@ import android.content.Intent;
 import android.util.Log;
 import android.widget.RemoteViews;
 
+import net.sourceforge.opencamera.utils.CameraXDebug;
+
 /** Handles the Open Camera "take photo" widget. This widget launches Open
  *  Camera, and immediately takes a photo.
  */

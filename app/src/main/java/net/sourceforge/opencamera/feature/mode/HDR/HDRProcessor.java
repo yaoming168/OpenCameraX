@@ -1,10 +1,8 @@
-package net.sourceforge.opencamera;
+package net.sourceforge.opencamera.feature.mode.HDR;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -15,7 +13,6 @@ import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.media.MediaScannerConnection;
 import android.os.Build;
-import android.os.Environment;
 import android.renderscript.Allocation;
 import android.renderscript.Element;
 import android.renderscript.RSInvalidStateException;
@@ -28,6 +25,16 @@ import android.renderscript.Type;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import android.util.Log;
+
+import net.sourceforge.opencamera.ScriptC_align_mtb;
+import net.sourceforge.opencamera.ScriptC_avg_brighten;
+import net.sourceforge.opencamera.ScriptC_calculate_sharpness;
+import net.sourceforge.opencamera.ScriptC_create_mtb;
+import net.sourceforge.opencamera.ScriptC_histogram_adjust;
+import net.sourceforge.opencamera.ScriptC_histogram_compute;
+import net.sourceforge.opencamera.ScriptC_process_avg;
+import net.sourceforge.opencamera.ScriptC_process_hdr;
+import net.sourceforge.opencamera.utils.CameraXDebug;
 
 public class HDRProcessor {
     private static final String TAG = "HDRProcessor";
@@ -1045,7 +1052,7 @@ public class HDRProcessor {
             Log.d(TAG, "time for processSingleImage: " + (System.currentTimeMillis() - time_s));
     }
 
-    void brightenImage(Bitmap bitmap, int brightness, int max_brightness, int brightness_target) {
+    public void brightenImage(Bitmap bitmap, int brightness, int max_brightness, int brightness_target) {
         if( CameraXDebug.LOG ) {
             Log.d(TAG, "brightenImage");
             Log.d(TAG, "brightness: " + brightness);
@@ -1689,7 +1696,7 @@ public class HDRProcessor {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    void autoAlignment(int[] offsets_x, int[] offsets_y, int width, int height, List<Bitmap> bitmaps, int base_bitmap, boolean use_mtb, int max_align_scale) {
+    public void autoAlignment(int[] offsets_x, int[] offsets_y, int width, int height, List<Bitmap> bitmaps, int base_bitmap, boolean use_mtb, int max_align_scale) {
         if( CameraXDebug.LOG )
             Log.d(TAG, "autoAlignment");
         initRenderscript();
@@ -2329,7 +2336,7 @@ public class HDRProcessor {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    void adjustHistogram(Allocation allocation_in, Allocation allocation_out, int width, int height, float hdr_alpha, int n_tiles, boolean ce_preserve_blacks, long time_s) {
+    public void adjustHistogram(Allocation allocation_in, Allocation allocation_out, int width, int height, float hdr_alpha, int n_tiles, boolean ce_preserve_blacks, long time_s) {
         if( CameraXDebug.LOG )
             Log.d(TAG, "adjustHistogram");
         final boolean adjust_histogram = false;
@@ -2731,11 +2738,11 @@ public class HDRProcessor {
         return histogram;
     }
 
-    static class HistogramInfo {
-        final int total;
-        final int mean_brightness;
-        final int median_brightness;
-        final int max_brightness;
+   public static class HistogramInfo {
+       public final int total;
+       public final int mean_brightness;
+       public final int median_brightness;
+       public final int max_brightness;
 
         HistogramInfo(int total, int mean_brightness, int median_brightness, int max_brightness) {
             this.total = total;
@@ -2745,7 +2752,7 @@ public class HDRProcessor {
         }
     }
 
-    HistogramInfo getHistogramInfo(int[] histo) {
+   public HistogramInfo getHistogramInfo(int[] histo) {
         int total = 0;
         for(int value : histo)
             total += value;

@@ -7,6 +7,8 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.util.Log;
 
+import net.sourceforge.opencamera.utils.CameraXDebug;
+
 import java.util.ArrayList;
 import java.util.List;
 

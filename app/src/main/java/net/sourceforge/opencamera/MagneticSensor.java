@@ -9,6 +9,8 @@ import android.hardware.SensorManager;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import net.sourceforge.opencamera.utils.CameraXDebug;
+
 /** Handles magnetic sensor.
  */
 class MagneticSensor {

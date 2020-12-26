@@ -1,4 +1,4 @@
-package net.sourceforge.opencamera;
+package net.sourceforge.opencamera.feature.mode.panorama;
 
 /** Exception for PanoramaProcessor class.
  */

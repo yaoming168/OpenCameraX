@@ -6,7 +6,7 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
-import net.sourceforge.opencamera.CameraXDebug;
+import net.sourceforge.opencamera.utils.CameraXDebug;
 
 /** This is essentially similar to CamcorderProfile in that it encapsulates a set of video settings
      *  to be passed to MediaRecorder, but allows us to store additional fields.

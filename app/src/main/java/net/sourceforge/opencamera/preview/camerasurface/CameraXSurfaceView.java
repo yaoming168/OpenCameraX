@@ -1,6 +1,6 @@
 package net.sourceforge.opencamera.preview.camerasurface;
 
-import net.sourceforge.opencamera.CameraXDebug;
+import net.sourceforge.opencamera.utils.CameraXDebug;
 import net.sourceforge.opencamera.cameracontroller.CameraController;
 import net.sourceforge.opencamera.cameracontroller.CameraControllerException;
 import net.sourceforge.opencamera.preview.Preview;

@@ -15,11 +15,14 @@ import java.util.TimerTask;
 
 import net.sourceforge.opencamera.cameracontroller.CameraController;
 import net.sourceforge.opencamera.cameracontroller.RawImage;
+import net.sourceforge.opencamera.feature.mode.HDR.HDRProcessor;
+import net.sourceforge.opencamera.feature.mode.panorama.PanoramaProcessor;
 import net.sourceforge.opencamera.preview.ApplicationInterface;
 import net.sourceforge.opencamera.preview.BasicApplicationInterface;
 import net.sourceforge.opencamera.preview.Preview;
 import net.sourceforge.opencamera.preview.VideoProfile;
 import net.sourceforge.opencamera.ui.DrawPreview;
+import net.sourceforge.opencamera.utils.CameraXDebug;
 
 import android.annotation.TargetApi;
 import android.app.Activity;

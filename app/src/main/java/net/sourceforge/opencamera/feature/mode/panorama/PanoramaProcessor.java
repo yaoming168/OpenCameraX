@@ -1,4 +1,4 @@
-package net.sourceforge.opencamera;
+package net.sourceforge.opencamera.feature.mode.panorama;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -29,6 +29,12 @@ import android.renderscript.Script;
 import android.renderscript.Type;
 import androidx.annotation.RequiresApi;
 import android.util.Log;
+
+import net.sourceforge.opencamera.CameraXActivity;
+import net.sourceforge.opencamera.ScriptC_feature_detector;
+import net.sourceforge.opencamera.ScriptC_pyramid_blending;
+import net.sourceforge.opencamera.feature.mode.HDR.HDRProcessor;
+import net.sourceforge.opencamera.utils.CameraXDebug;
 
 public class PanoramaProcessor {
     private static final String TAG = "PanoramaProcessor";

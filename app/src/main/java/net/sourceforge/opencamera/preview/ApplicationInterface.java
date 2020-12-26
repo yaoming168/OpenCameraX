@@ -13,7 +13,7 @@ import android.util.Log;
 import android.util.Pair;
 import android.view.MotionEvent;
 
-import net.sourceforge.opencamera.CameraXDebug;
+import net.sourceforge.opencamera.utils.CameraXDebug;
 import net.sourceforge.opencamera.cameracontroller.CameraController;
 import net.sourceforge.opencamera.cameracontroller.RawImage;
 

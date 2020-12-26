@@ -2,7 +2,7 @@ package net.sourceforge.opencamera.ui;
 
 import net.sourceforge.opencamera.CameraXActivity;
 import net.sourceforge.opencamera.CameraXApplicationInterface;
-import net.sourceforge.opencamera.CameraXDebug;
+import net.sourceforge.opencamera.utils.CameraXDebug;
 import net.sourceforge.opencamera.PreferenceKeys;
 import net.sourceforge.opencamera.R;
 import net.sourceforge.opencamera.cameracontroller.CameraController;

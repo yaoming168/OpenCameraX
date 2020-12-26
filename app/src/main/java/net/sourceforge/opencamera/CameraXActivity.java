@@ -9,6 +9,7 @@ import net.sourceforge.opencamera.remotecontrol.BluetoothRemoteControl;
 import net.sourceforge.opencamera.ui.FolderChooserDialog;
 import net.sourceforge.opencamera.ui.MainUI;
 import net.sourceforge.opencamera.ui.ManualSeekbars;
+import net.sourceforge.opencamera.utils.CameraXDebug;
 
 import java.io.File;
 import java.io.IOException;
