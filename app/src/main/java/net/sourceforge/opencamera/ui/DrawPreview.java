@@ -11,9 +11,9 @@ import java.util.Locale;
 
 import net.sourceforge.opencamera.GyroSensor;
 import net.sourceforge.opencamera.ImageSaver;
-import net.sourceforge.opencamera.LocationSupplier;
+import net.sourceforge.opencamera.utils.LocationSupplier;
 import net.sourceforge.opencamera.CameraXActivity;
-import net.sourceforge.opencamera.CameraXApplicationInterface;
+import net.sourceforge.opencamera.common.CameraXApplicationInterface;
 import net.sourceforge.opencamera.utils.CameraXDebug;
 import net.sourceforge.opencamera.PreferenceKeys;
 import net.sourceforge.opencamera.preview.ApplicationInterface;

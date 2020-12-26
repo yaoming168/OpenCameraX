@@ -1,4 +1,4 @@
-package net.sourceforge.opencamera;
+package net.sourceforge.opencamera.utils;
 
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
@@ -8,7 +8,11 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 import android.util.Xml;
 
+import net.sourceforge.opencamera.CameraXActivity;
+import net.sourceforge.opencamera.PreferenceKeys;
+import net.sourceforge.opencamera.R;
 import net.sourceforge.opencamera.utils.CameraXDebug;
+import net.sourceforge.opencamera.utils.StorageUtils;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -33,7 +37,7 @@ public class SettingsManager {
 
     private final CameraXActivity main_activity;
 
-    SettingsManager(CameraXActivity main_activity) {
+    public SettingsManager(CameraXActivity main_activity) {
         this.main_activity = main_activity;
     }
 

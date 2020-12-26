@@ -1,10 +1,13 @@
-package net.sourceforge.opencamera;
+package net.sourceforge.opencamera.video;
 
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import net.sourceforge.opencamera.CameraXActivity;
+import net.sourceforge.opencamera.PreferenceKeys;
 import net.sourceforge.opencamera.utils.CameraXDebug;
+import net.sourceforge.opencamera.video.AudioListener;
 
 /** Handles the audio "noise" trigger option.
  */
@@ -18,11 +21,11 @@ public class CameraXAudioTriggerListenerCallback implements AudioListener.AudioL
     private long time_last_audio_trigger_photo = -1;
     private int audio_noise_sensitivity = -1;
 
-    CameraXAudioTriggerListenerCallback(CameraXActivity main_activity) {
+    public CameraXAudioTriggerListenerCallback(CameraXActivity main_activity) {
         this.main_activity = main_activity;
     }
 
-    void setAudioNoiseSensitivity(int audio_noise_sensitivity) {
+    public void setAudioNoiseSensitivity(int audio_noise_sensitivity) {
         this.audio_noise_sensitivity = audio_noise_sensitivity;
     }
 

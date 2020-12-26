@@ -69,7 +69,7 @@ public class GyroSensor implements SensorEventListener {
     private float lastTargetAngle;
     private int is_upright; // if hasTarget==true, this stores whether the "upright" orientation of the device is close enough to the orientation when recording was started: 0 for yes, otherwise -1 for too anti-clockwise, +1 for too clockwise
 
-    GyroSensor(Context context) {
+    public GyroSensor(Context context) {
         mSensorManager = (SensorManager)context.getSystemService(Context.SENSOR_SERVICE);
 
         mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
@@ -183,7 +183,7 @@ public class GyroSensor implements SensorEventListener {
         mSensorManager.unregisterListener(this);
     }
 
-    void startRecording() {
+    public void startRecording() {
         if( CameraXDebug.LOG )
             Log.d(TAG, "startRecording");
         is_recording = true;
@@ -191,7 +191,7 @@ public class GyroSensor implements SensorEventListener {
         setToIdentity();
     }
 
-    void stopRecording() {
+    public void stopRecording() {
         if( is_recording ) {
             if( CameraXDebug.LOG )
                 Log.d(TAG, "stopRecording");
@@ -204,7 +204,7 @@ public class GyroSensor implements SensorEventListener {
         return this.is_recording;
     }
 
-    void setTarget(float target_x, float target_y, float target_z, float targetAngle, float uprightAngleTol, float tooFarAngle, TargetCallback targetCallback) {
+    public void setTarget(float target_x, float target_y, float target_z, float targetAngle, float uprightAngleTol, float tooFarAngle, TargetCallback targetCallback) {
         this.hasTarget = true;
         this.targetVectors.clear();
         addTarget(target_x, target_y, target_z);
@@ -216,12 +216,12 @@ public class GyroSensor implements SensorEventListener {
         this.lastTargetAngle = 0.0f;
     }
 
-    void addTarget(float target_x, float target_y, float target_z) {
+    public void addTarget(float target_x, float target_y, float target_z) {
         float [] vector = new float[]{target_x, target_y, target_z};
         this.targetVectors.add(vector);
     }
 
-    void clearTarget() {
+    public void clearTarget() {
         this.hasTarget = false;
         this.targetVectors.clear();
         this.targetCallback = null;
@@ -229,15 +229,15 @@ public class GyroSensor implements SensorEventListener {
         this.lastTargetAngle = 0.0f;
     }
 
-    void disableTargetCallback() {
+    public void disableTargetCallback() {
         this.targetCallback = null;
     }
 
-    boolean hasTarget() {
+    public boolean hasTarget() {
         return this.hasTarget;
     }
 
-    boolean isTargetAchieved() {
+    public boolean isTargetAchieved() {
         return this.hasTarget && this.targetAchieved;
     }
 

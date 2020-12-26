@@ -2,7 +2,7 @@ package net.sourceforge.opencamera.ui;
 
 import net.sourceforge.opencamera.utils.CameraXDebug;
 import net.sourceforge.opencamera.R;
-import net.sourceforge.opencamera.StorageUtils;
+import net.sourceforge.opencamera.utils.StorageUtils;
 
 import java.io.File;
 import java.util.ArrayList;

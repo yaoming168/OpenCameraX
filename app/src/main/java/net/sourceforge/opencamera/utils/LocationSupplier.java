@@ -1,4 +1,4 @@
-package net.sourceforge.opencamera;
+package net.sourceforge.opencamera.utils;
 
 import android.Manifest;
 import android.content.Context;
@@ -14,6 +14,7 @@ import android.preference.PreferenceManager;
 import androidx.core.content.ContextCompat;
 import android.util.Log;
 
+import net.sourceforge.opencamera.PreferenceKeys;
 import net.sourceforge.opencamera.utils.CameraXDebug;
 
 /** Handles listening for GPS location (both coarse and fine).
@@ -29,7 +30,7 @@ public class LocationSupplier {
     private Location cached_location;
     private long cached_location_ms;
 
-    LocationSupplier(Context context) {
+    public LocationSupplier(Context context) {
         this.context = context;
         locationManager = (LocationManager)context.getSystemService(Context.LOCATION_SERVICE);
     }
@@ -173,7 +174,7 @@ public class LocationSupplier {
     /* Best to only call this from MainActivity.initLocation().
      * @return Returns false if location permission not available for either coarse or fine.
      */
-    boolean setupLocationListener() {
+    public boolean setupLocationListener() {
         if( CameraXDebug.LOG )
             Log.d(TAG, "setupLocationListener");
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
@@ -236,7 +237,7 @@ public class LocationSupplier {
         return true;
     }
 
-    void freeLocationListeners() {
+    public void freeLocationListeners() {
         if( CameraXDebug.LOG )
             Log.d(TAG, "freeLocationListeners");
         if( locationListeners != null ) {

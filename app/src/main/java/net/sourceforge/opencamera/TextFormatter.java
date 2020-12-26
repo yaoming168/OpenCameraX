@@ -5,6 +5,7 @@ import android.location.Location;
 import android.util.Log;
 
 import net.sourceforge.opencamera.utils.CameraXDebug;
+import net.sourceforge.opencamera.utils.LocationSupplier;
 
 import java.text.DateFormat;
 import java.text.DecimalFormat;

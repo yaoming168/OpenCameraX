@@ -1,4 +1,4 @@
-package net.sourceforge.opencamera;
+package net.sourceforge.opencamera.video;
 
 import android.media.AudioFormat;
 import android.media.AudioRecord;
@@ -9,7 +9,7 @@ import net.sourceforge.opencamera.utils.CameraXDebug;
 
 /** Sets up a listener to listen for noise level.
  */
-class AudioListener {
+public class AudioListener {
     private static final String TAG = "AudioListener";
     private volatile boolean is_running = true; // should be volatile, as used to communicate between threads
     private int buffer_size = -1;
@@ -22,7 +22,7 @@ class AudioListener {
 
     /** Create a new AudioListener. The caller should call the start() method to start listening.
      */
-    AudioListener(final AudioListenerCallback cb) {
+    public AudioListener(final AudioListenerCallback cb) {
         if( CameraXDebug.LOG )
             Log.d(TAG, "new AudioListener");
         final int sample_rate = 8000;
@@ -137,7 +137,7 @@ class AudioListener {
     /**
      * @return Whether the audio recorder was created successfully.
      */
-    boolean status() {
+    public boolean status() {
         boolean ok;
         synchronized(AudioListener.this) {
             ok = ar != null;
@@ -147,7 +147,7 @@ class AudioListener {
 
     /** Start listening.
      */
-    void start() {
+    public void start() {
         if( CameraXDebug.LOG )
             Log.d(TAG, "start");
         if( thread != null ) {
@@ -158,7 +158,7 @@ class AudioListener {
     /** Stop listening and release the resources.
      * @param wait_until_done If true, this method will block until the resource is freed.
      */
-    void release(boolean wait_until_done) {
+    public void release(boolean wait_until_done) {
         if( CameraXDebug.LOG ) {
             Log.d(TAG, "release");
             Log.d(TAG, "wait_until_done: " + wait_until_done);

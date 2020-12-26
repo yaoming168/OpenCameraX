@@ -16,6 +16,7 @@ import android.view.MotionEvent;
 import net.sourceforge.opencamera.utils.CameraXDebug;
 import net.sourceforge.opencamera.cameracontroller.CameraController;
 import net.sourceforge.opencamera.cameracontroller.RawImage;
+import net.sourceforge.opencamera.video.VideoProfile;
 
 /** Provides communication between the Preview and the rest of the application
  *  - so in theory one can drop the Preview/ (and CameraController/) classes

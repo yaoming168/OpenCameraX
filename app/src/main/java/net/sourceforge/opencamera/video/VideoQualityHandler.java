@@ -1,4 +1,4 @@
-package net.sourceforge.opencamera.preview;
+package net.sourceforge.opencamera.video;
 
 import android.media.CamcorderProfile;
 import android.util.Log;
@@ -37,7 +37,7 @@ public class VideoQualityHandler {
     private List<CameraController.Size> video_sizes;
     private List<CameraController.Size> video_sizes_high_speed; // may be null if high speed not supported
 
-    void resetCurrentQuality() {
+    public void resetCurrentQuality() {
         video_quality = null;
         current_video_quality = -1;
     }
@@ -128,13 +128,13 @@ public class VideoQualityHandler {
         return this.video_quality;
     }
 
-    int getCurrentVideoQualityIndex() {
+    public int getCurrentVideoQualityIndex() {
         if( CameraXDebug.LOG )
             Log.d(TAG, "getCurrentVideoQualityIndex");
         return this.current_video_quality;
     }
 
-    void setCurrentVideoQualityIndex(int current_video_quality) {
+    public void setCurrentVideoQualityIndex(int current_video_quality) {
         if( CameraXDebug.LOG )
             Log.d(TAG, "setCurrentVideoQualityIndex: " + current_video_quality);
         this.current_video_quality = current_video_quality;
@@ -171,7 +171,7 @@ public class VideoQualityHandler {
         return CameraController.CameraFeatures.supportsFrameRate(this.video_sizes_high_speed, fps);
     }
 
-    CameraController.Size findVideoSizeForFrameRate(int width, int height, double fps) {
+    public CameraController.Size findVideoSizeForFrameRate(int width, int height, double fps) {
         if( CameraXDebug.LOG ) {
             Log.d(TAG, "findVideoSizeForFrameRate");
             Log.d(TAG, "width: " + width);
@@ -202,13 +202,13 @@ public class VideoQualityHandler {
 
     /** Returns the maximum supported (non-high-speed) video size.
      */
-    CameraController.Size getMaxSupportedVideoSize() {
+    public CameraController.Size getMaxSupportedVideoSize() {
         return getMaxVideoSize(video_sizes);
     }
 
     /** Returns the maximum supported high speed video size.
      */
-    CameraController.Size getMaxSupportedVideoSizeHighSpeed() {
+    public CameraController.Size getMaxSupportedVideoSizeHighSpeed() {
         return getMaxVideoSize(video_sizes_high_speed);
     }
 

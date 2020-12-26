@@ -70,7 +70,7 @@ class SoundPoolManager {
 
     /* Must call loadSound first (allowing enough time to load the sound).
      */
-    void playSound(int resource_id) {
+    public void playSound(int resource_id) {
         if( sound_pool != null ) {
             if( sound_ids.indexOfKey(resource_id) < 0 ) {
                 if( CameraXDebug.LOG )

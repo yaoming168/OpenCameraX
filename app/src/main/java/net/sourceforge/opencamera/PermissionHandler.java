@@ -115,7 +115,7 @@ public class PermissionHandler {
         }
     }
 
-    void requestCameraPermission() {
+    public void requestCameraPermission() {
         if( CameraXDebug.LOG )
             Log.d(TAG, "requestCameraPermission");
         if( Build.VERSION.SDK_INT < Build.VERSION_CODES.M ) {
@@ -143,7 +143,7 @@ public class PermissionHandler {
         }
     }
 
-    void requestStoragePermission() {
+    public void requestStoragePermission() {
         if( CameraXDebug.LOG )
             Log.d(TAG, "requestStoragePermission");
         if( Build.VERSION.SDK_INT < Build.VERSION_CODES.M ) {
@@ -176,7 +176,7 @@ public class PermissionHandler {
         }
     }
 
-    void requestRecordAudioPermission() {
+    public void requestRecordAudioPermission() {
         if( CameraXDebug.LOG )
             Log.d(TAG, "requestRecordAudioPermission");
         if( Build.VERSION.SDK_INT < Build.VERSION_CODES.M ) {

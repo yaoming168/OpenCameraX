@@ -1,4 +1,4 @@
-package net.sourceforge.opencamera.preview;
+package net.sourceforge.opencamera.video;
 
 import android.media.CamcorderProfile;
 import android.media.MediaRecorder;
@@ -40,10 +40,10 @@ public class VideoProfile {
 
     /** Returns a dummy video profile, used if video isn't supported.
      */
-    VideoProfile() {
+    public VideoProfile() {
     }
 
-    VideoProfile(CamcorderProfile camcorderProfile) {
+    public VideoProfile(CamcorderProfile camcorderProfile) {
         this.record_audio = true;
         this.no_audio_permission = false;
         this.audioSource = MediaRecorder.AudioSource.CAMCORDER;

@@ -1,4 +1,4 @@
-package net.sourceforge.opencamera;
+package net.sourceforge.opencamera.utils;
 
 import java.util.ArrayList;
 
@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import net.sourceforge.opencamera.CameraXActivity;
 import net.sourceforge.opencamera.utils.CameraXDebug;
 
 /** Handles a history of save locations.
@@ -21,7 +22,7 @@ public class SaveLocationHistory {
      * @param pref_base String to use for shared preferences.
      * @param folder_name The current save folder.
      */
-    SaveLocationHistory(CameraXActivity main_activity, String pref_base, String folder_name) {
+    public SaveLocationHistory(CameraXActivity main_activity, String pref_base, String folder_name) {
         if( CameraXDebug.LOG )
             Log.d(TAG, "pref_base: " + pref_base);
         this.main_activity = main_activity;
@@ -51,7 +52,7 @@ public class SaveLocationHistory {
      * @param update_icon Whether to update the gallery icon. If false, it's the caller's responsibility to call
      * MainActivity.updateGalleryIcon().
      */
-    void updateFolderHistory(String folder_name, boolean update_icon) {
+    public void updateFolderHistory(String folder_name, boolean update_icon) {
         updateFolderHistory(folder_name);
         if( update_icon ) {
             main_activity.updateGalleryIcon(); // if the folder has changed, need to update the gallery icon
@@ -88,7 +89,7 @@ public class SaveLocationHistory {
     /** Clears the folder history, and reinitialise it with the current folder.
      * @param folder_name The current folder name.
      */
-    void clearFolderHistory(String folder_name) {
+    public void clearFolderHistory(String folder_name) {
         if( CameraXDebug.LOG )
             Log.d(TAG, "clearFolderHistory: " + folder_name);
         save_location_history.clear();

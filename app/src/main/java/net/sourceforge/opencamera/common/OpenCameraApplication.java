@@ -1,4 +1,4 @@
-package net.sourceforge.opencamera;
+package net.sourceforge.opencamera.common;
 
 import android.app.Application;
 import android.os.Process;

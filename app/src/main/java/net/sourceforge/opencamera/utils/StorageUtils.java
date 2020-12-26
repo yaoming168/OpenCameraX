@@ -1,4 +1,4 @@
-package net.sourceforge.opencamera;
+package net.sourceforge.opencamera.utils;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -41,7 +41,9 @@ import android.system.Os;
 import android.system.StructStatVfs;
 import android.util.Log;
 
-import net.sourceforge.opencamera.utils.CameraXDebug;
+import net.sourceforge.opencamera.CameraXActivity;
+import net.sourceforge.opencamera.common.CameraXApplicationInterface;
+import net.sourceforge.opencamera.PreferenceKeys;
 
 /** Provides access to the filesystem. Supports both standard and Storage
  *  Access Framework.
@@ -52,10 +54,10 @@ import net.sourceforge.opencamera.utils.CameraXDebug;
 public class StorageUtils {
     private static final String TAG = "StorageUtils";
 
-    static final int MEDIA_TYPE_IMAGE = 1;
-    static final int MEDIA_TYPE_VIDEO = 2;
-    static final int MEDIA_TYPE_PREFS = 3;
-    static final int MEDIA_TYPE_GYRO_INFO = 4;
+    public static final int MEDIA_TYPE_IMAGE = 1;
+    public static final int MEDIA_TYPE_VIDEO = 2;
+    public static final int MEDIA_TYPE_PREFS = 3;
+    public static final int MEDIA_TYPE_GYRO_INFO = 4;
 
     private final Context context;
     private final CameraXApplicationInterface applicationInterface;
@@ -66,20 +68,20 @@ public class StorageUtils {
     // for testing:
     public volatile boolean failed_to_scan;
 
-    StorageUtils(Context context, CameraXApplicationInterface applicationInterface) {
+    public StorageUtils(Context context, CameraXApplicationInterface applicationInterface) {
         this.context = context;
         this.applicationInterface = applicationInterface;
     }
 
-    Uri getLastMediaScanned() {
+    public Uri getLastMediaScanned() {
         return last_media_scanned;
     }
 
-    void clearLastMediaScanned() {
+    public void clearLastMediaScanned() {
         last_media_scanned = null;
     }
 
-    void setLastMediaScanned(Uri uri) {
+    public void setLastMediaScanned(Uri uri) {
         last_media_scanned = uri;
         if( CameraXDebug.LOG )
             Log.d(TAG, "set last_media_scanned to " + last_media_scanned);
@@ -93,7 +95,7 @@ public class StorageUtils {
      *  https://developer.android.com/reference/android/app/job/JobInfo.Builder.html#addTriggerContentUri(android.app.job.JobInfo.TriggerContentUri)
      *  See https://github.com/owncloud/android/issues/1675 for OwnCloud's discussion on this.
      */
-    void announceUri(Uri uri, boolean is_new_picture, boolean is_new_video) {
+    public void announceUri(Uri uri, boolean is_new_picture, boolean is_new_video) {
         if( CameraXDebug.LOG )
             Log.d(TAG, "announceUri: " + uri);
         if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.N ) {
@@ -318,13 +320,13 @@ public class StorageUtils {
     }
 
     // only valid if !isUsingSAF()
-    String getSaveLocation() {
+    public String getSaveLocation() {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         return sharedPreferences.getString(PreferenceKeys.SaveLocationPreferenceKey, "OpenCamera");
     }
 
     // only valid if isUsingSAF()
-    String getSaveLocationSAF() {
+    public String getSaveLocationSAF() {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         return sharedPreferences.getString(PreferenceKeys.SaveLocationSAFPreferenceKey, "");
     }
@@ -335,7 +337,7 @@ public class StorageUtils {
         return Uri.parse(folder_name);
     }
 
-    File getSettingsFolder() {
+    public File getSettingsFolder() {
         return new File(context.getExternalFilesDir(null), "backups");
     }
 
@@ -357,7 +359,7 @@ public class StorageUtils {
      *  File corresponding to the SAF Uri.
      */
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    File getImageFolder() {
+    public File getImageFolder() {
         File file;
         if( isUsingSAF() ) {
             Uri uri = getTreeUriSAF();
@@ -374,7 +376,7 @@ public class StorageUtils {
 
     // only valid if !isUsingSAF()
     // returns a form for use with RELATIVE_PATH (scoped storage)
-    String getSaveRelativeFolder() {
+    public String getSaveRelativeFolder() {
         String folder_name = getSaveLocation();
         return getSaveRelativeFolder(folder_name);
     }
@@ -397,7 +399,7 @@ public class StorageUtils {
     /** Whether the save photo/video location is in a form that represents a full path, or a
      *  sub-folder in DCIM/.
      */
-    static boolean saveFolderIsFull(String folder_name) {
+    public static boolean saveFolderIsFull(String folder_name) {
         return folder_name.startsWith("/");
     }
 
@@ -631,7 +633,7 @@ public class StorageUtils {
         return result;
     }
 
-    String createMediaFilename(int type, String suffix, int count, String extension, Date current_date) {
+    public String createMediaFilename(int type, String suffix, int count, String extension, Date current_date) {
         String index = "";
         if( count > 0 ) {
             index = "_" + count; // try to find a unique filename
@@ -677,14 +679,14 @@ public class StorageUtils {
     }
 
     // only valid if !isUsingSAF()
-    File createOutputMediaFile(int type, String suffix, String extension, Date current_date) throws IOException {
+    public File createOutputMediaFile(int type, String suffix, String extension, Date current_date) throws IOException {
         File mediaStorageDir = getImageFolder();
         return createOutputMediaFile(mediaStorageDir, type, suffix, extension, current_date);
     }
 
     /** Create the folder if it does not exist.
      */
-    void createFolderIfRequired(File folder) throws IOException {
+    public void createFolderIfRequired(File folder) throws IOException {
         if( !folder.exists() ) {
             if( CameraXDebug.LOG )
                 Log.d(TAG, "create directory: " + folder);
@@ -698,7 +700,7 @@ public class StorageUtils {
 
     // only valid if !isUsingSAF()
     @SuppressLint("SimpleDateFormat")
-    File createOutputMediaFile(File mediaStorageDir, int type, String suffix, String extension, Date current_date) throws IOException {
+    public File createOutputMediaFile(File mediaStorageDir, int type, String suffix, String extension, Date current_date) throws IOException {
         createFolderIfRequired(mediaStorageDir);
 
         // Create a media file name
@@ -743,7 +745,7 @@ public class StorageUtils {
 
     // only valid if isUsingSAF()
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    Uri createOutputFileSAF(String filename, String mimeType) throws IOException {
+    public Uri createOutputFileSAF(String filename, String mimeType) throws IOException {
         try {
             Uri treeUri = getTreeUriSAF();
             if( CameraXDebug.LOG )
@@ -786,7 +788,7 @@ public class StorageUtils {
 
     /** Return the mime type corresponding to the supplied extension. Supports images only, not video.
      */
-    String getImageMimeType(String extension) {
+    public String getImageMimeType(String extension) {
         String mimeType;
         switch (extension) {
             case "dng":
@@ -808,7 +810,7 @@ public class StorageUtils {
 
     /** Return the mime type corresponding to the supplied extension. Supports video only, not images.
      */
-    String getVideoMimeType(String extension) {
+    public String getVideoMimeType(String extension) {
         String mimeType;
         switch( extension ) {
             case "3gp":
@@ -826,7 +828,7 @@ public class StorageUtils {
 
     // only valid if isUsingSAF()
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    Uri createOutputMediaFileSAF(int type, String suffix, String extension, Date current_date) throws IOException {
+    public Uri createOutputMediaFileSAF(int type, String suffix, String extension, Date current_date) throws IOException {
         String mimeType;
         switch (type) {
             case MEDIA_TYPE_IMAGE:
@@ -850,14 +852,14 @@ public class StorageUtils {
         return createOutputFileSAF(mediaFilename, mimeType);
     }
 
-    static class Media {
-        final boolean mediastore; // whether uri is from mediastore
-        final long id; // for mediastore==true only
-        final boolean video;
-        final Uri uri;
-        final long date;
-        final int orientation; // for mediastore==true, video==false only
-        final String filename; // this should correspond to DISPLAY_NAME (so available with scoped storage) - so this includes file extension, but not full path
+    public static class Media {
+        public final boolean mediastore; // whether uri is from mediastore
+        public final long id; // for mediastore==true only
+        public final boolean video;
+        public final Uri uri;
+        public final long date;
+        public final int orientation; // for mediastore==true, video==false only
+        public final String filename; // this should correspond to DISPLAY_NAME (so available with scoped storage) - so this includes file extension, but not full path
 
         Media(boolean mediastore, long id, boolean video, Uri uri, long date, int orientation, String filename) {
             this.mediastore = mediastore;
@@ -873,7 +875,7 @@ public class StorageUtils {
          *  this will try to convert using MediaStore.getMediaUri(), but if this fails the function
          *  will return null.
          */
-        Uri getMediaStoreUri(Context context) {
+        public Uri getMediaStoreUri(Context context) {
             if( this.mediastore )
                 return this.uri;
             else {
@@ -1387,7 +1389,7 @@ public class StorageUtils {
         return media;
     }
 
-    Media getLatestMedia() {
+    public Media getLatestMedia() {
         if( CameraXActivity.useScopedStorage() && this.isUsingSAF() ) {
             Uri treeUri = this.getTreeUriSAF();
             return getLatestMediaSAF(treeUri);

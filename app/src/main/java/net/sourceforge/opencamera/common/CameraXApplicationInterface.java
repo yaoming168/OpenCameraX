@@ -1,4 +1,4 @@
-package net.sourceforge.opencamera;
+package net.sourceforge.opencamera.common;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -13,6 +13,12 @@ import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import net.sourceforge.opencamera.CameraXActivity;
+import net.sourceforge.opencamera.GyroSensor;
+import net.sourceforge.opencamera.ImageSaver;
+import net.sourceforge.opencamera.PreferenceKeys;
+import net.sourceforge.opencamera.R;
+import net.sourceforge.opencamera.TextFormatter;
 import net.sourceforge.opencamera.cameracontroller.CameraController;
 import net.sourceforge.opencamera.cameracontroller.RawImage;
 import net.sourceforge.opencamera.feature.mode.HDR.HDRProcessor;
@@ -20,9 +26,11 @@ import net.sourceforge.opencamera.feature.mode.panorama.PanoramaProcessor;
 import net.sourceforge.opencamera.preview.ApplicationInterface;
 import net.sourceforge.opencamera.preview.BasicApplicationInterface;
 import net.sourceforge.opencamera.preview.Preview;
-import net.sourceforge.opencamera.preview.VideoProfile;
+import net.sourceforge.opencamera.video.VideoProfile;
 import net.sourceforge.opencamera.ui.DrawPreview;
 import net.sourceforge.opencamera.utils.CameraXDebug;
+import net.sourceforge.opencamera.utils.LocationSupplier;
+import net.sourceforge.opencamera.utils.StorageUtils;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -74,12 +82,12 @@ public class CameraXApplicationInterface extends BasicApplicationInterface {
         Panorama
     }
 
-    private final CameraXActivity main_activity;
-    private final LocationSupplier locationSupplier;
-    private final GyroSensor gyroSensor;
-    private final StorageUtils storageUtils;
-    private final DrawPreview drawPreview;
-    private final ImageSaver imageSaver;
+    public final CameraXActivity main_activity;
+    public final LocationSupplier locationSupplier;
+    public final GyroSensor gyroSensor;
+    public final StorageUtils storageUtils;
+    public final DrawPreview drawPreview;
+    public final ImageSaver imageSaver;
 
     private final static float panorama_pics_per_screen = 3.33333f;
     private int n_capture_images = 0; // how many calls to onPictureTaken() since the last call to onCaptureStarted()
@@ -155,7 +163,7 @@ public class CameraXApplicationInterface extends BasicApplicationInterface {
     public volatile int test_n_videos_scanned;
     public volatile int test_max_mp;
 
-    CameraXApplicationInterface(CameraXActivity main_activity, Bundle savedInstanceState) {
+    public CameraXApplicationInterface(CameraXActivity main_activity, Bundle savedInstanceState) {
         long debug_time = 0;
         if( CameraXDebug.LOG ) {
             Log.d(TAG, "CameraXApplicationInterface");
@@ -200,7 +208,7 @@ public class CameraXApplicationInterface extends BasicApplicationInterface {
      *  application is restarted from scratch), but we do want to preserve if Android has to recreate
      *  the application (e.g., configuration change, or it's destroyed while in background).
      */
-    void onSaveInstanceState(Bundle state) {
+    public void onSaveInstanceState(Bundle state) {
         if( CameraXDebug.LOG )
             Log.d(TAG, "onSaveInstanceState");
         if( CameraXDebug.LOG )
@@ -214,7 +222,7 @@ public class CameraXApplicationInterface extends BasicApplicationInterface {
         state.putFloat("aperture", aperture);
     }
 
-    void onDestroy() {
+    public void onDestroy() {
         if( CameraXDebug.LOG )
             Log.d(TAG, "onDestroy");
         if( drawPreview != null ) {
@@ -225,7 +233,7 @@ public class CameraXApplicationInterface extends BasicApplicationInterface {
         }
     }
 
-    LocationSupplier getLocationSupplier() {
+    public LocationSupplier getLocationSupplier() {
         return locationSupplier;
     }
 
@@ -233,7 +241,7 @@ public class CameraXApplicationInterface extends BasicApplicationInterface {
         return gyroSensor;
     }
 
-    StorageUtils getStorageUtils() {
+    public StorageUtils getStorageUtils() {
         return storageUtils;
     }
 
@@ -396,7 +404,7 @@ public class CameraXApplicationInterface extends BasicApplicationInterface {
         return sharedPreferences.getString(PreferenceKeys.getFocusPreferenceKey(cameraId, is_video), "");
     }
 
-    int getFocusAssistPref() {
+    public int getFocusAssistPref() {
         String focus_assist_value = sharedPreferences.getString(PreferenceKeys.FocusAssistPreferenceKey, "0");
         int focus_assist;
         try {
@@ -935,7 +943,7 @@ public class CameraXApplicationInterface extends BasicApplicationInterface {
         return remaining_restart_video;
     }
 
-    long getVideoMaxFileSizeUserPref() {
+    public long getVideoMaxFileSizeUserPref() {
         if( CameraXDebug.LOG )
             Log.d(TAG, "getVideoMaxFileSizeUserPref");
 
@@ -1196,7 +1204,7 @@ public class CameraXApplicationInterface extends BasicApplicationInterface {
         return sharedPreferences.getBoolean(PreferenceKeys.RequireLocationPreferenceKey, false);
     }
 
-    boolean getGeodirectionPref() {
+    public boolean getGeodirectionPref() {
         return sharedPreferences.getBoolean(PreferenceKeys.GPSDirectionPreferenceKey, false);
     }
 
@@ -1683,7 +1691,7 @@ public class CameraXApplicationInterface extends BasicApplicationInterface {
     /** Use this instead of isRawOnly() if the photo mode is already known - useful to call e.g. from MainActivity.supportsDRO()
      *  without causing an infinite loop!
      */
-    boolean isRawOnly(PhotoMode photo_mode) {
+    public boolean isRawOnly(PhotoMode photo_mode) {
         if( isRawAllowed(photo_mode) ) {
             //noinspection SwitchStatementWithTooFewBranches
             switch( sharedPreferences.getString(PreferenceKeys.RawPreferenceKey, "preference_raw_no") ) {
@@ -1756,7 +1764,7 @@ public class CameraXApplicationInterface extends BasicApplicationInterface {
         drawPreview.onContinuousFocusMove(start);
     }
 
-    void startPanorama() {
+    public void startPanorama() {
         if( CameraXDebug.LOG )
             Log.d(TAG, "startPanorama");
         gyroSensor.startRecording();
@@ -1773,7 +1781,7 @@ public class CameraXApplicationInterface extends BasicApplicationInterface {
 
     /** Ends panorama and submits the panoramic images to be processed.
      */
-    void finishPanorama() {
+    public void finishPanorama() {
         if( CameraXDebug.LOG )
             Log.d(TAG, "finishPanorama");
 
@@ -1789,7 +1797,7 @@ public class CameraXApplicationInterface extends BasicApplicationInterface {
     /** Stop the panorama recording. Does nothing if panorama isn't currently recording.
      * @param is_cancelled Whether the panorama has been cancelled.
      */
-    void stopPanorama(boolean is_cancelled) {
+    public void stopPanorama(boolean is_cancelled) {
         if( CameraXDebug.LOG )
             Log.d(TAG, "stopPanorama");
         if( !gyroSensor.isRecording() ) {
@@ -1894,7 +1902,7 @@ public class CameraXApplicationInterface extends BasicApplicationInterface {
         drawPreview.clearGyroDirectionMarker();
     }
 
-    static float getPanoramaPicsPerScreen() {
+    public static float getPanoramaPicsPerScreen() {
         return panorama_pics_per_screen;
     }
 
@@ -2418,7 +2426,7 @@ public class CameraXApplicationInterface extends BasicApplicationInterface {
     /** For use when called from a video capture intent. This returns the supplied uri to the
      *  caller, and finishes the activity.
      */
-    void finishVideoIntent(Uri uri) {
+    public void finishVideoIntent(Uri uri) {
         if( CameraXDebug.LOG )
             Log.d(TAG, "finishVideoIntent:" + uri);
         Intent output = new Intent();
@@ -2649,7 +2657,7 @@ public class CameraXApplicationInterface extends BasicApplicationInterface {
         drawPreview.clearContinuousFocusMove();
     }
 
-    void updateThumbnail(Bitmap thumbnail, boolean is_video) {
+    public void updateThumbnail(Bitmap thumbnail, boolean is_video) {
         if( CameraXDebug.LOG )
             Log.d(TAG, "updateThumbnail");
         main_activity.updateGalleryIcon(thumbnail);
@@ -2669,7 +2677,7 @@ public class CameraXApplicationInterface extends BasicApplicationInterface {
             if( CameraXDebug.LOG )
                 Log.d(TAG, "play beep!");
             boolean is_last = remaining_time <= 1000;
-            main_activity.getSoundPoolManager().playSound(is_last ? R.raw.mybeep_hi : R.raw.mybeep);
+//            main_activity.getSoundPoolManager().playSound(is_last ? R.raw.mybeep_hi : R.raw.mybeep);
         }
         if( sharedPreferences.getBoolean(PreferenceKeys.TimerSpeakPreferenceKey, false) ) {
             if( CameraXDebug.LOG )
@@ -2688,7 +2696,7 @@ public class CameraXApplicationInterface extends BasicApplicationInterface {
     /** Switch to the first available camera that is front or back facing as desired.
      * @param front_facing Whether to switch to a front or back facing camera.
      */
-    void switchToCamera(boolean front_facing) {
+    public void switchToCamera(boolean front_facing) {
         if( CameraXDebug.LOG )
             Log.d(TAG, "switchToCamera: " + front_facing);
         int n_cameras = main_activity.getPreview().getCameraControllerManager().getNumberOfCameras();
@@ -2705,7 +2713,7 @@ public class CameraXApplicationInterface extends BasicApplicationInterface {
 
     /* Note that the cameraId is still valid if this returns false, it just means that a cameraId hasn't be explicitly set yet.
      */
-    boolean hasSetCameraId() {
+    public boolean hasSetCameraId() {
         return has_set_cameraId;
     }
 
@@ -2903,7 +2911,7 @@ public class CameraXApplicationInterface extends BasicApplicationInterface {
     /** Should be called to reset parameters which aren't expected to be saved (e.g., resetting zoom when application is paused,
      *  when switching between photo/video modes, or switching cameras).
      */
-    void reset(boolean switched_camera) {
+    public void reset(boolean switched_camera) {
         if( CameraXDebug.LOG )
             Log.d(TAG, "reset");
         if( switched_camera ) {
@@ -3028,7 +3036,7 @@ public class CameraXApplicationInterface extends BasicApplicationInterface {
         return do_in_background;
     }
 
-    boolean isImageCaptureIntent() {
+    public boolean isImageCaptureIntent() {
         boolean image_capture_intent = false;
         String action = main_activity.getIntent().getAction();
         if( MediaStore.ACTION_IMAGE_CAPTURE.equals(action) || MediaStore.ACTION_IMAGE_CAPTURE_SECURE.equals(action) ) {
@@ -3394,7 +3402,7 @@ public class CameraXApplicationInterface extends BasicApplicationInterface {
         return success;
     }
 
-    void addLastImage(File file, boolean share) {
+    public void addLastImage(File file, boolean share) {
         if( CameraXDebug.LOG ) {
             Log.d(TAG, "addLastImage: " + file);
             Log.d(TAG, "share?: " + share);
@@ -3404,7 +3412,7 @@ public class CameraXApplicationInterface extends BasicApplicationInterface {
         last_images.add(last_image);
     }
 
-    void addLastImageSAF(Uri uri, boolean share) {
+    public void addLastImageSAF(Uri uri, boolean share) {
         if( CameraXDebug.LOG ) {
             Log.d(TAG, "addLastImageSAF: " + uri);
             Log.d(TAG, "share?: " + share);
@@ -3414,7 +3422,7 @@ public class CameraXApplicationInterface extends BasicApplicationInterface {
         last_images.add(last_image);
     }
 
-    void addLastImageMediaStore(Uri uri, boolean share) {
+    public void addLastImageMediaStore(Uri uri, boolean share) {
         if( CameraXDebug.LOG ) {
             Log.d(TAG, "addLastImageMediaStore: " + uri);
             Log.d(TAG, "share?: " + share);
@@ -3424,7 +3432,7 @@ public class CameraXApplicationInterface extends BasicApplicationInterface {
         last_images.add(last_image);
     }
 
-    void clearLastImages() {
+    public void clearLastImages() {
         if( CameraXDebug.LOG )
             Log.d(TAG, "clearLastImages");
         last_images_type = LastImagesType.FILE;
@@ -3432,7 +3440,7 @@ public class CameraXApplicationInterface extends BasicApplicationInterface {
         drawPreview.clearLastImage();
     }
 
-    void shareLastImage() {
+    public void shareLastImage() {
         if( CameraXDebug.LOG )
             Log.d(TAG, "shareLastImage");
         Preview preview  = main_activity.getPreview();
@@ -3525,7 +3533,7 @@ public class CameraXApplicationInterface extends BasicApplicationInterface {
         }
     }
 
-    void trashLastImage() {
+    public void trashLastImage() {
         if( CameraXDebug.LOG )
             Log.d(TAG, "trashLastImage");
         Preview preview  = main_activity.getPreview();
@@ -3553,7 +3561,7 @@ public class CameraXApplicationInterface extends BasicApplicationInterface {
      * @param file The file that was scanned.
      * @param uri  The file's corresponding uri.
      */
-    void scannedFile(File file, Uri uri) {
+    public void scannedFile(File file, Uri uri) {
         if( CameraXDebug.LOG ) {
             Log.d(TAG, "scannedFile");
             Log.d(TAG, "file: " + file);
@@ -3574,7 +3582,7 @@ public class CameraXApplicationInterface extends BasicApplicationInterface {
 
     // for testing
 
-    boolean hasThumbnailAnimation() {
+    public boolean hasThumbnailAnimation() {
         return this.drawPreview.hasThumbnailAnimation();
     }
 

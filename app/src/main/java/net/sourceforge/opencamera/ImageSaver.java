@@ -2,11 +2,13 @@ package net.sourceforge.opencamera;
 
 import net.sourceforge.opencamera.cameracontroller.CameraController;
 import net.sourceforge.opencamera.cameracontroller.RawImage;
+import net.sourceforge.opencamera.common.CameraXApplicationInterface;
 import net.sourceforge.opencamera.feature.mode.HDR.HDRProcessor;
 import net.sourceforge.opencamera.feature.mode.HDR.HDRProcessorException;
 import net.sourceforge.opencamera.feature.mode.panorama.PanoramaProcessor;
 import net.sourceforge.opencamera.feature.mode.panorama.PanoramaProcessorException;
 import net.sourceforge.opencamera.utils.CameraXDebug;
+import net.sourceforge.opencamera.utils.StorageUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -98,14 +100,14 @@ public class ImageSaver extends Thread {
     public volatile boolean test_slow_saving;
     public volatile boolean test_queue_blocked;
 
-    static class Request {
+    public static class Request {
         enum Type {
             JPEG, // also covers WEBP
             RAW,
             DUMMY
         }
         final Type type;
-        enum ProcessType {
+        public enum ProcessType {
             NORMAL,
             HDR,
             AVERAGE,
@@ -114,7 +116,7 @@ public class ImageSaver extends Thread {
         final ProcessType process_type; // for type==JPEG
         final boolean force_suffix; // affects filename suffixes for saving jpeg_images: if true, filenames will always be appended with a suffix like _0, even if there's only 1 image in jpeg_images
         final int suffix_offset; // affects filename suffixes for saving jpeg_images, when force_suffix is true or there are multiple images in jpeg_images: the suffixes will be offset by this number
-        enum SaveBase {
+        public enum SaveBase {
             SAVEBASE_NONE,
             SAVEBASE_FIRST,
             SAVEBASE_ALL,
@@ -133,7 +135,7 @@ public class ImageSaver extends Thread {
         final boolean using_camera2;
         /* image_format allows converting the standard JPEG image into another file format.
 #		 */
-        enum ImageFormat {
+        public enum ImageFormat {
             STD, // leave unchanged from the standard JPEG format
             WEBP,
             PNG
@@ -143,10 +145,10 @@ public class ImageSaver extends Thread {
         boolean do_auto_stabilise;
         final double level_angle; // in degrees
         final List<float []> gyro_rotation_matrix; // used for panorama (one 3x3 matrix per jpeg_images entry), otherwise can be null
-        boolean panorama_dir_left_to_right; // used for panorama
-        float camera_view_angle_x; // used for panorama
-        float camera_view_angle_y; // used for panorama
-        final boolean is_front_facing;
+        public boolean panorama_dir_left_to_right; // used for panorama
+        public float camera_view_angle_x; // used for panorama
+        public float camera_view_angle_y; // used for panorama
+        public final boolean is_front_facing;
         boolean mirror;
         final Date current_date;
         final String preference_hdr_contrast_enhancement; // for HDR
@@ -274,7 +276,7 @@ public class ImageSaver extends Thread {
         }
     }
 
-    ImageSaver(CameraXActivity main_activity) {
+    public ImageSaver(CameraXActivity main_activity) {
         if( CameraXDebug.LOG )
             Log.d(TAG, "ImageSaver");
         this.main_activity = main_activity;
@@ -366,7 +368,7 @@ public class ImageSaver extends Thread {
      * @param n_raw The number of JPEGs that will be taken.
      * @param n_jpegs The number of JPEGs that will be taken.
      */
-    int computePhotoCost(int n_raw, int n_jpegs) {
+    public int computePhotoCost(int n_raw, int n_jpegs) {
         if( CameraXDebug.LOG ) {
             Log.d(TAG, "computePhotoCost");
             Log.d(TAG, "n_raw: " + n_raw);
@@ -386,7 +388,7 @@ public class ImageSaver extends Thread {
      * @param n_raw The number of JPEGs that will be taken.
      * @param n_jpegs The number of JPEGs that will be taken.
      */
-    boolean queueWouldBlock(int n_raw, int n_jpegs) {
+    public boolean queueWouldBlock(int n_raw, int n_jpegs) {
         int photo_cost = this.computePhotoCost(n_raw, n_jpegs);
         return this.queueWouldBlock(photo_cost);
     }
@@ -394,7 +396,7 @@ public class ImageSaver extends Thread {
     /** Whether taking an extra photo would overflow the queue, resulting in the UI hanging.
      * @param photo_cost The result returned by computePhotoCost().
      */
-    synchronized boolean queueWouldBlock(int photo_cost) {
+    public synchronized boolean queueWouldBlock(int photo_cost) {
         if( CameraXDebug.LOG ) {
             Log.d(TAG, "queueWouldBlock");
             Log.d(TAG, "photo_cost: " + photo_cost);
@@ -423,7 +425,7 @@ public class ImageSaver extends Thread {
 
     /** Returns the maximum number of DNG images that might be held by the image saver queue at once, before blocking.
      */
-    int getMaxDNG() {
+    public int getMaxDNG() {
         int max_dng = (queue_capacity+1)/queue_cost_dng_c;
         max_dng++; // increase by 1, as the user can still take one extra photo if the queue is exactly full
         if( CameraXDebug.LOG )
@@ -462,7 +464,7 @@ public class ImageSaver extends Thread {
         }
     }
 
-    void onDestroy() {
+    public void onDestroy() {
         if( CameraXDebug.LOG )
             Log.d(TAG, "onDestroy");
         if( panoramaProcessor != null ) {
@@ -557,7 +559,7 @@ public class ImageSaver extends Thread {
      *  If do_in_background is false, the photo is saved on the current thread, and the function returns whether the photo was saved
      *  successfully.
      */
-    boolean saveImageJpeg(boolean do_in_background,
+    public boolean saveImageJpeg(boolean do_in_background,
                           boolean is_hdr,
                           boolean force_suffix,
                           int suffix_offset,
@@ -619,7 +621,7 @@ public class ImageSaver extends Thread {
      *  If do_in_background is false, the photo is saved on the current thread, and the function returns whether the photo was saved
      *  successfully.
      */
-    boolean saveImageRaw(boolean do_in_background,
+    public boolean saveImageRaw(boolean do_in_background,
                          boolean force_suffix,
                          int suffix_offset,
                          RawImage raw_image,
@@ -659,7 +661,7 @@ public class ImageSaver extends Thread {
     /** Used for a batch of images that will be combined into a single request. This applies to
      *  processType AVERAGE and PANORAMA.
      */
-    void startImageBatch(boolean do_in_background,
+    public void startImageBatch(boolean do_in_background,
                            Request.ProcessType processType,
                            Request.SaveBase save_base,
                            boolean image_capture_intent, Uri image_capture_intent_uri,
@@ -709,7 +711,7 @@ public class ImageSaver extends Thread {
                 sample_factor);
     }
 
-    void addImageBatch(byte [] image, float [] gyro_rotation_matrix) {
+    public void addImageBatch(byte [] image, float [] gyro_rotation_matrix) {
         if( CameraXDebug.LOG )
             Log.d(TAG, "addImageBatch");
         if( pending_image_average_request == null ) {
@@ -726,11 +728,11 @@ public class ImageSaver extends Thread {
             Log.d(TAG, "image average request images: " + pending_image_average_request.jpeg_images.size());
     }
 
-    Request getImageBatchRequest() {
+    public Request getImageBatchRequest() {
         return pending_image_average_request;
     }
 
-    void finishImageBatch(boolean do_in_background) {
+    public void finishImageBatch(boolean do_in_background) {
         if( CameraXDebug.LOG )
             Log.d(TAG, "finishImageBatch");
         if( pending_image_average_request == null ) {
@@ -752,7 +754,7 @@ public class ImageSaver extends Thread {
         pending_image_average_request = null;
     }
 
-    void flushImageBatch() {
+    public void flushImageBatch() {
         if( CameraXDebug.LOG )
             Log.d(TAG, "flushImageBatch");
         // aside from resetting the state, this allows the allocated JPEG data to be garbage collected
@@ -3584,7 +3586,7 @@ public class ImageSaver extends Thread {
 
     // for testing:
 
-    HDRProcessor getHDRProcessor() {
+    public HDRProcessor getHDRProcessor() {
         return hdrProcessor;
     }
 

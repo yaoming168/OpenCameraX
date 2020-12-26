@@ -3,13 +3,21 @@ package net.sourceforge.opencamera;
 import net.sourceforge.opencamera.cameracontroller.CameraController;
 import net.sourceforge.opencamera.cameracontroller.CameraControllerManager;
 import net.sourceforge.opencamera.cameracontroller.CameraControllerManager2;
+import net.sourceforge.opencamera.common.CameraXApplicationInterface;
+import net.sourceforge.opencamera.common.ToastBoxer;
 import net.sourceforge.opencamera.preview.Preview;
-import net.sourceforge.opencamera.preview.VideoProfile;
+import net.sourceforge.opencamera.video.AudioListener;
+import net.sourceforge.opencamera.video.CameraXAudioTriggerListenerCallback;
+import net.sourceforge.opencamera.video.VideoProfile;
 import net.sourceforge.opencamera.remotecontrol.BluetoothRemoteControl;
 import net.sourceforge.opencamera.ui.FolderChooserDialog;
 import net.sourceforge.opencamera.ui.MainUI;
 import net.sourceforge.opencamera.ui.ManualSeekbars;
 import net.sourceforge.opencamera.utils.CameraXDebug;
+import net.sourceforge.opencamera.utils.LocationSupplier;
+import net.sourceforge.opencamera.utils.SaveLocationHistory;
+import net.sourceforge.opencamera.utils.SettingsManager;
+import net.sourceforge.opencamera.utils.StorageUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -1257,7 +1265,7 @@ public class CameraXActivity extends Activity {
     /* Audio trigger - either loud sound, or speech recognition.
      * This performs some additional checks before taking a photo.
      */
-    void audioTrigger() {
+    public void audioTrigger() {
         if( CameraXDebug.LOG )
             Log.d(TAG, "ignore audio trigger due to popup open");
         if( popupIsOpen() ) {
@@ -2866,7 +2874,7 @@ public class CameraXActivity extends Activity {
         }
     }
 
-    void setImmersiveMode(boolean on) {
+    public void setImmersiveMode(boolean on) {
         if( CameraXDebug.LOG )
             Log.d(TAG, "setImmersiveMode: " + on);
         // n.b., preview.setImmersiveMode() is called from onSystemUiVisibilityChange()
@@ -3285,7 +3293,7 @@ public class CameraXActivity extends Activity {
 
     /** Shows a thumbnail for the gallery icon.
      */
-    void updateGalleryIcon(Bitmap thumbnail) {
+    public void updateGalleryIcon(Bitmap thumbnail) {
         if( CameraXDebug.LOG )
             Log.d(TAG, "updateGalleryIcon: " + thumbnail);
         ImageButton galleryButton = this.findViewById(R.id.gallery);
@@ -4242,7 +4250,7 @@ public class CameraXActivity extends Activity {
 
     /** Returns whether the last photo operation was a continuous fast burst.
      */
-    boolean lastContinuousFastBurst() {
+    public boolean lastContinuousFastBurst() {
         return this.last_continuous_fast_burst;
     }
 
@@ -4252,7 +4260,7 @@ public class CameraXActivity extends Activity {
      *                       on the current mode.
      * @param continuous_fast_burst If true, then start a continuous fast burst.
      */
-    void takePicturePressed(boolean photo_snapshot, boolean continuous_fast_burst) {
+    public void takePicturePressed(boolean photo_snapshot, boolean continuous_fast_burst) {
         if( CameraXDebug.LOG )
             Log.d(TAG, "takePicturePressed");
 
@@ -4265,7 +4273,7 @@ public class CameraXActivity extends Activity {
     /** Lock the screen - this is Open Camera's own lock to guard against accidental presses,
      *  not the standard Android lock.
      */
-    void lockScreen() {
+    public void lockScreen() {
         findViewById(R.id.locker).setOnTouchListener(new View.OnTouchListener() {
             @SuppressLint("ClickableViewAccessibility") @Override
             public boolean onTouch(View arg0, MotionEvent event) {
@@ -4278,7 +4286,7 @@ public class CameraXActivity extends Activity {
 
     /** Unlock the screen (see lockScreen()).
      */
-    void unlockScreen() {
+    public void unlockScreen() {
         findViewById(R.id.locker).setOnTouchListener(null);
         screen_is_locked = false;
     }
@@ -4356,7 +4364,7 @@ public class CameraXActivity extends Activity {
         return preview.supportsExposures() || (manual_iso && preview.supportsISORange() );
     }
 
-    void cameraSetup() {
+    public void cameraSetup() {
         long debug_time = 0;
         if( CameraXDebug.LOG ) {
             Log.d(TAG, "cameraSetup");
@@ -4730,7 +4738,7 @@ public class CameraXActivity extends Activity {
         return is_visible;
     }
 
-    void setManualFocusSeekBarVisibility(final boolean is_target_distance) {
+    public void setManualFocusSeekBarVisibility(final boolean is_target_distance) {
         boolean is_visible = showManualFocusSeekbar(is_target_distance);
         SeekBar focusSeekBar = findViewById(is_target_distance ? R.id.focus_bracketing_target_seekbar : R.id.focus_seekbar);
         final int visibility = is_visible ? View.VISIBLE : View.GONE;
@@ -4905,7 +4913,7 @@ public class CameraXActivity extends Activity {
         return this.textFormatter;
     }
 
-    SoundPoolManager getSoundPoolManager() {
+    public SoundPoolManager getSoundPoolManager() {
         return this.soundPoolManager;
     }
 
@@ -5355,7 +5363,7 @@ public class CameraXActivity extends Activity {
         }
     }
 
-    void speak(String text) {
+    public void speak(String text) {
         if( textToSpeech != null && textToSpeechSuccess ) {
             textToSpeech.speak(text, TextToSpeech.QUEUE_FLUSH, null);
         }

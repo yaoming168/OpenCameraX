@@ -6,7 +6,7 @@ import net.sourceforge.opencamera.utils.CameraXDebug;
 import net.sourceforge.opencamera.R;
 import net.sourceforge.opencamera.ScriptC_histogram_compute;
 import net.sourceforge.opencamera.TakePhoto;
-import net.sourceforge.opencamera.ToastBoxer;
+import net.sourceforge.opencamera.common.ToastBoxer;
 import net.sourceforge.opencamera.cameracontroller.CameraController;
 import net.sourceforge.opencamera.cameracontroller.CameraController1;
 import net.sourceforge.opencamera.cameracontroller.CameraController2;
@@ -18,6 +18,8 @@ import net.sourceforge.opencamera.preview.ApplicationInterface.NoFreeStorageExce
 import net.sourceforge.opencamera.preview.camerasurface.CameraSurface;
 import net.sourceforge.opencamera.preview.camerasurface.CameraXSurfaceView;
 import net.sourceforge.opencamera.preview.camerasurface.CameraXTextureView;
+import net.sourceforge.opencamera.video.VideoProfile;
+import net.sourceforge.opencamera.video.VideoQualityHandler;
 
 import java.io.File;
 //import java.io.FileOutputStream;
